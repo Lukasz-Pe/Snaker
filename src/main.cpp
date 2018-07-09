@@ -1,0 +1,511 @@
+/*
+ * main.cpp
+ *
+ *  Created on: 03.07.2018
+ *      Author: lpekalski
+ */
+
+#include "main.h"
+#include "Win.h"
+#include "LTexture.h"
+#include "Snake.h"
+#include "Dot.h"
+#include "Tile.h"
+#include "Menu.h"
+#include "Timer.h"
+int const MNOZNIK = 2, SCREEN_WIDTH = 1024, SCREEN_HEIGHT = 768, LEVEL_WIDTH = MNOZNIK * SCREEN_WIDTH, LEVEL_HEIGHT = MNOZNIK * SCREEN_HEIGHT, TOTAL_FRUITS = 300;
+bool initSDL(Win *window = NULL);
+void close(Win *window = NULL);
+void handleEvents();
+void print();
+//----------------------------------------------------------------Deklaracje zmiennych
+bool gContinue = true, gCollision = false, gReset = false;
+
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, ENEMY_COUNT = 20, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
+const int TOTAL_SPRITES = 25, SPRITE_DIMS = 20;
+double gAngle[ENEMY_COUNT], timeStep;
+int gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT];
+SDL_Point gEnemyStartPos[ENEMY_COUNT];
+stringstream gScore;
+string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
+SDL_Renderer *gRenderer = NULL;
+SDL_Event event;
+Win gWindow;
+LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTTextTexture, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail;
+Snake gSnake, gEnemy[ENEMY_COUNT];
+Dot gFruit[TOTAL_FRUITS];
+SDL_Rect gCamera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT }, gLevelBorders = { 0, 0, LEVEL_WIDTH, LEVEL_HEIGHT }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES];
+TTF_Font *gFont = NULL, *gTitleFont = NULL;
+SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 };
+Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
+Timer stepTimer;
+int Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT];
+int main(int argc, char* args[]) {
+	gContinue = initSDL(&gWindow);
+
+	gContinue = gLTFruit.loadFromFile("./assets/images/fruits.png", gWindow);
+	gContinue = gLTSnakeHead.loadFromFile("./assets/images/face.png", gWindow);
+	gContinue = gLTSnakeTail.loadFromFile("./assets/images/dot.png", gWindow);
+	gContinue = gLTLevelTexture.loadFromFile("./assets/images/bo_play_pattern.png", gWindow);
+	gContinue = gLTMenuBackground.loadFromFile("./assets/images/escheresque.png", gWindow);
+	gContinue = gLTEnemyHead.loadFromFile("./assets/images/faces.png", gWindow);
+	gContinue = gLTEnemyTail.loadFromFile("./assets/images/tails.png", gWindow);
+
+	for (int i = 0; i < TOTAL_SPRITES; i++) {
+		gSpriteClips[i]= {gSpritePosX, gSpritePosY, SPRITE_DIMS, SPRITE_DIMS};
+		gSpritePosX+=SPRITE_DIMS;
+		if(gSpritePosX>=100) {
+			gSpritePosY+=SPRITE_DIMS;
+			gSpritePosX=0;
+		}
+	}
+
+	gFont = TTF_OpenFont("./assets/fonts/Horta.ttf", TEXT_SIZE);
+	gTitleFont = TTF_OpenFont("./assets/fonts/Horta.ttf", TITLE_TEXT_SIZE);
+	TTF_SetFontStyle(gTitleFont, TTF_STYLE_UNDERLINE);
+	if (gFont == NULL || gTitleFont == NULL) {
+		printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
+		gContinue = false;
+	}
+
+	gLTTitleText.loadFromText("Snaker", gTextColor, gTitleFont, gWindow);
+	gLTTitleText.setWidth(3 * gLTTitleText.getWidth());
+	gLTTitleText.setHeight(TITLE_TEXT_SIZE);
+	gLTExitQuestion.loadFromText("End of game?", gTextColor, gTitleFont, gWindow);
+	gLTExitQuestion.setWidth(1.25 * gLTTitleText.getWidth());
+	gLTExitQuestion.setHeight(TEXT_SIZE);
+	gLTPause.loadFromText("Game paused", gTextPauseColor, gFont, gWindow);
+	gLTPause.setWidth(5 * gLTPause.getWidth());
+	for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
+		gButtons[i].setButtonText(gMenuItems[i], gWindow, gFont, TEXT_SIZE);
+	}
+
+	const int TOTAL_TILES = 1.5 * (LEVEL_WIDTH / gLTLevelTexture.getWidth()) * (LEVEL_HEIGHT / gLTLevelTexture.getHeight());
+	const int TOTAL_MENU_TILES = 1.5 * ((SCREEN_WIDTH / gLTMenuBackground.getWidth()) * (SCREEN_HEIGHT / gLTMenuBackground.getHeight()));
+	Tile *tileSet[TOTAL_TILES], *gMenuBackground[TOTAL_MENU_TILES];
+	gSnake.setStartPos(0.5 * LEVEL_WIDTH * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, 0.5 * LEVEL_HEIGHT * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
+	gSnake.resetLength();
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		gEnemyStartPos[i].x = 100 + 0.5 * LEVEL_WIDTH * ((double) rand() / RAND_MAX);
+		gEnemyStartPos[i].y = 100 + 0.5 * LEVEL_HEIGHT * ((double) rand() / RAND_MAX);
+		gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
+//		gEnemy[i] = new Snake();
+		gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+		gEnemy[i].resetLength();
+	}
+//print();
+	gWindow.setTitle("Snaker");
+	gRenderer = gWindow.getRenderer();
+	int x[TOTAL_FRUITS], y[TOTAL_FRUITS];
+	for (int i = 0; i < TOTAL_FRUITS; i++) {
+		x[i] = 100 + 0.9 * LEVEL_WIDTH * ((float) rand() / RAND_MAX);
+		y[i] = 100 + 0.9 * LEVEL_HEIGHT * ((float) rand() / RAND_MAX);
+		gSpriteNum[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
+//		gFruit[i] = new Dot();
+	}
+	int tilePosX = 0, tilePosY = 0;
+	for (int i = 0; i < TOTAL_TILES; i++) {
+		tileSet[i] = new Tile(tilePosX, tilePosY, gLTLevelTexture.getWidth(), gLTLevelTexture.getHeight());
+		tilePosX += gLTLevelTexture.getWidth();
+		if (tilePosX >= LEVEL_WIDTH) {
+			tilePosX = 0;
+			tilePosY += gLTLevelTexture.getHeight();
+		}
+	}
+	tilePosX = 0;
+	tilePosY = 0;
+	for (int i = 0; i < TOTAL_MENU_TILES; i++) {
+		gMenuBackground[i] = new Tile(tilePosX, tilePosY, gLTMenuBackground.getWidth(), gLTMenuBackground.getHeight());
+		tilePosX += gLTMenuBackground.getWidth();
+		if (tilePosX >= SCREEN_WIDTH) {
+			tilePosX = 0;
+			tilePosY += gLTMenuBackground.getHeight();
+		}
+	}
+	gBoxExitQuestion.x = ((gWindow.getWidth() - gLTExitQuestion.getWidth()) / 2);
+	gBoxExitQuestion.y = TITLE_TEXT_SIZE + 0.5 * gLTExitQuestion.getHeight();
+	gBoxExitQuestion.h = 1.25 * gLTExitQuestion.getHeight() + gButtons[4].getButtonDims().h;
+	gBoxExitQuestion.w = gLTExitQuestion.getWidth();
+	gBoxPause.x = (gWindow.getWidth() - gLTPause.getWidth()) / 2;
+	gBoxPause.y = (gWindow.getHeight() - gLTPause.getHeight()) / 2;
+	gBoxPause.w = gLTPause.getWidth();
+	gBoxPause.h = gLTPause.getHeight();
+	while (gContinue) {
+//		HERE RESIDES GAME MENU +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		handleEvents();
+		if (gGameState >= 1) {
+
+			gWindow.prepareRenderer(0, 0, 0);
+//			GETTING MENU BACKGROUND ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < TOTAL_MENU_TILES; i++) {
+				gMenuBackground[i]->render(gMenuCamera, gWindow, gLTMenuBackground);
+			}
+			gLTTitleText.render((gWindow.getWidth() - gLTTitleText.getWidth()) / 2, 0, gWindow);
+			switch (gGameState) {
+//				QUIT DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 2:
+					SDL_RenderFillRect(gRenderer, &gBoxExitQuestion);
+					gLTExitQuestion.render(gBoxExitQuestion.x, gBoxExitQuestion.y, gWindow);
+					gButtons[MAIN_MENU_OPTS].render(gBoxExitQuestion.x, gBoxExitQuestion.y + 1.25 * gLTExitQuestion.getHeight(), gWindow);
+					gButtons[MAIN_MENU_OPTS + 1].render(gBoxExitQuestion.x + gLTExitQuestion.getWidth() - gButtons[3].getButtonDims().w, gBoxExitQuestion.y + 1.25 * gLTExitQuestion.getHeight(), gWindow);
+					break;
+//					PAUSE DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 3:
+					SDL_RenderFillRect(gRenderer, &gBoxPause);
+					gLTPause.render(gBoxPause.x, gBoxPause.y, gWindow);
+					break;
+//					MAIN MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				default:
+					for (int i = 0; i < MAIN_MENU_OPTS; i++) {
+						gButtons[i].render((gWindow.getWidth() - gButtons[i].getButtonDims().w) / 2, gWindow.getHeight() / 3 + i * gButtons[i].getButtonDims().h, gWindow);
+					}
+					break;
+			}
+			gWindow.render();
+		}
+//		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		if (gGameState == 0) {
+//			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			if (gReset) {
+				gSnake.resetLength();
+				gSnake.setStartPos(0.85 * LEVEL_WIDTH * (((double) rand() / RAND_MAX)), 0.85 * LEVEL_HEIGHT * (((double) rand() / RAND_MAX)));
+				for (int i = 0; i < ENEMY_COUNT; i++) {
+					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+					gEnemy[i].resetLength();
+				}
+				gReset = false;
+			}
+//			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			gWindow.prepareRenderer(0, 0, 0);
+			gSnake.setCamera(LEVEL_WIDTH, LEVEL_HEIGHT, gCamera);
+//			RENDERING OF BACKGROUND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < TOTAL_TILES; i++) {
+				tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
+			}
+//			SETTING STARTING POS OF FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < TOTAL_FRUITS; i++) {
+				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gSpriteClips[gSpriteNum[i]]);
+			}
+//			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < TOTAL_FRUITS; i++) {
+				gCollision = checkCollision(gFruit[i].getRect(), gSnake.getHeadBox());
+				if (gCollision) {
+					x[i] = (LEVEL_WIDTH - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
+					y[i] = (LEVEL_HEIGHT - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gSpriteClips[gSpriteNum[i]]);
+					gSnake.addLength();
+				}
+				for (int j = 0; j < ENEMY_COUNT; j++) {
+					gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
+					if (gCollision) {
+						x[i] = (LEVEL_WIDTH - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
+						y[i] = (LEVEL_HEIGHT - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
+						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gSpriteClips[gSpriteNum[i]]);
+						gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+						gEnemy[j].addLength();
+					}
+				}
+			}
+//			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				if (gEnemy[i].getHeadBox().x <= 1 || gEnemy[i].getHeadBox().y <= 1 || (gEnemy[i].getHeadBox().w + gEnemy[i].getHeadBox().x) >= (LEVEL_WIDTH) || (gEnemy[i].getHeadBox().h + gEnemy[i].getHeadBox().y) >= (LEVEL_HEIGHT)) {
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+				}
+			}
+			gCollision = false;
+//			COLLISIONS BETWEEN BOTS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				for (int j = 0; j < ENEMY_COUNT; j++) {
+					gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
+//					cout<<"gCollision "<<gCollision<<endl;
+//					 cout<<"iEnemy "<<i<<"\tHx:"<<gEnemy[i].getHeadBox().x<<"\tHy:"<<gEnemy[i].getHeadBox().y<<"\tHw:"<<gEnemy[i].getHeadBox().w<<"\tHh:"<<gEnemy[i].getHeadBox().h<<endl;
+//					 cout<<"jEnemy "<<j<<"\tHx:"<<gEnemy[j].getHeadBox().x<<"\tHy:"<<gEnemy[j].getHeadBox().y<<"\tHw:"<<gEnemy[j].getHeadBox().w<<"\tHh:"<<gEnemy[j].getHeadBox().h<<endl;
+					if (gCollision && i != j) {
+						gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+						gEnemy[i].resetLength();
+						gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+					}
+					if (gEnemy[i].getLength() != 0 && i != j) {
+						for (int t = 0; t < gEnemy[i].getLength(); t++) {
+							gCollision = checkCollision(gEnemy[i].getTailBox(t), gEnemy[j].getHeadBox());
+							if (gCollision) {
+								gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+								gEnemy[j].resetLength();
+								gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+							}
+						}
+					}
+				}
+			}
+//			COLLISIONS WITH PLAYER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
+				if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
+					gSnake.resetLength();
+					gSnake.setStartPos(0.5 * LEVEL_WIDTH * (((double) rand() / RAND_MAX)), 0.5 * LEVEL_HEIGHT * (((double) rand() / RAND_MAX)));
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+					gEnemy[i].resetLength();
+					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+				}
+				if (gSnake.getLength() != 0) {
+					for (int t = 0; t < gSnake.getLength(); t++) {
+						gCollision = checkCollision(gSnake.getTailBox(t), gEnemy[i].getHeadBox());
+						if (gCollision) {
+							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+							gEnemy[i].resetLength();
+							gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+						}
+					}
+				}
+				if (gEnemy[i].getLength() != 0) {
+					for (int t = 0; t<gEnemy[i].getLength(); t++) {
+						gCollision = checkCollision(gEnemy[i].getTailBox(t), gSnake.getHeadBox());
+						if (gCollision) {
+							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+							gSnake.resetLength();
+							gSnake.setStartPos(0.5 * LEVEL_WIDTH * (((double) rand() / RAND_MAX)), 0.5 * LEVEL_HEIGHT * (((double) rand() / RAND_MAX)));
+						}
+					}
+				}
+			}
+//			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			if (gCurrentScore != gSnake.getLength() || gCurrentScore >= 0) {
+				gScore.str("");
+				gScore << " Length: " << gSnake.getLength();
+				gLTTextTexture.loadFromText(gScore.str().c_str(), gTextColor, gFont, gWindow);
+				gCurrentScore = gSnake.getLength();
+				gLTTextTexture.setWidth(3 * gLTTextTexture.getWidth());
+				gLTTextTexture.setHeight(TEXT_SIZE);
+			}
+//			MOVEMEN AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			gSnake.move(gLevelBorders, gLTSnakeTail);
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				gEnemy[i].setAngle(gAngle[i]);
+				gEnemy[i].move(gLevelBorders, gLTSnakeTail);
+			}
+//			RENDERING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				gEnemy[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gEnemySprite[i]]);
+			}
+
+			gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
+			gLTTextTexture.render(0, 0, gWindow);
+			gWindow.render();
+		}
+	}
+
+	for (int i = 0; i < TOTAL_TILES; i++) {
+		delete tileSet[i];
+	}
+	for (int i = 0; i < TOTAL_MENU_TILES; i++) {
+		delete gMenuBackground[i];
+	}
+	close(&gWindow);
+	return 0;
+}
+void print() {
+	cout << "Print drukuje: \n";
+	cout << "gSHx: " << gSnake.getHeadBox().x << "\tgSHBy: " << gSnake.getHeadBox().y; //<<endl;
+	cout << "\tgSHBw: " << gSnake.getHeadBox().w << "\tgSHBh: " << gSnake.getHeadBox().h << endl;
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		cout << "gEHx: " << gEnemy[i].getHeadBox().x << "\tgEHBy: " << gEnemy[i].getHeadBox().y; // << endl;
+		cout << "\tgEHw: " << gEnemy[i].getHeadBox().w << "\tgEHh: " << gEnemy[i].getHeadBox().h << endl;
+	}
+	cout << "Koniec Printa\n";
+	gContinue = false;
+}
+
+//TUTAJ SĄ POZOSTAŁE FUNKCJE ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void handleEvents() {
+	while (SDL_PollEvent(&event)) {
+		gOption = -1;
+		if (event.type == SDL_QUIT) {
+			gContinue = false;
+		}
+//		if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_a) {
+//			gSnake.addLength();
+//			for (int i = 0; i < ENEMY_COUNT; i++) {
+//				gEnemy[i].addLength();
+//			}
+//		}
+		if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
+			switch (event.key.keysym.sym) {
+				case SDLK_ESCAPE:
+				case SDLK_q:
+					if (gGameState == 1) {
+						gGameState = 2;
+					} else {
+						gGameState = 1;
+					}
+					break;
+				case SDLK_p:
+					if (gGameState == 3) {
+						gGameState = 0;
+					} else {
+						gGameState = 3;
+					}
+					break;
+				case SDLK_s:
+					gGameState = 0;
+					break;
+				case SDLK_y:
+				case SDLK_t:
+					if (gGameState == 2) {
+						gContinue = false;
+					}
+					break;
+				case SDLK_n:
+					if (gGameState == 2) {
+						gGameState = 1;
+					}
+					break;
+				case SDLK_r:
+					gGameState = 0;
+					gReset = true;
+					break;
+			}
+		}
+		if (event.type == SDL_MOUSEMOTION) {
+			SDL_GetMouseState(&gMouse.x, &gMouse.y);
+		}
+		gWindow.eventHandler(event);
+		gSnake.eventHandler(event, &gWindow, &gCamera);
+		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
+			switch (gGameState) {
+				case 1:
+					if (i >= 0 && i <= 2) {
+						gButtons[i].eventHandler(event);
+						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
+							if (event.type == SDL_MOUSEBUTTONUP) {
+								gOption = gButtons[i].getID();
+							}
+						}
+					}
+					break;
+				case 2:
+					if (i >= 3 && i <= 4) {
+						gButtons[i].eventHandler(event);
+						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
+							if (event.type == SDL_MOUSEBUTTONUP) {
+								gOption = gButtons[i].getID();
+							}
+						}
+					}
+					break;
+			}
+		}
+		if (event.type == SDL_MOUSEBUTTONDOWN && (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))) {
+			if (gGameState == 0) {
+				gGameState = 3;
+			} else if (gGameState == 3) {
+				gGameState = 0;
+			}
+		}
+		switch (gOption) {
+			case 1:
+				gGameState = 0;
+				break;
+			case 2:
+				gGameState = 0;
+				gReset = true;
+				break;
+			case 3:
+				gGameState = 2;
+				break;
+			case 4:
+				gContinue = false;
+				;
+				break;
+			case 5:
+				gGameState = 1;
+				break;
+		}
+	}
+}
+
+bool initSDL(Win *window) {
+	if (window == NULL) {
+		cout << "Window not set!\n";
+		return false;
+	}
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+		return false;
+	}
+	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
+		printf("Warning: Linear texture filtering not enabled!");
+		return false;
+	}
+	window->setWidth(SCREEN_WIDTH);
+	window->setHeight(SCREEN_HEIGHT);
+	if (!window->init()) {
+		printf("Failed to properly initialize Window object.");
+		return false;
+	}
+
+	return true;
+}
+
+void close(Win *window) {
+	/*for (int i = 0; i < TOTAL_FRUITS; i++) {
+	 delete gFruit[i];
+	 }*/
+	gLTFruit.free();
+	gLTSnakeHead.free();
+	gLTSnakeTail.free();
+	gLTLevelTexture.free();
+	gLTPause.free();
+	if (gLTTextTexture.getWidth() != 0) {
+		gLTTextTexture.free();
+	}
+	gLTExitQuestion.free();
+	gLTMenuBackground.free();
+	gLTTitleText.free();
+
+	if (window != NULL) {
+		window->close();
+	}
+
+}
+
+bool checkCollision(SDL_Rect a, SDL_Rect b) {
+//The sides of the rectangles
+	int leftA, leftB;
+	int rightA, rightB;
+	int topA, topB;
+	int bottomA, bottomB;
+
+//Calculate the sides of rect A
+	leftA = a.x;
+	rightA = a.x + a.w;
+	topA = a.y;
+	bottomA = a.y + a.h;
+
+//Calculate the sides of rect B
+	leftB = b.x;
+	rightB = b.x + b.w;
+	topB = b.y;
+	bottomB = b.y + b.h;
+
+//If any of the sides from A are outside of B
+	if (bottomA <= topB) {
+		return false;
+	}
+
+	if (topA >= bottomB) {
+		return false;
+	}
+
+	if (rightA <= leftB) {
+		return false;
+	}
+
+	if (leftA >= rightB) {
+		return false;
+	}
+
+//If none of the sides from A are outside B
+	return true;
+}
+
