@@ -8,7 +8,7 @@
 #ifndef SRC_T49_WIN_H_
 #define SRC_T49_WIN_H_
 
-#include "main.h"
+#include "../main.h"
 
 class Win {
 public:

@@ -6,13 +6,13 @@
  */
 
 #include "main.h"
-#include "Win.h"
-#include "LTexture.h"
-#include "Snake.h"
-#include "Dot.h"
-#include "Tile.h"
-#include "Menu.h"
-#include "Timer.h"
+#include "classes/Win.h"
+#include "classes/LTexture.h"
+#include "classes/Snake.h"
+#include "classes/Dot.h"
+#include "classes/Tile.h"
+#include "classes/Menu.h"
+#include "classes/Timer.h"
 int const MULTIPLIER = 3, TOTAL_FRUITS = 600, CLEARANCE_RADIUS = 150;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);

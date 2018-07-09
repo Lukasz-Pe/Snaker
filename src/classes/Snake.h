@@ -7,7 +7,7 @@
 
 #ifndef SNAKE_H_
 #define SNAKE_H_
-#include "main.h"
+#include "../main.h"
 #include "Win.h"
 #include "LTexture.h"
 #include "Dot.h"

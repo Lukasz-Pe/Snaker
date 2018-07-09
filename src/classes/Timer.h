@@ -8,7 +8,7 @@
 #ifndef SRC_TIMER_H_
 #define SRC_TIMER_H_
 
-#include "main.h"
+#include "../main.h"
 
 class Timer {
 	public:
