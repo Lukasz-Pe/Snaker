@@ -15,6 +15,11 @@ Tile::Tile(int x, int y, int gTileDimX, int gTileDimY, int tileType) {
 	mType = tileType;
 }
 
+void Tile::setNewPos(int &x, int &y) {
+	mBox.x = x;
+	mBox.y = y;
+}
+
 void Tile::render(SDL_Rect &gCamera, Win &vWin, LTexture &vTexture, SDL_Rect *vClip) {
 	if (vClip != NULL) {
 		if (checkCollision(gCamera, mBox)) {
@@ -32,9 +37,9 @@ SDL_Rect Tile::getBox() {
 	return mBox;
 }
 
-void Tile::setWindowCoords(int x, int y){
-	mBox.x=x;
-	mBox.y=y;
+void Tile::setWindowCoords(int x, int y) {
+	mBox.x = x;
+	mBox.y = y;
 }
 
 Tile::~Tile() {

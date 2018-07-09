@@ -38,7 +38,7 @@ public:
 private:
 	SDL_Window *mWindow;
 	SDL_Renderer *mRenderer;
-	int mHeight, mWidth;
+	int mHeight, mWidth/*, mTmpWidth, mTmpHeight*/;
 	bool mMinimized, mMouseFocus, mFullscreen;
 	//--------------------------------------Friends
 

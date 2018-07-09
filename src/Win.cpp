@@ -15,11 +15,13 @@ Win::Win() {
 	mFullscreen = false;
 	mWidth = 0;
 	mHeight = 0;
+//	mTmpWidth=0;
+//	mTmpHeight=0;
 }
 
 bool Win::init() {
 	mWindow = SDL_CreateWindow("Default window title", SDL_WINDOWPOS_CENTERED,
-	SDL_WINDOWPOS_CENTERED, mWidth, mHeight, SDL_WINDOW_SHOWN);
+	SDL_WINDOWPOS_CENTERED, mWidth, mHeight, SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 	if (mWindow == NULL) {
 		cout << "Window could not be created. SDL_Error: " << SDL_GetError() << endl;
 		return false;
@@ -51,9 +53,15 @@ void Win::eventHandler(SDL_Event &event) {
 //	if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_f && event.key.repeat == 0) {
 //		if (mFullscreen) {
 //			SDL_SetWindowFullscreen(mWindow, SDL_FALSE);
+//			mWidth=mTmpWidth;
+//			mHeight=mTmpHeight;
 //			mFullscreen = false;
 //		} else {
 //			SDL_SetWindowFullscreen(mWindow, SDL_TRUE);
+//			mTmpWidth=mWidth;
+//			mTmpHeight=mHeight;
+//			mWidth=1920;
+//			mHeight=1080;
 //			mFullscreen = true;
 //		}
 //	}
@@ -73,6 +81,11 @@ void Win::eventHandler(SDL_Event &event) {
 				break;
 			case SDL_WINDOWEVENT_LEAVE:
 				mMouseFocus = false;
+				break;
+			case SDL_WINDOWEVENT_SIZE_CHANGED:
+				mWidth=event.window.data1;
+				mHeight=event.window.data2;
+				SDL_RenderPresent(mRenderer);
 				break;
 		}
 	}

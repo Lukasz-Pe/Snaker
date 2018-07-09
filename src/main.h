@@ -29,5 +29,6 @@
 using namespace std;
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
+void isResized();
 
 #endif /* MAIN_H_ */

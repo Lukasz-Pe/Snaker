@@ -17,6 +17,7 @@ public:
 	void render(SDL_Rect &gCamera, Win &vWin, LTexture &vTexture, SDL_Rect *vClip=NULL);
 	int getType();
 	void setWindowCoords(int x, int y);
+	void setNewPos(int &x, int &y);
 	SDL_Rect getBox();
 	virtual ~Tile();
 private:
