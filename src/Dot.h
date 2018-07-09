@@ -10,12 +10,14 @@
 #include "main.h"
 #include "Tile.h"
 #include "Win.h"
+//#include "Snake.h"
 bool touchesWall(SDL_Rect vBox, Tile *vTiles[]);
 class Dot {
 	public:
 		Dot();
 		void eventHandler(SDL_Event &event);
 		void move(Win &vWin);
+//		void moveToSnake(Snake &vSnake);
 		void moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[]=NULL);
 		void moveFramerateIndependent(Win &vWin, float &timeStep);
 		void renderBox(LTexture &vDotTexture, Win &vWin, SDL_Rect *vCamera=NULL);
@@ -28,7 +30,8 @@ class Dot {
 		void setCollisionBox(LTexture &vTexture, SDL_Rect *vClip=NULL);
 		virtual ~Dot();
 	private:
-		float mPosX, mPosY, mVelX, mVelY;
+		double mPosX, mPosY, mVelX, mVelY, mAngle, mCollectDist,x,y;
+		int mRad;
 		const static int mDotRadius=20, mDotSpeed=10;
 		SDL_Rect mBox;
 		//friend bool touchesWall();

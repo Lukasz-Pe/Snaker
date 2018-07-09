@@ -22,6 +22,45 @@ Snake::Snake() {
 	mTemp = mSpeed;
 	mVeryFast = 3 * mSpeed;
 	mHeadBox= {0,0,20,20};
+	mCollectDist = 5;
+	mCollectAngle = 45;
+	x = 0;
+	y = 0;
+	mCalcAngle = 0;
+	mMinCollectAngle = 0;
+	mMaxCollectAngle = 0;
+}
+
+bool Snake::collectFruit(Dot &vFruit) {
+//	cout<<"\tDist: "<<sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2))<<"\tHx: "<<mHeadX<<"\tHy: "<<mHeadY<<"\tFx: "<<vFruit.getPosX()<<"\tFy: "<<vFruit.getPosY()<<endl;
+
+	if (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)) < 2*mHeadBox.w) {
+		x = (mHeadX + 10) - (vFruit.getPosX() + 10);
+		y = (mHeadY + 10) - (vFruit.getPosY() + 10);
+		if (x > 0 && y >= 0) {
+			mCalcAngle = (180 / M_PI) * atan(x / y);
+		} else if (x > 0 && y < 0) {
+			mCalcAngle = 180 + (180 / M_PI) * atan(x / y);
+		} else if (x < 0 && y >= 0) {
+			mCalcAngle = (180 / M_PI) * atan(x / y);
+		} else if (x < 0 && y < 0) {
+			mCalcAngle = 180 + (180 / M_PI) * atan(x / y);
+		}
+		mMinCollectAngle = mCalcAngle - mCollectAngle / 2;
+		mMaxCollectAngle = mCalcAngle + mCollectAngle / 2;
+		if (mMinCollectAngle < 0) {
+			mMinCollectAngle = 360 + mMinCollectAngle;
+		}
+		if (mMaxCollectAngle > 360) {
+			mMaxCollectAngle = mMaxCollectAngle - 360;
+		}
+		if (mHeadAngle >= mMinCollectAngle || mHeadAngle <= mMinCollectAngle) {
+			mNewFruitPos.x = vFruit.getPosX() + mCollectDist * sin(mCalcAngle * (M_PI / 180.0));
+			mNewFruitPos.y = vFruit.getPosY() + mCollectDist * cos(mCalcAngle * (M_PI / 180.0));
+			return true;
+		}
+	}
+	return false;
 }
 
 void Snake::setStartPos(int sPosX, int sPosY) {
@@ -29,7 +68,6 @@ void Snake::setStartPos(int sPosX, int sPosY) {
 	mHeadY = sPosY;
 	mHeadBox.x = sPosX;
 	mHeadBox.y = sPosY;
-	//cout<<mHeadBox.w<<" "<<mHeadBox.h<<endl;
 }
 
 void Snake::addLength() {
@@ -140,12 +178,10 @@ void Snake::updateTail(LTexture &vTex) {
 		mBox.push_back( { (int) mPrevHeadX, (int) mPrevHeadY, mHeadBox.w, mHeadBox.h });
 	}
 	for (unsigned int i = 1; i <= mTailLength; i++) {
-//		if (i > 0) {
 		mTailX[i - 1] = mTailX[i];
 		mTailY[i - 1] = mTailY[i];
 		mTailAngle[i - 1] = mTailAngle[i];
 		mBox[i - 1] = mBox[i];
-//		}
 	}
 	mTailX[mTailLength - 1] = mPrevHeadX;
 	mTailY[mTailLength - 1] = mPrevHeadY;
@@ -217,9 +253,9 @@ void Snake::setAngle(double newAngle) {
 }
 
 SDL_Rect Snake::getTailBox(int &num) {
-	SDL_Rect tmp={0,0,0,0};
-	if(mBox.size()!=0){
-		tmp=mBox[num];
+	SDL_Rect tmp = { 0, 0, 0, 0 };
+	if (mBox.size() != 0) {
+		tmp = mBox[num];
 	}
 	return tmp;
 }

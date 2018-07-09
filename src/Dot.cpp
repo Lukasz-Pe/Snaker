@@ -13,6 +13,11 @@ Dot::Dot() {
 	mVelX = 0;
 	mVelY = 0;
 	mBox= {0,0,mDotRadius, mDotRadius};
+	mRad = 2*mDotRadius;
+	mAngle = 0.0;
+	mCollectDist=5;
+	x=0;
+	y=0;
 }
 
 void Dot::eventHandler(SDL_Event &event) {
@@ -49,6 +54,25 @@ void Dot::eventHandler(SDL_Event &event) {
 		}
 	}
 }
+
+//void Dot::moveToSnake(Snake &vSnake) {
+//	double dist = sqrt(pow((vSnake.getHeadBox().x - mPosX), 2) + pow((vSnake.getHeadBox().y - mPosY), 2));
+//	if (dist <= mRad) {
+//		x = (vSnake.getHeadBox().x+10) - (mPosX+10);
+//		y = (vSnake.getHeadBox().y+10) - (mPosY+10);
+//		if (x > 0 && y >= 0) {
+//			mAngle = (180 / M_PI) * atan(x / y);
+//		} else if (x > 0 && y < 0) {
+//			mAngle = 180 + (180 / M_PI) * atan(x / y);
+//		} else if (x < 0 && y >= 0) {
+//			mAngle = (180 / M_PI) * atan(x / y);
+//		} else if (x < 0 && y < 0) {
+//			mAngle = 180 + (180 / M_PI) * atan(x / y);
+//		}
+//		mPosX = mPosX + mCollectDist * sin(mAngle * (M_PI / 180.0));
+//		mPosY = mPosY + mCollectDist * cos(mAngle * (M_PI / 180.0));
+//	}
+//}
 
 void Dot::move(Win &vWin) {
 	mPosX += mVelX;
@@ -101,14 +125,14 @@ void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vC
 		tmpPosY = vCamera->y;
 	}
 	if (x != -1 && y != -1) {
-			mPosX = x;
-			mPosY = y;
-		}
+		mPosX = x;
+		mPosY = y;
+	}
 	setCollisionBox(vDotTexture, vClip);
-	if(vClip!=NULL){
+	if (vClip != NULL) {
 		vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
 
-	}else{
+	} else {
 		vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin);
 	}
 //	SDL_RenderDrawRect(vWin.getRenderer(), &mBox);
@@ -139,9 +163,9 @@ int Dot::getPosY() {
 }
 
 void Dot::setCollisionBox(LTexture &vTexture, SDL_Rect *vClip) {
-	if(vClip==NULL){
-	mBox= {(int)mPosX,(int)mPosY,vTexture.getWidth(), vTexture.getHeight()};
-	}else{
+	if (vClip == NULL) {
+		mBox= {(int)mPosX,(int)mPosY,vTexture.getWidth(), vTexture.getHeight()};
+	} else {
 		mBox= {(int)mPosX,(int)mPosY,vClip->w, vClip->h};
 	}
 }

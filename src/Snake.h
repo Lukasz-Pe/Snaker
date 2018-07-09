@@ -10,6 +10,7 @@
 #include "main.h"
 #include "Win.h"
 #include "LTexture.h"
+#include "Dot.h"
 
 class Snake {
 public:
@@ -20,6 +21,7 @@ public:
 	void move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double timeStep=1.0);
 	void render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL);
 	void setCamera(const int &vLWidth, const int &vLHeight, SDL_Rect &vCam);
+	bool collectFruit(Dot &vFruit);
 	double getAngle();
 	SDL_Rect getHeadBox();
 	SDL_Rect getTailBox(int &num);
@@ -28,10 +30,11 @@ public:
 	void setAngle(double newAngle);
 	int getLength();
 	virtual ~Snake();
+	SDL_Point mNewFruitPos;
 private:
 	void updateTail(LTexture &vTex);
 	unsigned int mTailLength, mSpeed, mTemp, mVeryFast;
-	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY;
+	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist, mCollectAngle,x,y, mCalcAngle, mMinCollectAngle,mMaxCollectAngle;
 	const double mAngleDelta=5.0;
 	vector<double> mTailX;
 	vector<double> mTailY;
@@ -39,6 +42,7 @@ private:
 	bool hasMouseFocus;
 	vector<SDL_Rect> mBox;
 	SDL_Rect mHeadBox;
+
 
 };
 
