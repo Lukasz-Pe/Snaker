@@ -34,7 +34,7 @@ public:
 private:
 	void updateTail(LTexture &vTex);
 	unsigned int mTailLength, mSpeed, mTemp, mVeryFast;
-	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist, mCollectAngle,x,y, mCalcAngle, mMinCollectAngle,mMaxCollectAngle;
+	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist, mCollectAngle,xHeadToFruit,yHeadToFruit, mAngleHeadToFruit, mMinCollectAngle,mMaxCollectAngle, xFruitToHead, yFruitToHead, mAngleFruitToHead, mCollectDistanceMultiplier;
 	const double mAngleDelta=5.0;
 	vector<double> mTailX;
 	vector<double> mTailY;

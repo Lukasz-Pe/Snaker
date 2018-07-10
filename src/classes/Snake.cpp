@@ -22,41 +22,58 @@ Snake::Snake() {
 	mTemp = mSpeed;
 	mVeryFast = 3 * mSpeed;
 	mHeadBox= {0,0,20,20};
-	mCollectDist = 5;
-	mCollectAngle = 45;
-	x = 0;
-	y = 0;
-	mCalcAngle = 0;
+	mCollectDist = 10;
+	mCollectAngle = 120;
+	xHeadToFruit = 0;
+	yHeadToFruit = 0;
+	mAngleHeadToFruit = 0;
 	mMinCollectAngle = 0;
 	mMaxCollectAngle = 0;
+	xFruitToHead = 0;
+	yFruitToHead = 0;
+	mAngleFruitToHead = 0;
+	mCollectDistanceMultiplier=4;
 }
 
 bool Snake::collectFruit(Dot &vFruit) {
 //	cout<<"\tDist: "<<sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2))<<"\tHx: "<<mHeadX<<"\tHy: "<<mHeadY<<"\tFx: "<<vFruit.getPosX()<<"\tFy: "<<vFruit.getPosY()<<endl;
 
-	if (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)) < 2*mHeadBox.w) {
-		x = (mHeadX + 10) - (vFruit.getPosX() + 10);
-		y = (mHeadY + 10) - (vFruit.getPosY() + 10);
-		if (x > 0 && y >= 0) {
-			mCalcAngle = (180 / M_PI) * atan(x / y);
-		} else if (x > 0 && y < 0) {
-			mCalcAngle = 180 + (180 / M_PI) * atan(x / y);
-		} else if (x < 0 && y >= 0) {
-			mCalcAngle = (180 / M_PI) * atan(x / y);
-		} else if (x < 0 && y < 0) {
-			mCalcAngle = 180 + (180 / M_PI) * atan(x / y);
+	if (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)) < mCollectDistanceMultiplier * mHeadBox.w) {
+//		CALCULATING HEAD TO FRUIT ANGLE >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		xHeadToFruit = (vFruit.getPosX() + 10) - (mHeadX + 10);
+		yHeadToFruit = (mHeadY + 10) - (vFruit.getPosY() + 10);
+		if (xHeadToFruit > 0 && yHeadToFruit >= 0) {
+			mAngleHeadToFruit = (180 / M_PI) * atan(xHeadToFruit / yHeadToFruit);
+		} else if (xHeadToFruit > 0 && yHeadToFruit < 0) {
+			mAngleHeadToFruit = 180 + (180 / M_PI) * atan(xHeadToFruit / yHeadToFruit);
+		} else if (xHeadToFruit < 0 && yHeadToFruit >= 0) {
+			mAngleHeadToFruit = (180 / M_PI) * atan(xHeadToFruit / yHeadToFruit);
+		} else if (xHeadToFruit < 0 && yHeadToFruit < 0) {
+			mAngleHeadToFruit = 180 + (180 / M_PI) * atan(xHeadToFruit / yHeadToFruit);
 		}
-		mMinCollectAngle = mCalcAngle - mCollectAngle / 2;
-		mMaxCollectAngle = mCalcAngle + mCollectAngle / 2;
-		if (mMinCollectAngle < 0) {
-			mMinCollectAngle = 360 + mMinCollectAngle;
+//		CALCULATING FRUIT TO HEAD ANGLE >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		xFruitToHead = (mHeadX + 10) - (vFruit.getPosX() + 10);
+		yFruitToHead = (vFruit.getPosY() + 10) - (mHeadY + 10);
+		if (xFruitToHead > 0 && yFruitToHead >= 0) {
+			mAngleFruitToHead = (180 / M_PI) * atan(xFruitToHead / yFruitToHead);
+		} else if (xFruitToHead > 0 && yFruitToHead < 0) {
+			mAngleFruitToHead = 180 + (180 / M_PI) * atan(xFruitToHead / yFruitToHead);
+		} else if (xFruitToHead < 0 && yFruitToHead >= 0) {
+			mAngleFruitToHead = (180 / M_PI) * atan(xFruitToHead / yFruitToHead);
+		} else if (xFruitToHead < 0 && yFruitToHead < 0) {
+			mAngleFruitToHead = 180 + (180 / M_PI) * atan(xFruitToHead / yFruitToHead);
 		}
-		if (mMaxCollectAngle > 360) {
-			mMaxCollectAngle = mMaxCollectAngle - 360;
-		}
-		if (mHeadAngle >= mMinCollectAngle || mHeadAngle <= mMinCollectAngle) {
-			mNewFruitPos.x = vFruit.getPosX() + mCollectDist * sin(mCalcAngle * (M_PI / 180.0));
-			mNewFruitPos.y = vFruit.getPosY() + mCollectDist * cos(mCalcAngle * (M_PI / 180.0));
+//		CALCULATING MAX AND MIN COLLECT ANGLES >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		mMinCollectAngle = mAngleHeadToFruit - (mCollectAngle / 2);
+		mMaxCollectAngle = mAngleHeadToFruit + (mCollectAngle / 2);
+//		CHECKING IF ANGLE BETWEEN FRUIT AND HEAD IS IN RANGE OF COLLECTING ANGLES >>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//		cout << "x " << xHeadToFruit << "\ty " << yHeadToFruit << "\tmHeadX " << mHeadX << "\tmHeadY " << mHeadY << "\tFx " << vFruit.getPosX() << "\tFy " << vFruit.getPosY() << endl;
+//		cout <<"mAngleFruitToHead "<<mAngleFruitToHead<< "\tmAngleHeadToFruit " << mAngleHeadToFruit << "\tmHeadAngle " << mHeadAngle << "\tmMinCollectAngle " << mMinCollectAngle << "\tmMaxCollectAngle " << mMaxCollectAngle << endl;
+		if (mHeadAngle >= mMinCollectAngle && mHeadAngle <= mMaxCollectAngle) {
+//			cout<<"sin(mAngleFruitToHead * (M_PI / 180.0)) "<<sin(mAngleFruitToHead * (M_PI / 180.0))<<"\tcos(mAngleFruitToHead * (M_PI / 180.0)) "<<cos(mAngleFruitToHead * (M_PI / 180.0))<<endl;
+			mNewFruitPos.x = vFruit.getPosX() + mCollectDist * sin(mAngleFruitToHead * (M_PI / 180.0));
+			mNewFruitPos.y = vFruit.getPosY() - mCollectDist * cos(mAngleFruitToHead * (M_PI / 180.0));
+//			cout<<"vFruit.getPosX() "<<vFruit.getPosX()<<"\tvFruit.getPosY() "<<vFruit.getPosY()<<"\tmNewFruitPos.x "<<mNewFruitPos.x<<"\tmNewFruitPos.y "<<mNewFruitPos.y<<endl;
 			return true;
 		}
 	}

@@ -13,7 +13,7 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 3, TOTAL_FRUITS = 600, CLEARANCE_RADIUS = 150;
+int const MULTIPLIER = 3, TOTAL_FRUITS = 600;//, CLEARANCE_RADIUS = 150;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void handleEvents();
@@ -21,7 +21,7 @@ void print();
 //----------------------------------------------------------------Deklaracje zmiennych
 bool gContinue = true, gCollision = false, gReset = false;
 
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, ENEMY_COUNT = 10, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, ENEMY_COUNT = 0, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, SPRITE_DIMS = 20;
@@ -244,8 +244,10 @@ int main(int argc, char* args[]) {
 //			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < TOTAL_FRUITS; i++) {
-//				gFruit[i].moveToSnake(gSnake);
 				if (gSnake.collectFruit(gFruit[i])) {
+					SDL_SetRenderDrawColor(gRenderer,255,0,0,0);
+					SDL_RenderDrawLine(gRenderer, gSnake.getHeadBox().x+10,gSnake.getHeadBox().y+10, x[i]+10,y[i]+10);
+					SDL_SetRenderDrawColor(gRenderer,0,0,0,0);
 					x[i] = gSnake.mNewFruitPos.x;
 					y[i] = gSnake.mNewFruitPos.y;
 				}
@@ -332,7 +334,7 @@ int main(int argc, char* args[]) {
 						if (gCollision) {
 							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 //							gSnake.resetLength();
-							gGameState=4;
+//							gGameState=4;
 //							gSnake.setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 						}
 					}
@@ -357,6 +359,7 @@ int main(int argc, char* args[]) {
 			for (int i = 0; i < ENEMY_COUNT; i++) {
 				gEnemy[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gEnemySprite[i]]);
 			}
+//			SDL_RenderDrawLine(gRenderer, 0,0,gLvlWidth,gLvlHeight);
 			gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
 			gLTTextTexture.render(0, 0, gWindow);
 			gWindow.render();
