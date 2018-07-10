@@ -33,6 +33,8 @@ Snake::Snake() {
 	yFruitToHead = 0;
 	mAngleFruitToHead = 0;
 	mCollectDistanceMultiplier=4;
+//	hasActivePowerup[5]={false,false,false,false,false};
+//	powerupActivationTimestamp[5]={0,0,0,0,0};
 }
 
 void Snake::collectDistanceMultiplier(int &dist){

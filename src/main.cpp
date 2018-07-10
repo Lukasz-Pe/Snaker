@@ -13,9 +13,10 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 25, TOTAL_POWERUPS = 5,POWERUPS_COUNT=50 , MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 25, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
+void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
 void print();
 //----------------------------------------------------------------Deklaracje zmiennych
@@ -252,7 +253,6 @@ int main(int argc, char* args[]) {
 				}
 				gReset = false;
 			}
-			gSnake.collectDistanceMultiplier(distanceMultiplier);
 //			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gWindow.prepareRenderer(0, 0, 0);
 			gSnake.setCamera(gLvlWidth, gLvlHeight, gCamera);
@@ -286,6 +286,7 @@ int main(int argc, char* args[]) {
 					y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 					activatePowerup(gSpriteNum[i]);
+
 					gSnake.addLength();
 				}
 
@@ -296,6 +297,7 @@ int main(int argc, char* args[]) {
 						y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 						gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+						activatePowerup(gSpriteNum[i]);
 						gEnemy[j].addLength();
 					}
 				}
@@ -333,6 +335,7 @@ int main(int argc, char* args[]) {
 			}
 //			COLLISIONS WITH PLAYER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < ENEMY_COUNT; i++) {
+
 				gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
 				if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
 					gGameState = 4;
@@ -363,6 +366,7 @@ int main(int argc, char* args[]) {
 						}
 					}
 				}
+
 			}
 //			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			if (gCurrentScore != gSnake.getLength() || gCurrentScore >= 0) {
@@ -405,23 +409,57 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 //HERE ARE OTHER FUNCTIONS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void activatePowerup(int &fruitSpriteNum) {
+void powerupState(Snake &vSnake) {
+	for (int i = 0; i < TOTAL_POWERUPS; i++) {
+		if (vSnake.hasActivePowerup[i]) {
+			switch (i) {
+				case 2:
+					distanceMultiplier = 12;
+					vSnake.collectDistanceMultiplier(distanceMultiplier);
+					vSnake.powerupActivationTimestamp[i]=stepTimer.getSeconds();
+					break;
+				case 4:
+
+					break;
+			}
+		} else {
+			if (!vSnake.hasActivePowerup[i]) {
+				switch (i) {
+					case 2:
+						distanceMultiplier = 4;
+						vSnake.collectDistanceMultiplier(distanceMultiplier);
+						break;
+					case 4:
+
+						break;
+				}
+			}
+		}
+	}
+}
+
+void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 	switch (fruitSpriteNum) {
 		case 25:
-			powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			break;
+		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+		vSnake.hasActivePowerup[fruitSpriteNum - 25];
+		break;
 		case 26:
-			powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			break;
+		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+		vSnake.hasActivePowerup[fruitSpriteNum - 25];
+		break;
 		case 27:
-			powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			break;
+		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+		vSnake.hasActivePowerup[fruitSpriteNum - 25];
+		break;
 		case 28:
-			powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			break;
+		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+		vSnake.hasActivePowerup[fruitSpriteNum - 25];
+		break;
 		case 29:
-			powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			break;
+		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+		vSnake.hasActivePowerup[fruitSpriteNum - 25];
+		break;
 	}
 }
 double distanceCalc(SDL_Point &a, SDL_Point &b) {
@@ -451,45 +489,26 @@ void handleEvents() {
 			gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 			gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 			gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-			switch (i) {
-				case 0:
-					isPowerupActive[i] = true;
-					break;
-				case 1:
-					isPowerupActive[i] = true;
-					break;
-				case 2:
-					isPowerupActive[i] = true;
-					distanceMultiplier = 12;
-					break;
-				case 3:
-					isPowerupActive[i] = true;
-					break;
-				case 4:
-					isPowerupActive[i] = true;
-					SDL_RenderSetScale(gRenderer, 0.85, 0.85);
-					break;
-			}
 		}
 		if (powerupTime[i] < stepTimer.getSeconds()) {
 			switch (i) {
 				case 0:
-					isPowerupActive[i] = false;
-					break;
+				isPowerupActive[i] = false;
+				break;
 				case 1:
-					isPowerupActive[i] = false;
-					break;
+				isPowerupActive[i] = false;
+				break;
 				case 2:
-					isPowerupActive[i] = false;
-					distanceMultiplier = 4;
-					break;
+				isPowerupActive[i] = false;
+				distanceMultiplier = 4;
+				break;
 				case 3:
-					isPowerupActive[i] = false;
-					break;
+				isPowerupActive[i] = false;
+				break;
 				case 4:
-					isPowerupActive[i] = false;
-					SDL_RenderSetScale(gRenderer, 1, 1);
-					break;
+				isPowerupActive[i] = false;
+				SDL_RenderSetScale(gRenderer, 1, 1);
+				break;
 			}
 		}
 	}
@@ -507,56 +526,56 @@ void handleEvents() {
 		if (event.type == SDL_KEYUP && event.key.repeat == 0) {
 			switch (event.key.keysym.sym) {
 				case SDLK_a:
-					if (gGameState == 0) {
-						SDL_RenderSetScale(gRenderer, 1, 1);
-						distanceMultiplier = 4;
-					}
-					break;
+				if (gGameState == 0) {
+					SDL_RenderSetScale(gRenderer, 1, 1);
+					distanceMultiplier = 4;
+				}
+				break;
 			}
 		}
 		if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 			switch (event.key.keysym.sym) {
 				case SDLK_a:
-					if (gGameState == 0) {
+				if (gGameState == 0) {
 //						SDL_RenderSetScale(gRenderer, 0.85, 0.85);
 //						distanceMultiplier = 12;
-					}
-					break;
+				}
+				break;
 				case SDLK_ESCAPE:
 				case SDLK_q:
-					if (gGameState == 1) {
-						gGameState = 2;
-					} else {
-						gGameState = 1;
-					}
-					break;
+				if (gGameState == 1) {
+					gGameState = 2;
+				} else {
+					gGameState = 1;
+				}
+				break;
 				case SDLK_p:
-					if (gGameState == 3) {
-						stepTimer.unpause();
-						gGameState = 0;
-					} else {
-						stepTimer.pause();
-						gGameState = 3;
-					}
-					break;
-				case SDLK_s:
+				if (gGameState == 3) {
+					stepTimer.unpause();
 					gGameState = 0;
-					break;
+				} else {
+					stepTimer.pause();
+					gGameState = 3;
+				}
+				break;
+				case SDLK_s:
+				gGameState = 0;
+				break;
 				case SDLK_y:
 				case SDLK_t:
-					if (gGameState == 2) {
-						gContinue = false;
-					}
-					break;
+				if (gGameState == 2) {
+					gContinue = false;
+				}
+				break;
 				case SDLK_n:
-					if (gGameState == 2) {
-						gGameState = 1;
-					}
-					break;
+				if (gGameState == 2) {
+					gGameState = 1;
+				}
+				break;
 				case SDLK_r:
-					gGameState = 0;
-					gReset = true;
-					break;
+				gGameState = 0;
+				gReset = true;
+				break;
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
@@ -567,25 +586,25 @@ void handleEvents() {
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
 			switch (gGameState) {
 				case 1:
-					if (i >= 0 && i <= 2) {
-						gButtons[i].eventHandler(event);
-						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
-							if (event.type == SDL_MOUSEBUTTONUP) {
-								gOption = gButtons[i].getID();
-							}
+				if (i >= 0 && i <= 2) {
+					gButtons[i].eventHandler(event);
+					if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
+						if (event.type == SDL_MOUSEBUTTONUP) {
+							gOption = gButtons[i].getID();
 						}
 					}
-					break;
+				}
+				break;
 				case 2:
-					if (i >= 3 && i <= 4) {
-						gButtons[i].eventHandler(event);
-						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
-							if (event.type == SDL_MOUSEBUTTONUP) {
-								gOption = gButtons[i].getID();
-							}
+				if (i >= 3 && i <= 4) {
+					gButtons[i].eventHandler(event);
+					if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
+						if (event.type == SDL_MOUSEBUTTONUP) {
+							gOption = gButtons[i].getID();
 						}
 					}
-					break;
+				}
+				break;
 			}
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN && (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))) {
@@ -599,22 +618,22 @@ void handleEvents() {
 		}
 		switch (gOption) {
 			case 1:
-				gGameState = 0;
-				break;
+			gGameState = 0;
+			break;
 			case 2:
-				gGameState = 0;
-				gReset = true;
-				break;
+			gGameState = 0;
+			gReset = true;
+			break;
 			case 3:
-				gGameState = 2;
-				break;
+			gGameState = 2;
+			break;
 			case 4:
-				gContinue = false;
-				;
-				break;
+			gContinue = false;
+			;
+			break;
 			case 5:
-				gGameState = 1;
-				break;
+			gGameState = 1;
+			break;
 		}
 	}
 }

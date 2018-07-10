@@ -30,6 +30,8 @@ public:
 	void resetLength();
 	void setAngle(double newAngle);
 	int getLength();
+	bool hasActivePowerup[5]={false,false,false,false,false};
+	int powerupActivationTimestamp[5]={0,0,0,0,0};
 	virtual ~Snake();
 	SDL_Point mNewFruitPos;
 private:
