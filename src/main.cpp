@@ -13,7 +13,7 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 3, TOTAL_FRUITS = 600;//, CLEARANCE_RADIUS = 150;
+int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 50;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void handleEvents();
@@ -21,7 +21,7 @@ void print();
 //----------------------------------------------------------------Deklaracje zmiennych
 bool gContinue = true, gCollision = false, gReset = false;
 
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, ENEMY_COUNT = 0, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, SPRITE_DIMS = 20;
