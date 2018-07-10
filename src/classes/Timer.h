@@ -18,6 +18,7 @@ class Timer {
 		void pause();
 		void unpause();
 		Uint32 getTicks();
+		int getSeconds();
 		bool isStarted();
 		bool isPaused();
 		virtual ~Timer();

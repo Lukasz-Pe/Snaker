@@ -14,68 +14,67 @@ Timer::Timer() {
 	mStarted = false;
 }
 
-void Timer::start()
-{
-    mStarted = true;
-    mPaused = false;
-    mStartTicks = SDL_GetTicks();
+void Timer::start() {
+	mStarted = true;
+	mPaused = false;
+	mStartTicks = SDL_GetTicks();
 	mPausedTicks = 0;
 }
 
-void Timer::stop()
-{
-    mStarted = false;
-    mPaused = false;
+void Timer::stop() {
+	mStarted = false;
+	mPaused = false;
 	mStartTicks = 0;
 	mPausedTicks = 0;
 }
 
-void Timer::pause()
-{
-    if( mStarted && !mPaused )
-    {
-        mPaused = true;
-        mPausedTicks = SDL_GetTicks() - mStartTicks;
+void Timer::pause() {
+	if (mStarted && !mPaused) {
+		mPaused = true;
+		mPausedTicks = SDL_GetTicks() - mStartTicks;
 		mStartTicks = 0;
-    }
+	}
 }
 
-void Timer::unpause()
-{
-    if( mStarted && mPaused )
-    {
-        mPaused = false;
-        mStartTicks = SDL_GetTicks() - mPausedTicks;
-        mPausedTicks = 0;
-    }
+void Timer::unpause() {
+	if (mStarted && mPaused) {
+		mPaused = false;
+		mStartTicks = SDL_GetTicks() - mPausedTicks;
+		mPausedTicks = 0;
+	}
 }
 
-Uint32 Timer::getTicks()
-{
+Uint32 Timer::getTicks() {
 	Uint32 time = 0;
-    if( mStarted )
-    {
-        if( mPaused )
-        {
-            time = mPausedTicks;
-        }
-        else
-        {
-            time = SDL_GetTicks() - mStartTicks;
-        }
-    }
+	if (mStarted) {
+		if (mPaused) {
+			time = mPausedTicks;
+		} else {
+			time = SDL_GetTicks() - mStartTicks;
+		}
+	}
 
-    return time;
+	return time;
 }
 
-bool Timer::isStarted()
-{
-    return mStarted;
+int Timer::getSeconds() {
+	int time = 0;
+	if (mStarted) {
+		if (mPaused) {
+			time = (int)mPausedTicks/1000;
+		} else {
+			time = (int)((SDL_GetTicks() - mStartTicks)/1000);
+		}
+	}
+	return time;
 }
 
-bool Timer::isPaused()
-{
-    return mPaused && mStarted;
+bool Timer::isStarted() {
+	return mStarted;
+}
+
+bool Timer::isPaused() {
+	return mPaused && mStarted;
 }
 
 Timer::~Timer() {

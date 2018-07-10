@@ -35,6 +35,10 @@ Snake::Snake() {
 	mCollectDistanceMultiplier=4;
 }
 
+void Snake::collectDistanceMultiplier(int &dist){
+	mCollectDistanceMultiplier = dist;
+}
+
 bool Snake::collectFruit(Dot &vFruit) {
 //	cout<<"\tDist: "<<sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2))<<"\tHx: "<<mHeadX<<"\tHy: "<<mHeadY<<"\tFx: "<<vFruit.getPosX()<<"\tFy: "<<vFruit.getPosY()<<endl;
 

@@ -30,5 +30,5 @@ using namespace std;
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
 double distanceCalc(SDL_Point &a,SDL_Point &b);
-
+void activatePowerup(int &fruitSpriteNum);
 #endif /* MAIN_H_ */
