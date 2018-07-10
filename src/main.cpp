@@ -13,7 +13,7 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 5, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+int const MULTIPLIER = 2, TOTAL_FRUITS = 200, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
@@ -246,7 +246,7 @@ int main(int argc, char* args[]) {
 			if (gReset) {
 				for (int p = 0; p < TOTAL_POWERUPS; p++) {
 					gSnake.hasActivePowerup[p] = false;
-					gSnake.powerupActivationTimestamp[p]=0;
+					gSnake.powerupActivationTimestamp[p] = 0;
 				}
 				gSnake.resetLength();
 				gSnake.setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
@@ -254,7 +254,7 @@ int main(int argc, char* args[]) {
 					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
 					for (int p = 0; p < TOTAL_POWERUPS; p++) {
 						gEnemy[i].hasActivePowerup[p] = false;
-						gEnemy[i].powerupActivationTimestamp[p]=0;
+						gEnemy[i].powerupActivationTimestamp[p] = 0;
 					}
 					gEnemy[i].resetLength();
 				}
@@ -293,7 +293,7 @@ int main(int argc, char* args[]) {
 					y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 					activatePowerup(gSpriteNum[i], gSnake);
-					if (gSpriteNum[i]==29){
+					if (gSpriteNum[i] == 29) {
 						SDL_RenderSetScale(gRenderer, 0.85, 0.85);
 					}
 					if (gSpriteNum[i] < 25) {
@@ -525,7 +525,7 @@ void powerupCheck(Snake &vSnake, bool render) {
 				case 3:
 					break;
 				case 4:
-					if(render){
+					if (render) {
 						SDL_RenderSetScale(gRenderer, 1, 1);
 					}
 					break;
