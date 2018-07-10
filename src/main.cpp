@@ -13,14 +13,14 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 25, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 5, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
 void print();
 //----------------------------------------------------------------Deklaracje zmiennych
-bool gContinue = true, gCollision = false, gReset = false, isPowerupActive[TOTAL_POWERUPS] = { false, false, false, false, false };
+bool gContinue = true, gCollision = false, gReset = false;
 
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
@@ -42,7 +42,8 @@ Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
 Timer stepTimer;
 int Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
 // POWERUPS PARAMS
-int distanceMultiplier = 4, activePowerupNum = -1;
+void powerupCheck(Snake &vSnake, bool render = false);
+
 int main(int argc, char* args[]) {
 	gContinue = initSDL(&gWindow);
 
@@ -205,7 +206,6 @@ int main(int argc, char* args[]) {
 			}
 		}
 		if (gGameState >= 1) {
-
 			gWindow.prepareRenderer(0, 0, 0);
 //			GETTING MENU BACKGROUND ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < gTotalMenuTiles; i++) {
@@ -244,12 +244,19 @@ int main(int argc, char* args[]) {
 		if (gGameState == 0) {
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			if (gReset) {
+				for (int p = 0; p < TOTAL_POWERUPS; p++) {
+					gSnake.hasActivePowerup[p] = false;
+					gSnake.powerupActivationTimestamp[p]=0;
+				}
 				gSnake.resetLength();
 				gSnake.setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
 				for (int i = 0; i < ENEMY_COUNT; i++) {
 					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+					for (int p = 0; p < TOTAL_POWERUPS; p++) {
+						gEnemy[i].hasActivePowerup[p] = false;
+						gEnemy[i].powerupActivationTimestamp[p]=0;
+					}
 					gEnemy[i].resetLength();
-					distanceMultiplier = 4;
 				}
 				gReset = false;
 			}
@@ -285,9 +292,13 @@ int main(int argc, char* args[]) {
 					x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
 					y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
-					activatePowerup(gSpriteNum[i]);
-
-					gSnake.addLength();
+					activatePowerup(gSpriteNum[i], gSnake);
+					if (gSpriteNum[i]==29){
+						SDL_RenderSetScale(gRenderer, 0.85, 0.85);
+					}
+					if (gSpriteNum[i] < 25) {
+						gSnake.addLength();
+					}
 				}
 
 				for (int j = 0; j < ENEMY_COUNT; j++) {
@@ -297,8 +308,10 @@ int main(int argc, char* args[]) {
 						y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 						gAngle[j] = 360 * ((double) rand() / RAND_MAX);
-						activatePowerup(gSpriteNum[i]);
-						gEnemy[j].addLength();
+						activatePowerup(gSpriteNum[i], gEnemy[j]);
+						if (gSpriteNum[i] < 25) {
+							gEnemy[j].addLength();
+						}
 					}
 				}
 			}
@@ -311,6 +324,9 @@ int main(int argc, char* args[]) {
 			gCollision = false;
 //			COLLISIONS BETWEEN BOTS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < ENEMY_COUNT; i++) {
+				if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
+					break;
+				}
 				for (int j = 0; j < ENEMY_COUNT; j++) {
 					gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
 //					cout<<"gCollision "<<gCollision<<endl;
@@ -318,14 +334,21 @@ int main(int argc, char* args[]) {
 //					 cout<<"jEnemy "<<j<<"\tHx:"<<gEnemy[j].getHeadBox().x<<"\tHy:"<<gEnemy[j].getHeadBox().y<<"\tHw:"<<gEnemy[j].getHeadBox().w<<"\tHh:"<<gEnemy[j].getHeadBox().h<<endl;
 					if (gCollision && i != j) {
 						gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+						if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+							break;
+						}
 						gEnemy[i].resetLength();
 //						gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 					}
 					if (gEnemy[i].getLength() != 0 && i != j) {
+
 						for (int t = 0; t < gEnemy[i].getLength(); t++) {
 							gCollision = checkCollision(gEnemy[i].getTailBox(t), gEnemy[j].getHeadBox());
 							if (gCollision) {
 								gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+								if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+									break;
+								}
 								gEnemy[j].resetLength();
 //								gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 							}
@@ -335,13 +358,18 @@ int main(int argc, char* args[]) {
 			}
 //			COLLISIONS WITH PLAYER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < ENEMY_COUNT; i++) {
-
+				if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
+					break;
+				}
 				gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
 				if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
 					gGameState = 4;
 //					gSnake.resetLength();
 //					gSnake.setStartPos(0.5 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.5 * gLvlHeight * (((double) rand() / RAND_MAX)));
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+						break;
+					}
 					gEnemy[i].resetLength();
 //					gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 				}
@@ -350,6 +378,9 @@ int main(int argc, char* args[]) {
 						gCollision = checkCollision(gSnake.getTailBox(t), gEnemy[i].getHeadBox());
 						if (gCollision) {
 							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+							if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+								break;
+							}
 							gEnemy[i].resetLength();
 //							gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 						}
@@ -360,7 +391,10 @@ int main(int argc, char* args[]) {
 						gCollision = checkCollision(gEnemy[i].getTailBox(t), gSnake.getHeadBox());
 						if (gCollision) {
 							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-//							gSnake.resetLength();
+							if (gSnake.hasActivePowerup[3]) { //MAGNET ON ****************
+								break;
+							}
+							gSnake.resetLength();
 //							gGameState=4;
 //							gSnake.setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 						}
@@ -377,11 +411,16 @@ int main(int argc, char* args[]) {
 				gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
 				gLTScoreText.setHeight(TEXT_SIZE);
 			}
-//			MOVEMEN AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//			MOVEMENT AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gSnake.move(gLevelBorders, gLTSnakeTail);
 			for (int i = 0; i < ENEMY_COUNT; i++) {
 				gEnemy[i].setAngle(gAngle[i]);
 				gEnemy[i].move(gLevelBorders, gLTSnakeTail);
+			}
+//			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			powerupCheck(gSnake, true);
+			for (int i = 0; i < ENEMY_COUNT; i++) {
+				powerupCheck(gEnemy[i]);
 			}
 //			RENDERING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			for (int i = 0; i < ENEMY_COUNT; i++) {
@@ -389,12 +428,6 @@ int main(int argc, char* args[]) {
 			}
 			gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
 			gLTScoreText.render(0, 0, gWindow);
-			for (int i = 0; i < TOTAL_POWERUPS; i++) {
-				if (isPowerupActive[i]) {
-					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
-				}
-			}
 			gWindow.render();
 		}
 	}
@@ -409,30 +442,93 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 //HERE ARE OTHER FUNCTIONS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void powerupState(Snake &vSnake) {
+void powerupCheck(Snake &vSnake, bool render) {
 	for (int i = 0; i < TOTAL_POWERUPS; i++) {
-		if (vSnake.hasActivePowerup[i]) {
+		if (gSnake.powerupActivationTimestamp[i] < stepTimer.getSeconds()) {
+			gSnake.hasActivePowerup[i] = false;
+		}
+		if (gSnake.hasActivePowerup[i]) {
+			if (!render) {
+				break;
+			}
 			switch (i) {
+				case 0:
+					gTimeLeft.str("");
+					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 1:
+					gTimeLeft.str("");
+					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
 				case 2:
-					distanceMultiplier = 12;
-					vSnake.collectDistanceMultiplier(distanceMultiplier);
-					vSnake.powerupActivationTimestamp[i]=stepTimer.getSeconds();
+					gTimeLeft.str("");
+					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 3:
+					gTimeLeft.str("");
+					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 				case 4:
-
+					gTimeLeft.str("");
+					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 			}
 		} else {
-			if (!vSnake.hasActivePowerup[i]) {
-				switch (i) {
-					case 2:
-						distanceMultiplier = 4;
-						vSnake.collectDistanceMultiplier(distanceMultiplier);
-						break;
-					case 4:
-
-						break;
-				}
+			switch (i) {
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					vSnake.collectDistanceMultiplier(4);
+					break;
+				case 3:
+					break;
+				case 4:
+					if(render){
+						SDL_RenderSetScale(gRenderer, 1, 1);
+					}
+					break;
 			}
 		}
 	}
@@ -441,25 +537,26 @@ void powerupState(Snake &vSnake) {
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 	switch (fruitSpriteNum) {
 		case 25:
-		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-		vSnake.hasActivePowerup[fruitSpriteNum - 25];
-		break;
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			break;
 		case 26:
-		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-		vSnake.hasActivePowerup[fruitSpriteNum - 25];
-		break;
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			break;
 		case 27:
-		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-		vSnake.hasActivePowerup[fruitSpriteNum - 25];
-		break;
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			vSnake.collectDistanceMultiplier(12);
+			break;
 		case 28:
-		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-		vSnake.hasActivePowerup[fruitSpriteNum - 25];
-		break;
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			break;
 		case 29:
-		powerupTime[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-		vSnake.hasActivePowerup[fruitSpriteNum - 25];
-		break;
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			break;
 	}
 }
 double distanceCalc(SDL_Point &a, SDL_Point &b) {
@@ -479,39 +576,6 @@ void print() {
 }
 
 void handleEvents() {
-	for (int i = 0; i < TOTAL_POWERUPS; i++) {
-		if ((powerupTime[i] - stepTimer.getSeconds()) >= 0) {
-			gTimeLeft.str(" ");
-			if (((powerupTime[i] - stepTimer.getSeconds()) < 10) && ((powerupTime[i] - stepTimer.getSeconds()) >= 0)) {
-				gTimeLeft << "0";
-			}
-			gTimeLeft << powerupTime[i] - stepTimer.getSeconds();
-			gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
-			gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
-			gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-		}
-		if (powerupTime[i] < stepTimer.getSeconds()) {
-			switch (i) {
-				case 0:
-				isPowerupActive[i] = false;
-				break;
-				case 1:
-				isPowerupActive[i] = false;
-				break;
-				case 2:
-				isPowerupActive[i] = false;
-				distanceMultiplier = 4;
-				break;
-				case 3:
-				isPowerupActive[i] = false;
-				break;
-				case 4:
-				isPowerupActive[i] = false;
-				SDL_RenderSetScale(gRenderer, 1, 1);
-				break;
-			}
-		}
-	}
 	while (SDL_PollEvent(&event)) {
 		gOption = -1;
 		if (event.type == SDL_QUIT) {
@@ -523,59 +587,58 @@ void handleEvents() {
 //				gEnemy[i].addLength();
 //			}
 //		}
-		if (event.type == SDL_KEYUP && event.key.repeat == 0) {
-			switch (event.key.keysym.sym) {
-				case SDLK_a:
-				if (gGameState == 0) {
-					SDL_RenderSetScale(gRenderer, 1, 1);
-					distanceMultiplier = 4;
-				}
-				break;
-			}
-		}
+//		if (event.type == SDL_KEYUP && event.key.repeat == 0) {
+//			switch (event.key.keysym.sym) {
+//				case SDLK_a:
+//					if (gGameState == 0) {
+//						SDL_RenderSetScale(gRenderer, 1, 1);
+//					}
+//					break;
+//			}
+//		}
 		if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 			switch (event.key.keysym.sym) {
 				case SDLK_a:
-				if (gGameState == 0) {
+					if (gGameState == 0) {
 //						SDL_RenderSetScale(gRenderer, 0.85, 0.85);
 //						distanceMultiplier = 12;
-				}
-				break;
+					}
+					break;
 				case SDLK_ESCAPE:
 				case SDLK_q:
-				if (gGameState == 1) {
-					gGameState = 2;
-				} else {
-					gGameState = 1;
-				}
-				break;
+					if (gGameState == 1) {
+						gGameState = 2;
+					} else {
+						gGameState = 1;
+					}
+					break;
 				case SDLK_p:
-				if (gGameState == 3) {
-					stepTimer.unpause();
-					gGameState = 0;
-				} else {
-					stepTimer.pause();
-					gGameState = 3;
-				}
-				break;
+					if (gGameState == 3) {
+						stepTimer.unpause();
+						gGameState = 0;
+					} else {
+						stepTimer.pause();
+						gGameState = 3;
+					}
+					break;
 				case SDLK_s:
-				gGameState = 0;
-				break;
+					gGameState = 0;
+					break;
 				case SDLK_y:
 				case SDLK_t:
-				if (gGameState == 2) {
-					gContinue = false;
-				}
-				break;
+					if (gGameState == 2) {
+						gContinue = false;
+					}
+					break;
 				case SDLK_n:
-				if (gGameState == 2) {
-					gGameState = 1;
-				}
-				break;
+					if (gGameState == 2) {
+						gGameState = 1;
+					}
+					break;
 				case SDLK_r:
-				gGameState = 0;
-				gReset = true;
-				break;
+					gGameState = 0;
+					gReset = true;
+					break;
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
@@ -586,25 +649,25 @@ void handleEvents() {
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
 			switch (gGameState) {
 				case 1:
-				if (i >= 0 && i <= 2) {
-					gButtons[i].eventHandler(event);
-					if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
-						if (event.type == SDL_MOUSEBUTTONUP) {
-							gOption = gButtons[i].getID();
+					if (i >= 0 && i <= 2) {
+						gButtons[i].eventHandler(event);
+						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
+							if (event.type == SDL_MOUSEBUTTONUP) {
+								gOption = gButtons[i].getID();
+							}
 						}
 					}
-				}
-				break;
+					break;
 				case 2:
-				if (i >= 3 && i <= 4) {
-					gButtons[i].eventHandler(event);
-					if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
-						if (event.type == SDL_MOUSEBUTTONUP) {
-							gOption = gButtons[i].getID();
+					if (i >= 3 && i <= 4) {
+						gButtons[i].eventHandler(event);
+						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
+							if (event.type == SDL_MOUSEBUTTONUP) {
+								gOption = gButtons[i].getID();
+							}
 						}
 					}
-				}
-				break;
+					break;
 			}
 		}
 		if (event.type == SDL_MOUSEBUTTONDOWN && (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(3))) {
@@ -618,22 +681,22 @@ void handleEvents() {
 		}
 		switch (gOption) {
 			case 1:
-			gGameState = 0;
-			break;
+				gGameState = 0;
+				break;
 			case 2:
-			gGameState = 0;
-			gReset = true;
-			break;
+				gGameState = 0;
+				gReset = true;
+				break;
 			case 3:
-			gGameState = 2;
-			break;
+				gGameState = 2;
+				break;
 			case 4:
-			gContinue = false;
-			;
-			break;
+				gContinue = false;
+				;
+				break;
 			case 5:
-			gGameState = 1;
-			break;
+				gGameState = 1;
+				break;
 		}
 	}
 }

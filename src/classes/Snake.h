@@ -25,7 +25,7 @@ public:
 	double getAngle();
 	SDL_Rect getHeadBox();
 	SDL_Rect getTailBox(int &num);
-	void collectDistanceMultiplier(int &dist);
+	void collectDistanceMultiplier(int dist);
 	void printParams();
 	void resetLength();
 	void setAngle(double newAngle);
