@@ -29,9 +29,13 @@
 using namespace std;
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
-double distanceCalc(SDL_Point &a,SDL_Point &b);
+double distanceCalc(SDL_Point &a, SDL_Point &b);
 void fruitCollisions();
 void betweenBotsCollisions();
 void playerAndBotsCollisions();
-
+void gameReset(bool &reset);
+void spritesGenerator();
+void boxesSetup();
+void resolutionChange();
+void gameMenu(int &gGameState);
 #endif /* MAIN_H_ */

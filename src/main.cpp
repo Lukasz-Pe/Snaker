@@ -55,7 +55,6 @@ int main(int argc, char* args[]) {
 	gContinue = gLTEnemyHead.loadFromFile("./assets/images/faces.png", gWindow);
 	gContinue = gLTEnemyTail.loadFromFile("./assets/images/tails.png", gWindow);
 	gContinue = gLTPowerupIcons.loadFromFile("./assets/images/powerups.png", gWindow);
-
 	for (int i = 0; i < TOTAL_SPRITES; i++) {
 		gSpriteClips[i]= {gSpritePosX, gSpritePosY, SPRITE_DIMS, SPRITE_DIMS};
 		gSpritePosX+=SPRITE_DIMS;
