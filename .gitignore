@@ -1,7 +1,6 @@
 
 .project
-.settings/language.settings.xml
-.settings/org.eclipse.cdt.managedbuilder.core.prefs
+.settings/*
 Debug/Snaker.exe
 Debug/src/Dot.o
 Debug/src/LBitmapFont.o
