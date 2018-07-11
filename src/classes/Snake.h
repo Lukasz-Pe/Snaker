@@ -30,12 +30,12 @@ public:
 	void resetLength();
 	void setAngle(double newAngle);
 	int getLength();
+	void updateTail(LTexture &vTex);
 	bool hasActivePowerup[5]={false,false,false,false,false};
 	int powerupActivationTimestamp[5]={0,0,0,0,0};
 	virtual ~Snake();
 	SDL_Point mNewFruitPos;
 private:
-	void updateTail(LTexture &vTex);
 	unsigned int mTailLength, mSpeed, mTemp, mVeryFast;
 	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist, mCollectAngle,xHeadToFruit,yHeadToFruit, mAngleHeadToFruit, mMinCollectAngle,mMaxCollectAngle, xFruitToHead, yFruitToHead, mAngleFruitToHead, mCollectDistanceMultiplier;
 	const double mAngleDelta=5.0;

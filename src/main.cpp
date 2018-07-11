@@ -13,7 +13,7 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 2, TOTAL_FRUITS = 200, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+int const MULTIPLIER = 5, TOTAL_FRUITS = 600, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 24, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
@@ -333,6 +333,22 @@ int main(int argc, char* args[]) {
 //					 cout<<"iEnemy "<<i<<"\tHx:"<<gEnemy[i].getHeadBox().x<<"\tHy:"<<gEnemy[i].getHeadBox().y<<"\tHw:"<<gEnemy[i].getHeadBox().w<<"\tHh:"<<gEnemy[i].getHeadBox().h<<endl;
 //					 cout<<"jEnemy "<<j<<"\tHx:"<<gEnemy[j].getHeadBox().x<<"\tHy:"<<gEnemy[j].getHeadBox().y<<"\tHw:"<<gEnemy[j].getHeadBox().w<<"\tHh:"<<gEnemy[j].getHeadBox().h<<endl;
 					if (gCollision && i != j) {
+						if (gEnemy[i].hasActivePowerup[0]) {
+							for (int et = 0; et < gEnemy[j].getLength(); et++) {
+								gEnemy[i].addLength();
+								gEnemy[i].updateTail(gLTEnemyTail);
+							}
+							gEnemy[j].resetLength();
+							break;
+						}
+						if (gEnemy[j].hasActivePowerup[0]) {
+							for (int et = 0; et < gEnemy[i].getLength(); et++) {
+								gEnemy[j].addLength();
+								gEnemy[j].updateTail(gLTEnemyTail);
+							}
+							gEnemy[i].resetLength();
+							break;
+						}
 						gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 						if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
 							break;
@@ -341,10 +357,17 @@ int main(int argc, char* args[]) {
 //						gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 					}
 					if (gEnemy[i].getLength() != 0 && i != j) {
-
 						for (int t = 0; t < gEnemy[i].getLength(); t++) {
 							gCollision = checkCollision(gEnemy[i].getTailBox(t), gEnemy[j].getHeadBox());
 							if (gCollision) {
+								if (gEnemy[j].hasActivePowerup[0]) {
+									for (int et = 0; et < gEnemy[i].getLength(); et++) {
+										gEnemy[j].addLength();
+										gEnemy[j].updateTail(gLTEnemyTail);
+									}
+									gEnemy[i].resetLength();
+									break;
+								}
 								gAngle[j] = 360 * ((double) rand() / RAND_MAX);
 								if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
 									break;
@@ -363,13 +386,29 @@ int main(int argc, char* args[]) {
 				}
 				gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
 				if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
+					if (gSnake.hasActivePowerup[0]) {
+						for (int et = 0; et < gEnemy[i].getLength(); et++) {
+							gSnake.addLength();
+							gSnake.updateTail(gLTSnakeTail);
+						}
+						gEnemy[i].resetLength();
+						break;
+					}
+					if (gEnemy[i].hasActivePowerup[0]) {
+						for (int et = 0; et < gSnake.getLength(); et++) {
+							gEnemy[i].addLength();
+							gEnemy[i].updateTail(gLTEnemyTail);
+						}
+						gSnake.resetLength();
+						break;
+					}
+					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+						break;
+					}
 					gGameState = 4;
 //					gSnake.resetLength();
 //					gSnake.setStartPos(0.5 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.5 * gLvlHeight * (((double) rand() / RAND_MAX)));
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
-						break;
-					}
 					gEnemy[i].resetLength();
 //					gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 				}
@@ -377,6 +416,14 @@ int main(int argc, char* args[]) {
 					for (int t = 0; t < gSnake.getLength(); t++) {
 						gCollision = checkCollision(gSnake.getTailBox(t), gEnemy[i].getHeadBox());
 						if (gCollision) {
+							if (gEnemy[i].hasActivePowerup[0]) {
+								for (int et = 0; et < gSnake.getLength(); et++) {
+									gEnemy[i].addLength();
+									gEnemy[i].updateTail(gLTEnemyTail);
+								}
+								gSnake.resetLength();
+								break;
+							}
 							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 							if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
 								break;
@@ -390,12 +437,20 @@ int main(int argc, char* args[]) {
 					for (int t = 0; t < gEnemy[i].getLength(); t++) {
 						gCollision = checkCollision(gEnemy[i].getTailBox(t), gSnake.getHeadBox());
 						if (gCollision) {
+							if (gSnake.hasActivePowerup[0]) {
+								for (int et = 0; et < gEnemy[i].getLength(); et++) {
+									gSnake.addLength();
+									gSnake.updateTail(gLTSnakeTail);
+								}
+								gEnemy[i].resetLength();
+								break;
+							}
 							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 							if (gSnake.hasActivePowerup[3]) { //MAGNET ON ****************
 								break;
 							}
-							gSnake.resetLength();
-//							gGameState=4;
+//							gSnake.resetLength();
+							gGameState=4;
 //							gSnake.setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
 						}
 					}
