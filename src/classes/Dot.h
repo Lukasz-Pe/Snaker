@@ -21,7 +21,7 @@ class Dot {
 		void moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[]=NULL);
 		void moveFramerateIndependent(Win &vWin, float &timeStep);
 		void renderBox(LTexture &vDotTexture, Win &vWin, SDL_Rect *vCamera=NULL);
-		void renderDot(LTexture &vDotTexture, Win &vWin, int x=-1, int y=-1, SDL_Rect *vCamera=NULL, SDL_Rect *vClip=NULL);
+		void renderDot(LTexture &vDotTexture, Win &vWin, int x=-1, int y=-1, SDL_Rect *vCamera=NULL, SDL_Rect *vClip=NULL, const double *scaleFactor=NULL);
 		void setCamera(Win &vWin, SDL_Rect &vCamera,const int &LevelWidht,const int &LevelHeight);
 		//>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>getters
 		int getPosX();

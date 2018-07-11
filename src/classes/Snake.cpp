@@ -212,11 +212,11 @@ void Snake::updateTail(LTexture &vTex) {
 
 void Snake::render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip) {
 	for (unsigned int i = 0; i < mTailLength; i++) {
-		vTexTail.render(mTailX[i] - gCam.x, mTailY[i] - gCam.y, vWin, vClip, mTailAngle[i]);
+		vTexTail.render(mTailX[i] - gCam.x, mTailY[i] - gCam.y, vWin, vClip, NULL, mTailAngle[i]);
 //		SDL_Rect tbox={mBox[i].x - gCam.x,mBox[i].y - gCam.y,mBox[i].w,mBox[i].h};
 //		SDL_RenderDrawRect(vWin.getRenderer(), &tbox);
 	}
-	vTexHead.render(mHeadX - gCam.x, mHeadY - gCam.y, vWin, vClip, mHeadAngle);
+	vTexHead.render(mHeadX - gCam.x, mHeadY - gCam.y, vWin, vClip, NULL, mHeadAngle);
 	if (vClip == NULL) {
 		mHeadBox= {(int)mHeadX,(int)mHeadY, vTexHead.getWidth(),vTexHead.getHeight()};
 	} else {

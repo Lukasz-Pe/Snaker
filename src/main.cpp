@@ -14,6 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 int const MULTIPLIER = 5, TOTAL_FRUITS = 600, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 24, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+const double POWERUP_SCALE = 2;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
@@ -21,7 +22,6 @@ void handleEvents();
 void print();
 //----------------------------------------------------------------Deklaracje zmiennych
 bool gContinue = true, gCollision = false, gReset = false;
-
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT];
@@ -252,7 +252,12 @@ int main(int argc, char* args[]) {
 			}
 //			SETTING STARTING POS OF FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < TOTAL_FRUITS; i++) {
-				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				if (gSpriteNum[i] < 25) {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				} else {
+//					cout<<gSpriteNum[i]<<endl;
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
+				}
 			}
 //			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -486,7 +491,12 @@ void fruitCollisions() {
 		if (gCollision) {
 			x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
 			y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
-			gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+			if (gSpriteNum[i] < 25) {
+				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+			} else {
+//				cout<<gSpriteNum[i]<<endl;
+				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
+			}
 			activatePowerup(gSpriteNum[i], gSnake);
 			if (gSpriteNum[i] == 29) {
 				SDL_RenderSetScale(gRenderer, 0.85, 0.85);
@@ -501,7 +511,12 @@ void fruitCollisions() {
 			if (gCollision) {
 				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
 				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
-				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				if (gSpriteNum[i] < 25) {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				} else {
+//					cout<<gSpriteNum[i]<<endl;
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
+				}
 				gAngle[j] = 360 * ((double) rand() / RAND_MAX);
 				activatePowerup(gSpriteNum[i], gEnemy[j]);
 				if (gSpriteNum[i] < 25) {

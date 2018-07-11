@@ -137,11 +137,16 @@ void LTexture::free() {
 	}
 }
 
-void LTexture::render(int posX, int posY, Win &vWin, SDL_Rect *clip, double angle, SDL_Point *center, SDL_RendererFlip flip) {
+void LTexture::render(int posX, int posY, Win &vWin, SDL_Rect *clip, const double *scaleFactor, double angle, SDL_Point *center, SDL_RendererFlip flip) {
 	SDL_Rect rect = { posX, posY, mTextureWidht, mTextureHeight };
 	if (clip != NULL) {
-		rect.w = clip->w;
-		rect.h = clip->h;
+		if (scaleFactor != NULL) {
+			rect.w = *scaleFactor * clip->w;
+			rect.h = *scaleFactor * clip->h;
+		} else {
+			rect.w = clip->w;
+			rect.h = clip->h;
+		}
 	}
 
 	SDL_RenderCopyEx(vWin.getRenderer(), mTexture, clip, &rect, angle, center, flip);
@@ -235,10 +240,10 @@ SDL_Texture *LTexture::getTexture() {
 	return mTexture;
 }
 
-void LTexture::setWidth(int w){
-	mTextureWidht=w;
+void LTexture::setWidth(int w) {
+	mTextureWidht = w;
 }
 
-void LTexture::setHeight(int h){
-	mTextureHeight=h;
+void LTexture::setHeight(int h) {
+	mTextureHeight = h;
 }

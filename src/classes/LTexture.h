@@ -19,7 +19,7 @@ public:
 	bool loadFromText(string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin);
 	bool createBlank(int width, int height, Win &vWin, SDL_TextureAccess access=SDL_TEXTUREACCESS_STREAMING);
 	//------------------------------inne
-	void render(int posX, int posY, Win &vWin, SDL_Rect *clip=NULL, double angle=0.0, SDL_Point *center=NULL, SDL_RendererFlip flip=SDL_FLIP_NONE);
+	void render(int posX, int posY, Win &vWin, SDL_Rect *clip=NULL, const double *scaleFactor=NULL, double angle=0.0, SDL_Point *center=NULL, SDL_RendererFlip flip=SDL_FLIP_NONE);
 	void setAlpha(Uint8 alpha);
 	void setColor(Uint8 red, Uint8 green, Uint8 blue);
 	void setBlendMode(SDL_BlendMode blending);

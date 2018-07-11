@@ -13,11 +13,11 @@ Dot::Dot() {
 	mVelX = 0;
 	mVelY = 0;
 	mBox= {0,0,mDotRadius, mDotRadius};
-	mRad = 2*mDotRadius;
+	mRad = 2 * mDotRadius;
 	mAngle = 0.0;
-	mCollectDist=5;
-	x=0;
-	y=0;
+	mCollectDist = 5;
+	x = 0;
+	y = 0;
 }
 
 void Dot::eventHandler(SDL_Event &event) {
@@ -118,7 +118,7 @@ void Dot::renderBox(LTexture &vDotTexture, Win &vWin, SDL_Rect *vCamera) {
 	vDotTexture.render(mBox.x - vCamera->x, mBox.y - vCamera->y, vWin);
 }
 
-void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vCamera, SDL_Rect *vClip) {
+void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vCamera, SDL_Rect *vClip, const double *scaleFactor) {
 	int tmpPosX = 0, tmpPosY = 0;
 	if (vCamera != NULL) {
 		tmpPosX = vCamera->x;
@@ -128,12 +128,25 @@ void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vC
 		mPosX = x;
 		mPosY = y;
 	}
-	setCollisionBox(vDotTexture, vClip);
-	if (vClip != NULL) {
-		vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
-
+	if (scaleFactor != NULL) {
+		cout<<*scaleFactor<<endl;
+		mBox= {(int)mPosX,(int)mPosY,(int)(*scaleFactor*vClip->w), (int)(*scaleFactor*vClip->h)};
 	} else {
-		vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin);
+		setCollisionBox(vDotTexture, vClip);
+	}
+	if (vClip != NULL) {
+		if (scaleFactor != NULL) {
+			setCollisionBox(vDotTexture, vClip);
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip, scaleFactor);
+		} else {
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
+		}
+	} else {
+		if (scaleFactor != NULL) {
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip, scaleFactor);
+		} else {
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
+		}
 	}
 //	SDL_RenderDrawRect(vWin.getRenderer(), &mBox);
 }
