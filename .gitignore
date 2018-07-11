@@ -1,6 +1,5 @@
 
 .project
-.settings/*
 Debug/Snaker.exe
 Debug/src/Dot.o
 Debug/src/LBitmapFont.o
@@ -11,7 +10,7 @@ Debug/src/Snake.o
 Debug/src/Tile.o
 Debug/src/Timer.o
 Debug/src/Win.o
-inne/inne.cpp
+inne
 Release/Snaker.exe
 Release/src/Dot.o
 Release/src/LTexture.o
@@ -25,3 +24,4 @@ Snaker.7z
 .cproject
 /Debug/
 /Release/
+.settings
