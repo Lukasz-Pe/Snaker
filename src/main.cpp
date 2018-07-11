@@ -40,10 +40,10 @@ TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
 Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
 Timer stepTimer;
-int Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
+int x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
 // POWERUPS PARAMS
 void powerupCheck(Snake &vSnake, bool render = false);
-
+void gameReset(bool &reset);
 int main(int argc, char* args[]) {
 	gContinue = initSDL(&gWindow);
 
@@ -119,7 +119,6 @@ int main(int argc, char* args[]) {
 	}
 	gWindow.setTitle("Snaker");
 	gRenderer = gWindow.getRenderer();
-	int x[TOTAL_FRUITS], y[TOTAL_FRUITS];
 	for (int i = 0; i < TOTAL_FRUITS; i++) {
 		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
@@ -205,6 +204,7 @@ int main(int argc, char* args[]) {
 				y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
 			}
 		}
+//		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState >= 1) {
 			gWindow.prepareRenderer(0, 0, 0);
 //			GETTING MENU BACKGROUND ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -243,23 +243,7 @@ int main(int argc, char* args[]) {
 //		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState == 0) {
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			if (gReset) {
-				for (int p = 0; p < TOTAL_POWERUPS; p++) {
-					gSnake.hasActivePowerup[p] = false;
-					gSnake.powerupActivationTimestamp[p] = 0;
-				}
-				gSnake.resetLength();
-				gSnake.setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
-				for (int i = 0; i < ENEMY_COUNT; i++) {
-					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
-					for (int p = 0; p < TOTAL_POWERUPS; p++) {
-						gEnemy[i].hasActivePowerup[p] = false;
-						gEnemy[i].powerupActivationTimestamp[p] = 0;
-					}
-					gEnemy[i].resetLength();
-				}
-				gReset = false;
-			}
+			gameReset(gReset);
 //			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gWindow.prepareRenderer(0, 0, 0);
 			gSnake.setCamera(gLvlWidth, gLvlHeight, gCamera);
@@ -273,48 +257,7 @@ int main(int argc, char* args[]) {
 			}
 //			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			for (int i = 0; i < TOTAL_FRUITS; i++) {
-				if (gSnake.collectFruit(gFruit[i])) {
-//					SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 0);
-//					SDL_RenderDrawLine(gRenderer, gSnake.getHeadBox().x + 10, gSnake.getHeadBox().y + 10, x[i] + 10, y[i] + 10);
-//					SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
-					x[i] = gSnake.mNewFruitPos.x;
-					y[i] = gSnake.mNewFruitPos.y;
-				}
-				for (int e = 0; e < ENEMY_COUNT; e++) {
-					if (gEnemy[e].collectFruit(gFruit[i])) {
-						x[i] = gEnemy[e].mNewFruitPos.x;
-						y[i] = gEnemy[e].mNewFruitPos.y;
-					}
-				}
-				gCollision = checkCollision(gFruit[i].getRect(), gSnake.getHeadBox());
-				if (gCollision) {
-					x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
-					y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
-					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
-					activatePowerup(gSpriteNum[i], gSnake);
-					if (gSpriteNum[i] == 29) {
-						SDL_RenderSetScale(gRenderer, 0.85, 0.85);
-					}
-					if (gSpriteNum[i] < 25) {
-						gSnake.addLength();
-					}
-				}
-
-				for (int j = 0; j < ENEMY_COUNT; j++) {
-					gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
-					if (gCollision) {
-						x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
-						y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
-						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
-						gAngle[j] = 360 * ((double) rand() / RAND_MAX);
-						activatePowerup(gSpriteNum[i], gEnemy[j]);
-						if (gSpriteNum[i] < 25) {
-							gEnemy[j].addLength();
-						}
-					}
-				}
-			}
+			fruitCollisions();
 //			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < ENEMY_COUNT; i++) {
 				if (gEnemy[i].getHeadBox().x <= 1 || gEnemy[i].getHeadBox().y <= 1 || (gEnemy[i].getHeadBox().w + gEnemy[i].getHeadBox().x) >= (gLvlWidth) || (gEnemy[i].getHeadBox().h + gEnemy[i].getHeadBox().y) >= (gLvlHeight)) {
@@ -323,140 +266,9 @@ int main(int argc, char* args[]) {
 			}
 			gCollision = false;
 //			COLLISIONS BETWEEN BOTS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			for (int i = 0; i < ENEMY_COUNT; i++) {
-				if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
-					break;
-				}
-				for (int j = 0; j < ENEMY_COUNT; j++) {
-					gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
-//					cout<<"gCollision "<<gCollision<<endl;
-//					 cout<<"iEnemy "<<i<<"\tHx:"<<gEnemy[i].getHeadBox().x<<"\tHy:"<<gEnemy[i].getHeadBox().y<<"\tHw:"<<gEnemy[i].getHeadBox().w<<"\tHh:"<<gEnemy[i].getHeadBox().h<<endl;
-//					 cout<<"jEnemy "<<j<<"\tHx:"<<gEnemy[j].getHeadBox().x<<"\tHy:"<<gEnemy[j].getHeadBox().y<<"\tHw:"<<gEnemy[j].getHeadBox().w<<"\tHh:"<<gEnemy[j].getHeadBox().h<<endl;
-					if (gCollision && i != j) {
-						if (gEnemy[i].hasActivePowerup[0]) {
-							for (int et = 0; et < gEnemy[j].getLength(); et++) {
-								gEnemy[i].addLength();
-								gEnemy[i].updateTail(gLTEnemyTail);
-							}
-							gEnemy[j].resetLength();
-							break;
-						}
-						if (gEnemy[j].hasActivePowerup[0]) {
-							for (int et = 0; et < gEnemy[i].getLength(); et++) {
-								gEnemy[j].addLength();
-								gEnemy[j].updateTail(gLTEnemyTail);
-							}
-							gEnemy[i].resetLength();
-							break;
-						}
-						gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-						if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
-							break;
-						}
-						gEnemy[i].resetLength();
-//						gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-					}
-					if (gEnemy[i].getLength() != 0 && i != j) {
-						for (int t = 0; t < gEnemy[i].getLength(); t++) {
-							gCollision = checkCollision(gEnemy[i].getTailBox(t), gEnemy[j].getHeadBox());
-							if (gCollision) {
-								if (gEnemy[j].hasActivePowerup[0]) {
-									for (int et = 0; et < gEnemy[i].getLength(); et++) {
-										gEnemy[j].addLength();
-										gEnemy[j].updateTail(gLTEnemyTail);
-									}
-									gEnemy[i].resetLength();
-									break;
-								}
-								gAngle[j] = 360 * ((double) rand() / RAND_MAX);
-								if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
-									break;
-								}
-								gEnemy[j].resetLength();
-//								gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-							}
-						}
-					}
-				}
-			}
+			betweenBotsCollisions();
 //			COLLISIONS WITH PLAYER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			for (int i = 0; i < ENEMY_COUNT; i++) {
-				if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
-					break;
-				}
-				gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
-				if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
-					if (gSnake.hasActivePowerup[0]) {
-						for (int et = 0; et < gEnemy[i].getLength(); et++) {
-							gSnake.addLength();
-							gSnake.updateTail(gLTSnakeTail);
-						}
-						gEnemy[i].resetLength();
-						break;
-					}
-					if (gEnemy[i].hasActivePowerup[0]) {
-						for (int et = 0; et < gSnake.getLength(); et++) {
-							gEnemy[i].addLength();
-							gEnemy[i].updateTail(gLTEnemyTail);
-						}
-						gSnake.resetLength();
-						break;
-					}
-					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
-						break;
-					}
-					gGameState = 4;
-//					gSnake.resetLength();
-//					gSnake.setStartPos(0.5 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.5 * gLvlHeight * (((double) rand() / RAND_MAX)));
-					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					gEnemy[i].resetLength();
-//					gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-				}
-				if (gSnake.getLength() != 0) {
-					for (int t = 0; t < gSnake.getLength(); t++) {
-						gCollision = checkCollision(gSnake.getTailBox(t), gEnemy[i].getHeadBox());
-						if (gCollision) {
-							if (gEnemy[i].hasActivePowerup[0]) {
-								for (int et = 0; et < gSnake.getLength(); et++) {
-									gEnemy[i].addLength();
-									gEnemy[i].updateTail(gLTEnemyTail);
-								}
-								gSnake.resetLength();
-								break;
-							}
-							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-							if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
-								break;
-							}
-							gEnemy[i].resetLength();
-//							gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-						}
-					}
-				}
-				if (gEnemy[i].getLength() != 0) {
-					for (int t = 0; t < gEnemy[i].getLength(); t++) {
-						gCollision = checkCollision(gEnemy[i].getTailBox(t), gSnake.getHeadBox());
-						if (gCollision) {
-							if (gSnake.hasActivePowerup[0]) {
-								for (int et = 0; et < gEnemy[i].getLength(); et++) {
-									gSnake.addLength();
-									gSnake.updateTail(gLTSnakeTail);
-								}
-								gEnemy[i].resetLength();
-								break;
-							}
-							gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-							if (gSnake.hasActivePowerup[3]) { //MAGNET ON ****************
-								break;
-							}
-//							gSnake.resetLength();
-							gGameState=4;
-//							gSnake.setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-						}
-					}
-				}
-
-			}
+			playerAndBotsCollisions();
 //			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			if (gCurrentScore != gSnake.getLength() || gCurrentScore >= 0) {
 				gScore.str("");
@@ -497,6 +309,210 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 //HERE ARE OTHER FUNCTIONS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void gameReset(bool &reset) {
+	if (reset) {
+		for (int p = 0; p < TOTAL_POWERUPS; p++) {
+			gSnake.hasActivePowerup[p] = false;
+			gSnake.powerupActivationTimestamp[p] = 0;
+		}
+		gSnake.resetLength();
+		gSnake.setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
+		for (int i = 0; i < ENEMY_COUNT; i++) {
+			gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+			for (int p = 0; p < TOTAL_POWERUPS; p++) {
+				gEnemy[i].hasActivePowerup[p] = false;
+				gEnemy[i].powerupActivationTimestamp[p] = 0;
+			}
+			gEnemy[i].resetLength();
+		}
+		gReset = false;
+	}
+}
+
+void playerAndBotsCollisions() {
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
+			break;
+		}
+		gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
+		if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
+			if (gSnake.hasActivePowerup[0]) {
+				for (int et = 0; et < gEnemy[i].getLength(); et++) {
+					gSnake.addLength();
+					gSnake.updateTail(gLTSnakeTail);
+				}
+				gEnemy[i].resetLength();
+				break;
+			}
+			if (gEnemy[i].hasActivePowerup[0]) {
+				for (int et = 0; et < gSnake.getLength(); et++) {
+					gEnemy[i].addLength();
+					gEnemy[i].updateTail(gLTEnemyTail);
+				}
+				gSnake.resetLength();
+				break;
+			}
+			if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+				break;
+			}
+			gGameState = 4;
+			//					gSnake.resetLength();
+			//					gSnake.setStartPos(0.5 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.5 * gLvlHeight * (((double) rand() / RAND_MAX)));
+			gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+			gEnemy[i].resetLength();
+			//					gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
+		}
+		if (gSnake.getLength() != 0) {
+			for (int t = 0; t < gSnake.getLength(); t++) {
+				gCollision = checkCollision(gSnake.getTailBox(t), gEnemy[i].getHeadBox());
+				if (gCollision) {
+					if (gEnemy[i].hasActivePowerup[0]) {
+						for (int et = 0; et < gSnake.getLength(); et++) {
+							gEnemy[i].addLength();
+							gEnemy[i].updateTail(gLTEnemyTail);
+						}
+						gSnake.resetLength();
+						break;
+					}
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+						break;
+					}
+					gEnemy[i].resetLength();
+					//							gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
+				}
+			}
+		}
+		if (gEnemy[i].getLength() != 0) {
+			for (int t = 0; t < gEnemy[i].getLength(); t++) {
+				gCollision = checkCollision(gEnemy[i].getTailBox(t), gSnake.getHeadBox());
+				if (gCollision) {
+					if (gSnake.hasActivePowerup[0]) {
+						for (int et = 0; et < gEnemy[i].getLength(); et++) {
+							gSnake.addLength();
+							gSnake.updateTail(gLTSnakeTail);
+						}
+						gEnemy[i].resetLength();
+						break;
+					}
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+					if (gSnake.hasActivePowerup[3]) { //MAGNET ON ****************
+						break;
+					}
+					//							gSnake.resetLength();
+					gGameState = 4;
+					//							gSnake.setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
+				}
+			}
+		}
+
+	}
+}
+
+void betweenBotsCollisions() {
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
+			break;
+		}
+		for (int j = 0; j < ENEMY_COUNT; j++) {
+			gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
+			//					cout<<"gCollision "<<gCollision<<endl;
+			//					 cout<<"iEnemy "<<i<<"\tHx:"<<gEnemy[i].getHeadBox().x<<"\tHy:"<<gEnemy[i].getHeadBox().y<<"\tHw:"<<gEnemy[i].getHeadBox().w<<"\tHh:"<<gEnemy[i].getHeadBox().h<<endl;
+			//					 cout<<"jEnemy "<<j<<"\tHx:"<<gEnemy[j].getHeadBox().x<<"\tHy:"<<gEnemy[j].getHeadBox().y<<"\tHw:"<<gEnemy[j].getHeadBox().w<<"\tHh:"<<gEnemy[j].getHeadBox().h<<endl;
+			if (gCollision && i != j) {
+				if (gEnemy[i].hasActivePowerup[0]) {
+					for (int et = 0; et < gEnemy[j].getLength(); et++) {
+						gEnemy[i].addLength();
+						gEnemy[i].updateTail(gLTEnemyTail);
+					}
+					gEnemy[j].resetLength();
+					break;
+				}
+				if (gEnemy[j].hasActivePowerup[0]) {
+					for (int et = 0; et < gEnemy[i].getLength(); et++) {
+						gEnemy[j].addLength();
+						gEnemy[j].updateTail(gLTEnemyTail);
+					}
+					gEnemy[i].resetLength();
+					break;
+				}
+				gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+				if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+					break;
+				}
+				gEnemy[i].resetLength();
+				//						gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
+			}
+			if (gEnemy[i].getLength() != 0 && i != j) {
+				for (int t = 0; t < gEnemy[i].getLength(); t++) {
+					gCollision = checkCollision(gEnemy[i].getTailBox(t), gEnemy[j].getHeadBox());
+					if (gCollision) {
+						if (gEnemy[j].hasActivePowerup[0]) {
+							for (int et = 0; et < gEnemy[i].getLength(); et++) {
+								gEnemy[j].addLength();
+								gEnemy[j].updateTail(gLTEnemyTail);
+							}
+							gEnemy[i].resetLength();
+							break;
+						}
+						gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+						if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+							break;
+						}
+						gEnemy[j].resetLength();
+						//								gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
+					}
+				}
+			}
+		}
+	}
+}
+
+void fruitCollisions() {
+	for (int i = 0; i < TOTAL_FRUITS; i++) {
+		if (gSnake.collectFruit(gFruit[i])) {
+			//					SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 0);
+			//					SDL_RenderDrawLine(gRenderer, gSnake.getHeadBox().x + 10, gSnake.getHeadBox().y + 10, x[i] + 10, y[i] + 10);
+			//					SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
+			x[i] = gSnake.mNewFruitPos.x;
+			y[i] = gSnake.mNewFruitPos.y;
+		}
+		for (int e = 0; e < ENEMY_COUNT; e++) {
+			if (gEnemy[e].collectFruit(gFruit[i])) {
+				x[i] = gEnemy[e].mNewFruitPos.x;
+				y[i] = gEnemy[e].mNewFruitPos.y;
+			}
+		}
+		gCollision = checkCollision(gFruit[i].getRect(), gSnake.getHeadBox());
+		if (gCollision) {
+			x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
+			y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
+			gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+			activatePowerup(gSpriteNum[i], gSnake);
+			if (gSpriteNum[i] == 29) {
+				SDL_RenderSetScale(gRenderer, 0.85, 0.85);
+			}
+			if (gSpriteNum[i] < 25) {
+				gSnake.addLength();
+			}
+		}
+
+		for (int j = 0; j < ENEMY_COUNT; j++) {
+			gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
+			if (gCollision) {
+				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
+				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
+				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+				activatePowerup(gSpriteNum[i], gEnemy[j]);
+				if (gSpriteNum[i] < 25) {
+					gEnemy[j].addLength();
+				}
+			}
+		}
+	}
+}
+
 void powerupCheck(Snake &vSnake, bool render) {
 	for (int i = 0; i < TOTAL_POWERUPS; i++) {
 		if (gSnake.powerupActivationTimestamp[i] < stepTimer.getSeconds()) {

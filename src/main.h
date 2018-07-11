@@ -30,4 +30,8 @@ using namespace std;
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
 double distanceCalc(SDL_Point &a,SDL_Point &b);
+void fruitCollisions();
+void betweenBotsCollisions();
+void playerAndBotsCollisions();
+
 #endif /* MAIN_H_ */
