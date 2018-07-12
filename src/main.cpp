@@ -13,8 +13,8 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 5, TOTAL_FRUITS = 600, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 24, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
-const double POWERUP_SCALE = 2;
+int const MULTIPLIER = 5, TOTAL_FRUITS = 1200, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 100, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
@@ -24,6 +24,7 @@ void print();
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
+float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale=1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
@@ -35,7 +36,7 @@ Win gWindow;
 LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS];
 Snake gSnake, gEnemy[ENEMY_COUNT];
 Dot gFruit[TOTAL_FRUITS];
-SDL_Rect gCamera = { 0, 0, gScreenWidth, gScreenHeight }, gLevelBorders = { 0, 0, gLvlWidth, gLvlHeight }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
+SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, gLvlWidth, gLvlHeight }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
 Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
@@ -205,6 +206,12 @@ int main(int argc, char* args[]) {
 		}
 //		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState >= 1) {
+			if (gRenderScaleX < 1 && gRenderScaleY < 1) {
+				tempScale = gRenderScaleX;
+				gRenderScaleX = 1.0;
+				gRenderScaleY = gRenderScaleX;
+				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+			}
 			gWindow.prepareRenderer(0, 0, 0);
 //			GETTING MENU BACKGROUND ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < gTotalMenuTiles; i++) {
@@ -241,6 +248,11 @@ int main(int argc, char* args[]) {
 		}
 //		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState == 0) {
+			if(tempScale<1){
+				gRenderScaleX=tempScale;
+				gRenderScaleY=tempScale;
+				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+			}
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gameReset(gReset);
 //			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -297,6 +309,7 @@ int main(int argc, char* args[]) {
 			for (int i = 0; i < ENEMY_COUNT; i++) {
 				gEnemy[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gEnemySprite[i]]);
 			}
+
 			gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
 			gLTScoreText.render(0, 0, gWindow);
 			gWindow.render();
@@ -499,7 +512,8 @@ void fruitCollisions() {
 			}
 			activatePowerup(gSpriteNum[i], gSnake);
 			if (gSpriteNum[i] == 29) {
-				SDL_RenderSetScale(gRenderer, 0.85, 0.85);
+				SDL_RenderSetScale(gRenderer, 0.95, 0.95);
+				SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
 			}
 			if (gSpriteNum[i] < 25) {
 				gSnake.addLength();
@@ -536,6 +550,7 @@ void powerupCheck(Snake &vSnake, bool render) {
 			if (!render) {
 				break;
 			}
+			int iconPosX = (int) ((gWindow.getWidth() - 50) / gRenderScaleX);
 			switch (i) {
 				case 0:
 					gTimeLeft.str("");
@@ -546,8 +561,8 @@ void powerupCheck(Snake &vSnake, bool render) {
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 				case 1:
 					gTimeLeft.str("");
@@ -558,8 +573,8 @@ void powerupCheck(Snake &vSnake, bool render) {
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 				case 2:
 					gTimeLeft.str("");
@@ -570,8 +585,8 @@ void powerupCheck(Snake &vSnake, bool render) {
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 				case 3:
 					gTimeLeft.str("");
@@ -582,8 +597,8 @@ void powerupCheck(Snake &vSnake, bool render) {
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 				case 4:
 					gTimeLeft.str("");
@@ -594,8 +609,8 @@ void powerupCheck(Snake &vSnake, bool render) {
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(gWindow.getWidth() - 50, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(gWindow.getWidth() - 50 - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
 					break;
 			}
 		} else {
@@ -612,6 +627,7 @@ void powerupCheck(Snake &vSnake, bool render) {
 				case 4:
 					if (render) {
 						SDL_RenderSetScale(gRenderer, 1, 1);
+						SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
 					}
 					break;
 			}
