@@ -89,7 +89,7 @@ bool Snake::collectFruit(Dot &vFruit) {
 }
 
 double Snake::getHeadToFruitAngle(SDL_Rect &vFruit) {
-	double x, y, a;
+	double x, y, a=0;
 	x = (double)((vFruit.x + 10) - (mHeadX + 10));
 	y = (double)((mHeadY + 10) - (vFruit.y + 10));
 	if (x > 0 && y >= 0) {
