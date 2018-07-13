@@ -30,7 +30,7 @@ public:
 	void resetLength();
 	void setAngle(double newAngle);
 	int getLength();
-	int getSnakeFruitDistance(Dot &vFruit);
+	int getSnakeFruitDistance(SDL_Rect &vFruit);
 	double getHeadToFruitAngle(SDL_Rect &vFruit);
 	void updateTail(LTexture &vTex);
 	bool hasActivePowerup[5]={false,false,false,false,false};

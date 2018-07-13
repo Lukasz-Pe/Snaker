@@ -39,8 +39,8 @@ void Snake::collectDistanceMultiplier(int dist) {
 	mCollectDistanceMultiplier = dist;
 }
 
-int Snake::getSnakeFruitDistance(Dot &vFruit) {
-	return (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)));
+int Snake::getSnakeFruitDistance(SDL_Rect &vFruit) {
+	return (sqrt(pow((mHeadX - vFruit.x), 2) + pow((mHeadY - vFruit.y), 2)));
 }
 
 bool Snake::collectFruit(Dot &vFruit) {

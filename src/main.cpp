@@ -14,7 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 1, TOTAL_FRUITS = 50, ENEMY_COUNT = 1, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 1, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+int const MULTIPLIER = 1, TOTAL_FRUITS = 50, ENEMY_COUNT = 2, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -26,7 +26,7 @@ bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
-int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistence[2][ENEMY_COUNT];
+int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistance[2][ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
@@ -161,8 +161,8 @@ int main(int argc, char* args[]) {
 	gGameOverBox.h = 1.1 * (gLTGameOver.getHeight() + gLTPressToReset.getHeight());
 	stepTimer.start();
 	for (int i = 0; i < ENEMY_COUNT; i++) {
-		gEnemyToTargetDistence[0][i] = gLvlWidth * gLvlHeight;
-		gEnemyToTargetDistence[1][i] = i;
+		gEnemyToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
+		gEnemyToTargetDistance[1][i] = i;
 	}
 	while (gContinue) {
 //		HERE RESIDES GAME MENU +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -502,6 +502,18 @@ void betweenBotsCollisions() {
 }
 
 void fruitCollisions() {
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		gEnemyToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
+		gEnemyToTargetDistance[1][i] = -1;
+	}
+	for (int f = 0; f < TOTAL_FRUITS; f++) {
+		for (int e = 0; e < ENEMY_COUNT; e++) {
+			if (gEnemyToTargetDistance[0][e] > gEnemy[e].getSnakeFruitDistance(gFruit[f].mBox)) {
+				gEnemyToTargetDistance[0][e] = gEnemy[e].getSnakeFruitDistance(gFruit[f].mBox);
+				gEnemyToTargetDistance[1][e] = f;
+			}
+		}
+	}
 	for (int i = 0; i < TOTAL_FRUITS; i++) {
 		if (gSnake.collectFruit(gFruit[i])) {
 			x[i] = gSnake.mNewFruitPos.x;
@@ -541,24 +553,29 @@ void fruitCollisions() {
 
 		for (int j = 0; j < ENEMY_COUNT; j++) {
 			gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
-			if (gEnemy[j].hasActivePowerup[0]){
-				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
+			if (gEnemy[j].hasActivePowerup[0] && (gSnake.hasActivePowerup[1] || gSnake.hasActivePowerup[3])) {
+				gEnemy[j].hasActivePowerup[0] = false;
+			}
+			if (gEnemy[j].hasActivePowerup[0]) {
+				gEnemyToTargetDistance[0][j] = gEnemy[j].getSnakeFruitDistance(gSnake.mHeadBox);
+				gEnemyToTargetDistance[1][j] = -1;
+				for (int e = 0; e < ENEMY_COUNT; e++) {
+					if ((gEnemyToTargetDistance[0][j] > gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox))&&j!=e) {
+						gEnemyToTargetDistance[1][j] = e;
+					}
+				}
+				for (int e = 0; e < ENEMY_COUNT; e++) {
+				if((gEnemyToTargetDistance[0][j]<gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox))&&j!=e) {
+						gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
+					}else{
+						gAngle[j] = gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox);
+					}
+				}
+
 				break;
 			}
 			if (gCollision) {
-				for (int i = 0; i < ENEMY_COUNT; i++) {
-					gEnemyToTargetDistence[0][i] = gLvlWidth * gLvlHeight;
-					gEnemyToTargetDistence[1][i] = -1;
-				}
-				for (int f = 0; f < TOTAL_FRUITS; f++) {
-					for (int e = 0; e < ENEMY_COUNT; e++) {
-						if (gEnemyToTargetDistence[0][e] > gEnemy[e].getSnakeFruitDistance(gFruit[f])) {
-							gEnemyToTargetDistence[0][e] = gEnemy[e].getSnakeFruitDistance(gFruit[f]);
-							gEnemyToTargetDistence[1][e] = i;
-						}
-					}
-				}
-				cout << "gEnemyToTargetDistence[0][j] " << gEnemyToTargetDistence[0][j] << "\tgEnemyToTargetDistence[1][j] " << gEnemyToTargetDistence[1][j] << endl;
+//				cout << "gEnemyToTargetDistance[0][j] " << gEnemyToTargetDistance[0][j] << "\tgEnemyToTargetDistence[1][j] " << gEnemyToTargetDistance[1][j] << endl;
 				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
 				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 				if (gSpriteNum[i] < 25) {
@@ -567,13 +584,13 @@ void fruitCollisions() {
 //					cout<<gSpriteNum[i]<<endl;
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
 				}
-				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gFruit[gEnemyToTargetDistence[1][j]].mBox);
-//				gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+//				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gFruit[gEnemyToTargetDistence[1][j]].mBox);
 //				cout << "j " << j << "\t " << gEnemyToTargetDistence[1][j] << endl;
 				activatePowerup(gSpriteNum[i], gEnemy[j]);
 				if (gSpriteNum[i] < 25) {
 					gEnemy[j].addLength();
 				}
+				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gFruit[gEnemyToTargetDistance[1][j]].mBox);
 			}
 		}
 	}
@@ -581,10 +598,10 @@ void fruitCollisions() {
 
 void powerupCheck(Snake &vSnake, bool render) {
 	for (int i = 0; i < TOTAL_POWERUPS; i++) {
-		if (gSnake.powerupActivationTimestamp[i] < stepTimer.getSeconds()) {
-			gSnake.hasActivePowerup[i] = false;
+		if (vSnake.powerupActivationTimestamp[i] < stepTimer.getSeconds()) {
+			vSnake.hasActivePowerup[i] = false;
 		}
-		if (gSnake.hasActivePowerup[i]) {
+		if (vSnake.hasActivePowerup[i]) {
 			if (!render) {
 				break;
 			}
@@ -592,10 +609,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 			switch (i) {
 				case 0:
 					gTimeLeft.str("");
-					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -604,10 +621,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 1:
 					gTimeLeft.str("");
-					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -616,10 +633,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 2:
 					gTimeLeft.str("");
-					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -628,10 +645,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 3:
 					gTimeLeft.str("");
-					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -640,10 +657,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 4:
 					gTimeLeft.str("");
-					if (((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << gSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
