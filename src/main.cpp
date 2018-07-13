@@ -14,7 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 1, TOTAL_FRUITS = 50, ENEMY_COUNT = 2, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int const MULTIPLIER = 5, TOTAL_FRUITS = 1200, ENEMY_COUNT = 20, TOTAL_POWERUPS = 50, POWERUPS_COUNT = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -105,8 +105,8 @@ int main(int argc, char* args[]) {
 		gButtons[i].setButtonText(gMenuItems[i], gWindow, gFont, TEXT_SIZE);
 	}
 
-	int gTotalTiles = 15 * (gLvlWidth / gLTLevelTexture.getWidth()) * (gLvlHeight / gLTLevelTexture.getHeight());
-	int gTotalMenuTiles = 15 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
+	int gTotalTiles = 20 * (gLvlWidth / gLTLevelTexture.getWidth()) * (gLvlHeight / gLTLevelTexture.getHeight());
+	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
 	gSnake.setStartPos(gLvlWidth * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, gLvlHeight * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
 //	gSnake.resetLength();
@@ -553,7 +553,7 @@ void fruitCollisions() {
 
 		for (int j = 0; j < ENEMY_COUNT; j++) {
 			gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
-			if (gEnemy[j].hasActivePowerup[0] && (gSnake.hasActivePowerup[1] || gSnake.hasActivePowerup[3])) {
+			if (gEnemy[j].hasActivePowerup[0] && (gSnake.hasActivePowerup[1] || gSnake.hasActivePowerup[3]||gSnake.hasActivePowerup[0])) {
 				gEnemy[j].hasActivePowerup[0] = false;
 			}
 			if (gEnemy[j].hasActivePowerup[0]) {
