@@ -32,11 +32,15 @@ Snake::Snake() {
 	xFruitToHead = 0;
 	yFruitToHead = 0;
 	mAngleFruitToHead = 0;
-	mCollectDistanceMultiplier=4;
+	mCollectDistanceMultiplier = 4;
 }
 
-void Snake::collectDistanceMultiplier(int dist){
+void Snake::collectDistanceMultiplier(int dist) {
 	mCollectDistanceMultiplier = dist;
+}
+
+int Snake::getSnakeFruitDistance(Dot &vFruit) {
+	return (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)));
 }
 
 bool Snake::collectFruit(Dot &vFruit) {
@@ -82,6 +86,23 @@ bool Snake::collectFruit(Dot &vFruit) {
 		}
 	}
 	return false;
+}
+
+double Snake::getHeadToFruitAngle(SDL_Rect &vFruit) {
+	double x, y, a;
+	x = (double)((vFruit.x + 10) - (mHeadX + 10));
+	y = (double)((mHeadY + 10) - (vFruit.y + 10));
+	if (x > 0 && y >= 0) {
+		a = (180 / M_PI) * atan(x / y);
+	} else if (x > 0 && y < 0) {
+		a = 180 + (180 / M_PI) * atan(x / y);
+	} else if (x < 0 && y >= 0) {
+		a = (180 / M_PI) * atan(x / y);
+	} else if (x < 0 && y < 0) {
+		a = 180 + (180 / M_PI) * atan(x / y);
+	}
+
+	return a;
 }
 
 void Snake::setStartPos(int sPosX, int sPosY) {

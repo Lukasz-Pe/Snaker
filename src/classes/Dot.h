@@ -27,13 +27,14 @@ class Dot {
 		int getPosX();
 		int getPosY();
 		SDL_Rect getRect();
+		SDL_Rect mBox;
 		void setCollisionBox(LTexture &vTexture, SDL_Rect *vClip=NULL);
 		virtual ~Dot();
 	private:
 		double mPosX, mPosY, mVelX, mVelY, mAngle, mCollectDist,x,y;
 		int mRad;
 		const static int mDotRadius=20, mDotSpeed=10;
-		SDL_Rect mBox;
+
 		//friend bool touchesWall();
 		friend bool checkCollision();
 };

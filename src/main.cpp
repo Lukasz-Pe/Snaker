@@ -13,7 +13,8 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
-int const MULTIPLIER = 5, TOTAL_FRUITS = 1200, ENEMY_COUNT = 10, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 100, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
+
+int const MULTIPLIER = 1, TOTAL_FRUITS = 50, ENEMY_COUNT = 1, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 1, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 60, 30, 20, 60, 30 };
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -24,8 +25,8 @@ void print();
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
-float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale=1.0;
-int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT];
+float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
+int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistence[2][ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
@@ -36,7 +37,7 @@ Win gWindow;
 LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS];
 Snake gSnake, gEnemy[ENEMY_COUNT];
 Dot gFruit[TOTAL_FRUITS];
-SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, gLvlWidth, gLvlHeight }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
+SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, (int) (gLvlWidth / gRenderScaleX), (int) (gLvlHeight / gRenderScaleY) }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
 Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
@@ -47,7 +48,6 @@ void powerupCheck(Snake &vSnake, bool render = false);
 void gameReset(bool &reset);
 int main(int argc, char* args[]) {
 	gContinue = initSDL(&gWindow);
-
 	gContinue = gLTFruit.loadFromFile("./assets/images/fruits.png", gWindow);
 	gContinue = gLTSnakeHead.loadFromFile("./assets/images/face.png", gWindow);
 	gContinue = gLTSnakeTail.loadFromFile("./assets/images/dot.png", gWindow);
@@ -160,16 +160,21 @@ int main(int argc, char* args[]) {
 	gGameOverBox.w = gLTPressToReset.getWidth();
 	gGameOverBox.h = 1.1 * (gLTGameOver.getHeight() + gLTPressToReset.getHeight());
 	stepTimer.start();
+	for (int i = 0; i < ENEMY_COUNT; i++) {
+		gEnemyToTargetDistence[0][i] = gLvlWidth * gLvlHeight;
+		gEnemyToTargetDistence[1][i] = i;
+	}
 	while (gContinue) {
 //		HERE RESIDES GAME MENU +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		handleEvents();
+//		cout << gSnake.getHeadBox().x << " " << gSnake.getHeadBox().y << " " << gLevelBorders.w << " " << gLevelBorders.h << " " << gLvlWidth << " " << gLvlHeight << endl;
 //		ACTIONS TAKEN WHEN WINDOW DIMS ARE CHANGED >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		if (gScreenWidth != gWindow.getWidth() || gScreenHeight != gWindow.getHeight()) {
 			gScreenWidth = gWindow.getWidth();
 			gScreenHeight = gWindow.getHeight();
 //			cout<<gScreenWidth<<"x"<<gScreenHeight<<endl;
-			gLvlWidth = MULTIPLIER * gScreenWidth;
-			gLvlHeight = MULTIPLIER * gScreenHeight;
+			gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+			gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
 			gCamera.w = gScreenWidth;
 			gCamera.h = gScreenHeight;
 			gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
@@ -210,6 +215,11 @@ int main(int argc, char* args[]) {
 				tempScale = gRenderScaleX;
 				gRenderScaleX = 1.0;
 				gRenderScaleY = gRenderScaleX;
+//				gCamera.w = (int) (gScreenWidth / gRenderScaleX);
+//				gCamera.w = (int) (gScreenHeight / gRenderScaleY);
+				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
 				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
 			}
 			gWindow.prepareRenderer(0, 0, 0);
@@ -248,10 +258,17 @@ int main(int argc, char* args[]) {
 		}
 //		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState == 0) {
-			if(tempScale<1){
-				gRenderScaleX=tempScale;
-				gRenderScaleY=tempScale;
+			if (tempScale < 1) {
+				gRenderScaleX = tempScale;
+				gRenderScaleY = tempScale;
 				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+				gLvlWidth += 50;
+				gLvlHeight += 50;
+				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+				gLvlWidth -= 50;
+				gLvlHeight -= 50;
 			}
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gameReset(gReset);
@@ -267,7 +284,6 @@ int main(int argc, char* args[]) {
 				if (gSpriteNum[i] < 25) {
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 				} else {
-//					cout<<gSpriteNum[i]<<endl;
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
 				}
 			}
@@ -276,7 +292,7 @@ int main(int argc, char* args[]) {
 			fruitCollisions();
 //			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 0; i < ENEMY_COUNT; i++) {
-				if (gEnemy[i].getHeadBox().x <= 1 || gEnemy[i].getHeadBox().y <= 1 || (gEnemy[i].getHeadBox().w + gEnemy[i].getHeadBox().x) >= (gLvlWidth) || (gEnemy[i].getHeadBox().h + gEnemy[i].getHeadBox().y) >= (gLvlHeight)) {
+				if (gEnemy[i].getHeadBox().x < 1 || gEnemy[i].getHeadBox().y < 1 || (gEnemy[i].getHeadBox().w + gEnemy[i].getHeadBox().x) >= (gLvlWidth) || (gEnemy[i].getHeadBox().h + gEnemy[i].getHeadBox().y) >= (gLvlHeight)) {
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 				}
 			}
@@ -488,13 +504,11 @@ void betweenBotsCollisions() {
 void fruitCollisions() {
 	for (int i = 0; i < TOTAL_FRUITS; i++) {
 		if (gSnake.collectFruit(gFruit[i])) {
-			//					SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 0);
-			//					SDL_RenderDrawLine(gRenderer, gSnake.getHeadBox().x + 10, gSnake.getHeadBox().y + 10, x[i] + 10, y[i] + 10);
-			//					SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
 			x[i] = gSnake.mNewFruitPos.x;
 			y[i] = gSnake.mNewFruitPos.y;
 		}
 		for (int e = 0; e < ENEMY_COUNT; e++) {
+//			cout << gEnemy[e].getHeadToFruitAngle(gFruit[gEnemyToTargetDistence[1][e]]) << endl;
 			if (gEnemy[e].collectFruit(gFruit[i])) {
 				x[i] = gEnemy[e].mNewFruitPos.x;
 				y[i] = gEnemy[e].mNewFruitPos.y;
@@ -514,6 +528,11 @@ void fruitCollisions() {
 			if (gSpriteNum[i] == 29) {
 				SDL_RenderSetScale(gRenderer, 0.95, 0.95);
 				SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
+				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX) + 50;
+				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY) + 50;
+				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+				gLvlWidth -= 50;
+				gLvlHeight -= 50;
 			}
 			if (gSpriteNum[i] < 25) {
 				gSnake.addLength();
@@ -522,7 +541,24 @@ void fruitCollisions() {
 
 		for (int j = 0; j < ENEMY_COUNT; j++) {
 			gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
+			if (gEnemy[j].hasActivePowerup[0]){
+				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
+				break;
+			}
 			if (gCollision) {
+				for (int i = 0; i < ENEMY_COUNT; i++) {
+					gEnemyToTargetDistence[0][i] = gLvlWidth * gLvlHeight;
+					gEnemyToTargetDistence[1][i] = -1;
+				}
+				for (int f = 0; f < TOTAL_FRUITS; f++) {
+					for (int e = 0; e < ENEMY_COUNT; e++) {
+						if (gEnemyToTargetDistence[0][e] > gEnemy[e].getSnakeFruitDistance(gFruit[f])) {
+							gEnemyToTargetDistence[0][e] = gEnemy[e].getSnakeFruitDistance(gFruit[f]);
+							gEnemyToTargetDistence[1][e] = i;
+						}
+					}
+				}
+				cout << "gEnemyToTargetDistence[0][j] " << gEnemyToTargetDistence[0][j] << "\tgEnemyToTargetDistence[1][j] " << gEnemyToTargetDistence[1][j] << endl;
 				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
 				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 				if (gSpriteNum[i] < 25) {
@@ -531,7 +567,9 @@ void fruitCollisions() {
 //					cout<<gSpriteNum[i]<<endl;
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
 				}
-				gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gFruit[gEnemyToTargetDistence[1][j]].mBox);
+//				gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+//				cout << "j " << j << "\t " << gEnemyToTargetDistence[1][j] << endl;
 				activatePowerup(gSpriteNum[i], gEnemy[j]);
 				if (gSpriteNum[i] < 25) {
 					gEnemy[j].addLength();
