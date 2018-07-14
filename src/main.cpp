@@ -14,7 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 5, TOTAL_FRUITS = 1200, ENEMY_COUNT = 20, TOTAL_POWERUPS = 50, POWERUPS_COUNT = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int const MULTIPLIER = 3, TOTAL_FRUITS = 600, ENEMY_COUNT = 20, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -42,7 +42,7 @@ TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
 Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
 Timer stepTimer;
-int x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
+int gTimer=0, x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
 // POWERUPS PARAMS
 void powerupCheck(Snake &vSnake, bool render = false);
 void gameReset(bool &reset);
@@ -258,6 +258,7 @@ int main(int argc, char* args[]) {
 		}
 //		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState == 0) {
+			gTimer = stepTimer.getSeconds<int>();
 			if (tempScale < 1) {
 				gRenderScaleX = tempScale;
 				gRenderScaleY = tempScale;
@@ -346,19 +347,20 @@ void gameReset(bool &reset) {
 	if (reset) {
 		for (int p = 0; p < TOTAL_POWERUPS; p++) {
 			gSnake.hasActivePowerup[p] = false;
-			gSnake.powerupActivationTimestamp[p] = 0;
+//			gSnake.powerupActivationTimestamp[p] = gTime;
 		}
 		gSnake.resetLength();
 		gSnake.setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
 		for (int i = 0; i < ENEMY_COUNT; i++) {
 			gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+			gEnemy[i].resetLength();
 			for (int p = 0; p < TOTAL_POWERUPS; p++) {
 				gEnemy[i].hasActivePowerup[p] = false;
-				gEnemy[i].powerupActivationTimestamp[p] = 0;
+//				gEnemy[i].powerupActivationTimestamp[p] = gTime;
 			}
-			gEnemy[i].resetLength();
 		}
-		gReset = false;
+		reset = false;
+
 	}
 }
 
@@ -597,8 +599,10 @@ void fruitCollisions() {
 }
 
 void powerupCheck(Snake &vSnake, bool render) {
+
 	for (int i = 0; i < TOTAL_POWERUPS; i++) {
-		if (vSnake.powerupActivationTimestamp[i] < stepTimer.getSeconds()) {
+//		cout<<i<<" "<<vSnake.powerupActivationTimestamp[i]<<endl;
+		if (vSnake.powerupActivationTimestamp[i] < gTimer) {
 			vSnake.hasActivePowerup[i] = false;
 		}
 		if (vSnake.hasActivePowerup[i]) {
@@ -609,10 +613,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 			switch (i) {
 				case 0:
 					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -621,10 +625,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 1:
 					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -633,10 +637,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 2:
 					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -645,10 +649,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 3:
 					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -657,10 +661,10 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 4:
 					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) < 10) && ((vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds()) >= 0)) {
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
 						gTimeLeft << "0";
 					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - stepTimer.getSeconds();
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
 					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
 					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
 					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
@@ -693,24 +697,24 @@ void powerupCheck(Snake &vSnake, bool render) {
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 	switch (fruitSpriteNum) {
 		case 25:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
 			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
 			break;
 		case 26:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
 			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
 			break;
 		case 27:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
 			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
 			vSnake.collectDistanceMultiplier(12);
 			break;
 		case 28:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
 			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
 			break;
 		case 29:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = stepTimer.getSeconds() + MAX_POWERUP_TIME[fruitSpriteNum - 25];
+			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
 			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
 			break;
 	}
@@ -732,6 +736,9 @@ void print() {
 }
 
 void handleEvents() {
+	if(gReset){
+		gReset=false;
+	}
 	while (SDL_PollEvent(&event)) {
 		gOption = -1;
 		if (event.type == SDL_QUIT) {
