@@ -24,14 +24,14 @@ void print();
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
 //----------------------------------------------------------------Deklaracje zmiennych
 bool gContinue = true, gCollision = false, gReset = false;
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
 double gAngle[ENEMY_COUNT], timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistance[2][ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
-string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
+string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
 SDL_Renderer *gRenderer = NULL;
 SDL_Event event;
 Win gWindow;
@@ -847,7 +847,7 @@ void handleEvents() {
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
 			switch (gGameState) {
 				case 1:
-					if (i >= 0 && i <= 2) {
+					if (i >= 0 && i <= MAIN_MENU_OPTS-1) {
 						gButtons[i].eventHandler(event);
 						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
@@ -857,7 +857,7 @@ void handleEvents() {
 					}
 					break;
 				case 2:
-					if (i >= 3 && i <= 4) {
+					if (i >= MAIN_MENU_OPTS && i <= MAIN_MENU_OPTS+1) {
 						gButtons[i].eventHandler(event);
 						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
@@ -878,21 +878,21 @@ void handleEvents() {
 			}
 		}
 		switch (gOption) {
-			case 1:
+			case 1: //Start game
 				gGameState = 0;
 				break;
-			case 2:
+			case 2: //Reset game
 				gGameState = 0;
 				gReset = true;
 				break;
-			case 3:
+			case TOTAL_NUMBER_OF_BUTTONS-2: //Quit game
 				gGameState = 2;
 				break;
-			case 4:
+			case TOTAL_NUMBER_OF_BUTTONS-1: //Yes - kill game
 				gContinue = false;
 				;
 				break;
-			case 5:
+			case TOTAL_NUMBER_OF_BUTTONS: //No - get back to main menu
 				gGameState = 1;
 				break;
 		}
