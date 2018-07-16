@@ -21,6 +21,7 @@ void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
 void print();
+bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
 //----------------------------------------------------------------Deklaracje zmiennych
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 5, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
@@ -105,7 +106,7 @@ int main(int argc, char* args[]) {
 		gButtons[i].setButtonText(gMenuItems[i], gWindow, gFont, TEXT_SIZE);
 	}
 
-	int gTotalTiles = 20 * ((gLvlWidth/0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight/0.9) / gLTLevelTexture.getHeight());
+	int gTotalTiles = 20 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
 	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
 	gSnake.setStartPos(gLvlWidth * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, gLvlHeight * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
@@ -343,6 +344,25 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 //HERE ARE OTHER FUNCTIONS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle) {
+	if ((vSnake1.getSnakeFruitDistance(vSnake2.mHeadBox) < (vSnake1.mHeadBox.w * 20)) && (vSnake2.hasActivePowerup[0]) && !vSnake1.hasActivePowerup[1] && !vSnake1.hasActivePowerup[3]) {
+		if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 0 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 90) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 90 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 180) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 180 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 270) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		}
+	}
+	return false;
+}
+
 void gameReset(bool &reset) {
 	if (reset) {
 		for (int p = 0; p < TOTAL_POWERUPS; p++) {
@@ -366,6 +386,21 @@ void gameReset(bool &reset) {
 
 void playerAndBotsCollisions() {
 	for (int i = 0; i < ENEMY_COUNT; i++) {
+		if(escapeFromDanger(gEnemy[i], gSnake, gAngle[i])){
+			break;
+		}
+		/*if ((gEnemy[i].getSnakeFruitDistance(gSnake.mHeadBox) < (gEnemy[i].mHeadBox.w * 10)) && (gSnake.hasActivePowerup[0]) && (!gEnemy[i].hasActivePowerup[1] || !gEnemy[i].hasActivePowerup[3])) {
+			if (gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) >= 0 || gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) < 90) {
+				gAngle[i] = gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			} else if (gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) >= 90 || gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) < 180) {
+				gAngle[i] = gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			} else if (gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) >= 180 || gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) < 270) {
+				gAngle[i] = gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			} else {
+				gAngle[i] = gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			}
+			break;
+		}*/
 		gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
 		if (gEnemy[i].hasActivePowerup[1] || gSnake.hasActivePowerup[1]) { //GHOST ON ****************
 			gCollision = false;
@@ -453,6 +488,22 @@ void playerAndBotsCollisions() {
 void betweenBotsCollisions() {
 	for (int i = 0; i < ENEMY_COUNT; i++) {
 		for (int j = 0; j < ENEMY_COUNT; j++) {
+			if(escapeFromDanger(gEnemy[i], gEnemy[j], gAngle[i])){
+						break;
+					}
+			if ((gEnemy[i].getSnakeFruitDistance(gSnake.mHeadBox) < (gEnemy[i].mHeadBox.w * 10)) && (gEnemy[j].hasActivePowerup[0]) && (!gEnemy[i].hasActivePowerup[1] || !gEnemy[i].hasActivePowerup[3])) {
+
+				if (gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) >= 0 || gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) < 90) {
+					gAngle[i] = gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+				} else if (gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) >= 90 || gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) < 180) {
+					gAngle[i] = gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+				} else if (gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) >= 180 || gEnemy[i].getHeadToFruitAngle(gSnake.mHeadBox) < 270) {
+					gAngle[i] = gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+				} else {
+					gAngle[i] = gEnemy[i].getHeadToFruitAngle(gEnemy[j].mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+				}
+				break;
+			}
 			gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
 			if (gEnemy[i].hasActivePowerup[1] || gEnemy[j].hasActivePowerup[1]) { //GHOST ON ****************
 				gCollision = false;
