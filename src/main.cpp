@@ -24,24 +24,24 @@ void print();
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
 //----------------------------------------------------------------Deklaracje zmiennych
 bool gContinue = true, gCollision = false, gReset = false;
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2;
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 6;
 double gAngle[ENEMY_COUNT], timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistance[2][ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
-string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
+string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" }, gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Save changes", "Back to main menu (no saving)" };
 SDL_Renderer *gRenderer = NULL;
 SDL_Event event;
 Win gWindow;
-LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS];
+LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS], gLTOptionsText;
 Snake gSnake, gEnemy[ENEMY_COUNT];
 Dot gFruit[TOTAL_FRUITS];
 SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, (int) (gLvlWidth / gRenderScaleX), (int) (gLvlHeight / gRenderScaleY) }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
-Button gButtons[TOTAL_NUMBER_OF_BUTTONS];
+Button gButtons[TOTAL_NUMBER_OF_BUTTONS], gOptionButtons[POSITIONS_IN_OPTIONS_MENU];
 Timer stepTimer;
 int gTimer = 0, x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
 // POWERUPS PARAMS
@@ -90,22 +90,32 @@ int main(int argc, char* args[]) {
 	gLTTitleText.loadFromText("Snaker", gTextColor, gTitleFont, gWindow);
 	gLTTitleText.setWidth(3 * gLTTitleText.getWidth());
 	gLTTitleText.setHeight(TITLE_TEXT_SIZE);
+//	TEXT FOR EXIT GAME DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	gLTExitQuestion.loadFromText("End of game?", gTextColor, gTitleFont, gWindow);
 	gLTExitQuestion.setWidth(1.25 * gLTTitleText.getWidth());
 	gLTExitQuestion.setHeight(TEXT_SIZE);
+//	TEXT FOR PAUSE SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	gLTPause.loadFromText("Game paused", gTextPauseColor, gFont, gWindow);
 	gLTPause.setWidth(5 * gLTPause.getWidth());
+//	TEXT FOR GAME OVER SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	gLTGameOver.loadFromText("Game over :(", gTextColor, gTitleFont, gWindow);
 	gLTGameOver.setHeight(TITLE_TEXT_SIZE);
 	gLTGameOver.setWidth(5 * gLTGameOver.getWidth());
 	gLTPressToReset.loadFromText("Press R to restart or Q/ESC to exit", gTextNormalColor, gTitleFont, gWindow);
 	gLTPressToReset.setHeight(TEXT_SIZE);
 	gLTPressToReset.setWidth(5 * gLTPressToReset.getWidth());
-
+//	TEXT FOR OPTIONS SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	gLTOptionsText.loadFromText("Options", gTextColor, gTitleFont, gWindow);
+	gLTOptionsText.setHeight(TEXT_SIZE);
+//	gLTOptionsText.setWidth(5 * gLTOptionsText.getWidth());
+//	BUTTONS FOR MAIN MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
 		gButtons[i].setButtonText(gMenuItems[i], gWindow, gFont, TEXT_SIZE);
 	}
-
+//	BUTTONS FOR OPTIONS MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
+		gOptionButtons[i].setButtonText(gOptionsItems[i], gWindow, gFont, TEXT_SIZE);
+	}
 	int gTotalTiles = 20 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
 	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
@@ -247,6 +257,16 @@ int main(int argc, char* args[]) {
 					SDL_RenderFillRect(gRenderer, &gGameOverBox);
 					gLTGameOver.render(gGameOverBox.x, gGameOverBox.y, gWindow);
 					gLTPressToReset.render(gGameOverBox.x + gGameOverBox.w - gLTPressToReset.getWidth(), gGameOverBox.y + gGameOverBox.h - gLTPressToReset.getHeight(), gWindow);
+					break;
+//					OPTIONS MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 5:
+					gLTOptionsText.render((gWindow.getWidth() - gLTOptionsText.getWidth()) / 2, 1.25 * gLTTitleText.getHeight(), gWindow);
+					for (int i = 0; i < (POSITIONS_IN_OPTIONS_MENU - 2); i++) {
+						gOptionButtons[i].render((gWindow.getWidth() - gOptionButtons[i].getButtonDims().w) / 2, gWindow.getHeight() / 3 + i * gOptionButtons[i].getButtonDims().h, gWindow);
+					}
+					gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].render((gWindow.getWidth()-(gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().w+100+gOptionButtons[POSITIONS_IN_OPTIONS_MENU-1].getButtonDims().w))/2, gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU-2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().h, gWindow);
+					gOptionButtons[POSITIONS_IN_OPTIONS_MENU-1].render(((gWindow.getWidth()-(gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().w+100+gOptionButtons[POSITIONS_IN_OPTIONS_MENU-1].getButtonDims().w))/2)+(gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().w+100), gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU-2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().h, gWindow);
+
 					break;
 //					MAIN MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				default:
@@ -837,6 +857,9 @@ void handleEvents() {
 					gGameState = 0;
 					gReset = true;
 					break;
+				case SDLK_o:
+					gGameState = 5;
+					break;
 			}
 		}
 		if (event.type == SDL_MOUSEMOTION) {
@@ -847,7 +870,7 @@ void handleEvents() {
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
 			switch (gGameState) {
 				case 1:
-					if (i >= 0 && i <= MAIN_MENU_OPTS-1) {
+					if (i >= 0 && i <= MAIN_MENU_OPTS - 1) {
 						gButtons[i].eventHandler(event);
 						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
@@ -857,11 +880,22 @@ void handleEvents() {
 					}
 					break;
 				case 2:
-					if (i >= MAIN_MENU_OPTS && i <= MAIN_MENU_OPTS+1) {
+					if (i >= MAIN_MENU_OPTS && i <= MAIN_MENU_OPTS + 1) {
 						gButtons[i].eventHandler(event);
 						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
 								gOption = gButtons[i].getID();
+							}
+						}
+					}
+					break;
+				case 5:
+					if (i >= 0 && i <= POSITIONS_IN_OPTIONS_MENU-1) {
+						gOptionButtons[i].eventHandler(event);
+						if (checkCollision(gOptionButtons[i].getButtonDims(), gMouse)) {
+							if (event.type == SDL_MOUSEBUTTONUP) {
+								gOption = gOptionButtons[i].getID();
+								cout<<gOption<<endl;
 							}
 						}
 					}
@@ -885,15 +919,20 @@ void handleEvents() {
 				gGameState = 0;
 				gReset = true;
 				break;
-			case TOTAL_NUMBER_OF_BUTTONS-2: //Quit game
+			case 3:
+				gGameState = 5;
+				break;
+			case TOTAL_NUMBER_OF_BUTTONS - 2: //Quit game
 				gGameState = 2;
 				break;
-			case TOTAL_NUMBER_OF_BUTTONS-1: //Yes - kill game
+			case TOTAL_NUMBER_OF_BUTTONS - 1: //Yes - kill game
 				gContinue = false;
-				;
 				break;
 			case TOTAL_NUMBER_OF_BUTTONS: //No - get back to main menu
 				gGameState = 1;
+				break;
+			case 12:
+				gGameState=1;
 				break;
 		}
 	}
