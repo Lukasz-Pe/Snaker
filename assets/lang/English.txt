@@ -1,0 +1,17 @@
+Start :D (s)
+Reset game (r)
+Options (o)
+Quit :( (q/ESC)
+I have to :( (y)
+Maybe not :) (n/ESC)
+Change language
+Bots quantity
+Fruits quantity
+Powerups quantity
+Save changes
+Back to main menu (no saving)
+End of game?
+Game paused
+Game over :(
+Press R to restart or Q/ESC to exit
+Options

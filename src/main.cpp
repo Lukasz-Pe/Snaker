@@ -32,6 +32,8 @@ const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERU
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
 string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" }, gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Save changes", "Back to main menu (no saving)" };
+string gScreenInfos[5]={"End of game?","Game paused","Game over :(","Press R to restart or Q/ESC to exit","Options"};
+string gAllTexts[17];
 SDL_Renderer *gRenderer = NULL;
 SDL_Event event;
 Win gWindow;
@@ -48,6 +50,9 @@ int gTimer = 0, x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSprit
 void powerupCheck(Snake &vSnake, bool render = false);
 void gameReset(bool &reset);
 int main(int argc, char* args[]) {
+
+
+
 	gContinue = initSDL(&gWindow);
 	gContinue = gLTFruit.loadFromFile("./assets/images/fruits.png", gWindow);
 	gContinue = gLTSnakeHead.loadFromFile("./assets/images/face.png", gWindow);
@@ -91,21 +96,21 @@ int main(int argc, char* args[]) {
 	gLTTitleText.setWidth(3 * gLTTitleText.getWidth());
 	gLTTitleText.setHeight(TITLE_TEXT_SIZE);
 //	TEXT FOR EXIT GAME DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	gLTExitQuestion.loadFromText("End of game?", gTextColor, gTitleFont, gWindow);
+	gLTExitQuestion.loadFromText(gScreenInfos[0].c_str(), gTextColor, gTitleFont, gWindow);
 	gLTExitQuestion.setWidth(1.25 * gLTTitleText.getWidth());
 	gLTExitQuestion.setHeight(TEXT_SIZE);
 //	TEXT FOR PAUSE SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	gLTPause.loadFromText("Game paused", gTextPauseColor, gFont, gWindow);
+	gLTPause.loadFromText(gScreenInfos[1], gTextPauseColor, gFont, gWindow);
 	gLTPause.setWidth(5 * gLTPause.getWidth());
 //	TEXT FOR GAME OVER SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	gLTGameOver.loadFromText("Game over :(", gTextColor, gTitleFont, gWindow);
+	gLTGameOver.loadFromText(gScreenInfos[2].c_str(), gTextColor, gTitleFont, gWindow);
 	gLTGameOver.setHeight(TITLE_TEXT_SIZE);
 	gLTGameOver.setWidth(5 * gLTGameOver.getWidth());
-	gLTPressToReset.loadFromText("Press R to restart or Q/ESC to exit", gTextNormalColor, gTitleFont, gWindow);
+	gLTPressToReset.loadFromText(gScreenInfos[3].c_str(), gTextNormalColor, gTitleFont, gWindow);
 	gLTPressToReset.setHeight(TEXT_SIZE);
 	gLTPressToReset.setWidth(5 * gLTPressToReset.getWidth());
 //	TEXT FOR OPTIONS SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	gLTOptionsText.loadFromText("Options", gTextColor, gTitleFont, gWindow);
+	gLTOptionsText.loadFromText(gScreenInfos[4].c_str(), gTextColor, gTitleFont, gWindow);
 	gLTOptionsText.setHeight(TEXT_SIZE);
 //	gLTOptionsText.setWidth(5 * gLTOptionsText.getWidth());
 //	BUTTONS FOR MAIN MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
