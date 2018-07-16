@@ -23,7 +23,7 @@ bool LTexture::loadFromFile(string path, Win &vWin) {
 		cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << endl;
 		return false;
 	}
-	SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 255, 255));
+	SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 128, 128, 128));
 	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), loadedSurface);
 	if (mTexture == NULL) {
 		cout << "Failed to transform " << path.c_str() << " to texture. SDL Error: " << SDL_GetError() << endl;
