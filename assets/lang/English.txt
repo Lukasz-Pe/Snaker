@@ -15,3 +15,4 @@ Game paused
 Game over :(
 Press R to restart or Q/ESC to exit
 Options
+After saving restart the game in order for the changes to take effect.
