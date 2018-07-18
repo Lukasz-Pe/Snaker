@@ -2,7 +2,7 @@
  * main.cpp
  *
  *  Created on: 03.07.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #include "main.h"
@@ -15,7 +15,7 @@
 #include "classes/Timer.h"
 
 int const MULTIPLIER = 3, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
-int gPowerUpsQuantity = 2, gFruitsQuantity = 4, gEnemyQuantity = 0;
+int gPowerUpsQuantity, gFruitsQuantity, gEnemyQuantity;
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -131,6 +131,10 @@ int main(int argc, char* args[]) {
 	gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
 	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
 	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
+
+	gEnemyQuantity=gSettingsFileContent[1];
+	gFruitsQuantity=gSettingsFileContent[2];
+	gPowerUpsQuantity=gSettingsFileContent[3];
 
 	if (gContinue) {
 		for (int i = 0; i < gFruitsQuantity; i++) {
