@@ -14,8 +14,8 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 1, TOTAL_FRUITS = 10, ENEMY_COUNT = 2, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
-int gPowerUps = 2;
+int const MULTIPLIER = 1, ENEMY_COUNT = 2, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int gPowerUpsQuantity = 2, gFruitsQuantity = 10;
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -24,11 +24,15 @@ void handleEvents();
 void print();
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
 //----------------------------------------------------------------Deklaracje zmiennych
+//Fruits vars
+vector<int> gSpriteNum, x, y;
+vector<Dot> gFruit;
+//Enemies vars
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 6;
 double gAngle[ENEMY_COUNT], timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
-int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gSpriteNum[TOTAL_FRUITS], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistance[2][ENEMY_COUNT];
+int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1, gCurrentTime[ENEMY_COUNT], gTimeElapsed[ENEMY_COUNT], gEnemySprite[ENEMY_COUNT], gEnemyToTargetDistance[2][ENEMY_COUNT];
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
@@ -40,13 +44,12 @@ Win gWindow;
 LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS], gLTOptionsText;
 LTexture gLTPosTxt;
 Snake gSnake, gEnemy[ENEMY_COUNT];
-Dot gFruit[TOTAL_FRUITS];
 SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, (int) (gLvlWidth / gRenderScaleX), (int) (gLvlHeight / gRenderScaleY) }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
 Button gButtons[TOTAL_NUMBER_OF_BUTTONS], gOptionButtons[POSITIONS_IN_OPTIONS_MENU], gButtonNextPrev[8];
 Timer stepTimer;
-int gTimer = 0, x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
+int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
 // fstream vars
 fstream gSettingsFile, gLangFile, gFileLangList;
 vector<string> gLangList;
@@ -117,19 +120,19 @@ int main(int argc, char* args[]) {
 		gLangFile.close();
 	}
 	gSettingsFile.close();
-	gPowerUps = gSettingsFileContent[3];
+	gPowerUpsQuantity = gSettingsFileContent[3];
 	gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]].c_str();
 	gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
 	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
 	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
 
 	if (gContinue) {
-		/*for (int i = 0; i < gFruitsTotal; i++) {
-		 gSpriteNum.push_back(0);
-		 x.push_back(0);
-		 y.push_back(0);
-		 gFruit.push_back(Dot());
-		 }*/
+		for (int i = 0; i < gFruitsQuantity; i++) {
+			gSpriteNum.push_back(0);
+			x.push_back(0);
+			y.push_back(0);
+			gFruit.push_back(Dot());
+		}
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
 			gMenuItems[i] = gAllTexts[i];
 		}
@@ -246,10 +249,10 @@ int main(int argc, char* args[]) {
 	}
 	gWindow.setTitle("Snaker");
 	gRenderer = gWindow.getRenderer();
-	for (int i = 0; i < TOTAL_FRUITS; i++) {
+	for (int i = 0; i < gFruitsQuantity; i++) {
 		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
-		if (i % (TOTAL_FRUITS / gPowerUps) == 0) {
+		if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
 			gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
 		} else {
 			gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
@@ -350,7 +353,7 @@ int main(int argc, char* args[]) {
 					tilePosY += gLTMenuBackground.getHeight();
 				}
 			}
-			for (int i = 0; i < TOTAL_FRUITS; i++) {
+			for (int i = 0; i < gFruitsQuantity; i++) {
 				x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 				y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
 			}
@@ -438,7 +441,7 @@ int main(int argc, char* args[]) {
 				tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
 			}
 //			SETTING STARTING POS OF FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			for (int i = 0; i < TOTAL_FRUITS; i++) {
+			for (int i = 0; i < gFruitsQuantity; i++) {
 				if (gSpriteNum[i] < 25) {
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 				} else {
@@ -713,7 +716,7 @@ void fruitCollisions() {
 //		cout<<"AFR gEnemyToTargetDistance[1]["<<i<<"] "<<gEnemyToTargetDistance[1][i]<<"\tgEnemyToTargetDistance[0]["<<i<<"] "<<gEnemyToTargetDistance[0][i]<<endl;
 	}
 	for (int e = 0; e < ENEMY_COUNT; e++) {
-		for (int f = 0; f < TOTAL_FRUITS; f++) {
+		for (int f = 0; f < gFruitsQuantity; f++) {
 			if (gEnemyToTargetDistance[0][e] > gEnemy[e].getSnakeFruitDistance(gFruit[f].mBox)) {
 				gEnemyToTargetDistance[0][e] = gEnemy[e].getSnakeFruitDistance(gFruit[f].mBox);
 				gEnemyToTargetDistance[1][e] = f;
@@ -721,7 +724,7 @@ void fruitCollisions() {
 		}
 //		cout<<"AFC gEnemyToTargetDistance[1]["<<e<<"] "<<gEnemyToTargetDistance[1][e]<<"\tgEnemyToTargetDistance[0]["<<e<<"] "<<gEnemyToTargetDistance[0][e]<<endl;
 	}
-	for (int i = 0; i < TOTAL_FRUITS; i++) {
+	for (int i = 0; i < gFruitsQuantity; i++) {
 		if (gSnake.collectFruit(gFruit[i])) {
 			x[i] = gSnake.mNewFruitPos.x;
 			y[i] = gSnake.mNewFruitPos.y;
@@ -1101,6 +1104,21 @@ void handleEvents() {
 				gGameState = 1;
 				break;
 			case 11:
+				if (gSettingsFileContent[0] < 0) {
+					gSettingsFileContent[0] = 0;
+				}
+				if ((unsigned) gSettingsFileContent[0] > gLangList.size() - 1) {
+					gSettingsFileContent[0] = gLangList.size() - 1;
+				}
+				if (gSettingsFileContent[1] <= 0) {
+					gSettingsFileContent[1] = 0;
+				}
+				if (gSettingsFileContent[2] <= 2) {
+					gSettingsFileContent[2] = 2;
+				}
+				if (gSettingsFileContent[3] <= 1) {
+					gSettingsFileContent[3] = 1;
+				}
 				gSettingsFile.open("./assets/settings.txt", ios::out);
 				for (int i = 0; i < 4; i++) {
 					gSettingsFile << gSettingsFileContent[i] << "\t" << fSettingsInstructions[i] << endl;
@@ -1166,16 +1184,37 @@ void handleEvents() {
 				for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
 					gOptionButtons[i].setButtonText(gOptionsItems[i], gWindow, gFont, TEXT_SIZE);
 				}
-				gPowerUps = gSettingsFileContent[3];
-				for (int i = 0; i < TOTAL_FRUITS; i++) {
+				gPowerUpsQuantity = gSettingsFileContent[3];
+				for (int i = 0; i < gFruitsQuantity; i++) {
 					x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 					y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
-					if (i % (TOTAL_FRUITS / gPowerUps) == 0) {
+					if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
 						gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
 					} else {
 						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 					}
 				}
+				gFruitsQuantity = gSettingsFileContent[2];
+				gSpriteNum.push_back(0);
+				x.clear();
+				y.clear();
+				gFruit.clear();
+				for (int i = 0; i < gFruitsQuantity; i++) {
+					gSpriteNum.push_back(0);
+					x.push_back(0);
+					y.push_back(0);
+					gFruit.push_back(Dot());
+				}
+				for (int i = 0; i < gFruitsQuantity; i++) {
+					x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
+					y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
+					if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
+						gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
+					} else {
+						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
+					}
+				}
+
 				break;
 			case 12:
 				gGameState = 1;
