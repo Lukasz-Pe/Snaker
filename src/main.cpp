@@ -1060,10 +1060,10 @@ void handleEvents() {
 							//							cout<<gOption<<endl;
 						}
 						if (event.type == SDL_MOUSEWHEEL) {
-							if (event.wheel.y < 0 && j < 4) {
+							if (event.wheel.y < 0) {
 								gOption = gButtonNextPrev[j].getID();
 							}
-							if (event.wheel.y > 0 && j > 3) {
+							if (event.wheel.y > 0) {
 								gOption = gButtonNextPrev[j].getID();
 							}
 						}
