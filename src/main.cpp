@@ -14,7 +14,8 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 3, TOTAL_FRUITS = 300, ENEMY_COUNT = 15, TOTAL_POWERUPS = 5, POWERUPS_COUNT = 50, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int const MULTIPLIER = 1, TOTAL_FRUITS = 10, ENEMY_COUNT = 2, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int gPowerUps = 2;
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -116,7 +117,7 @@ int main(int argc, char* args[]) {
 		gLangFile.close();
 	}
 	gSettingsFile.close();
-
+	gPowerUps = gSettingsFileContent[3];
 	gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]].c_str();
 	gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
 	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
@@ -248,7 +249,7 @@ int main(int argc, char* args[]) {
 	for (int i = 0; i < TOTAL_FRUITS; i++) {
 		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
-		if (i % (TOTAL_FRUITS / POWERUPS_COUNT) == 0) {
+		if (i % (TOTAL_FRUITS / gPowerUps) == 0) {
 			gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
 		} else {
 			gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
@@ -302,13 +303,12 @@ int main(int argc, char* args[]) {
 		if (gSettingsFileContent[1] <= 0) {
 			gSettingsFileContent[1] = 0;
 		}
-		if (gSettingsFileContent[2] <= 1) {
-			gSettingsFileContent[2] = 1;
+		if (gSettingsFileContent[2] <= 2) {
+			gSettingsFileContent[2] = 2;
 		}
 		if (gSettingsFileContent[3] <= 1) {
 			gSettingsFileContent[3] = 1;
 		}
-
 		gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]];
 		gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
 		gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
@@ -1140,7 +1140,6 @@ void handleEvents() {
 				gLTPressToReset.free();
 				gLTOptionsText.free();
 
-
 				//	TEXT FOR EXIT GAME DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				gLTExitQuestion.loadFromText(gScreenInfos[0].c_str(), gTextColor, gTitleFont, gWindow);
 				gLTExitQuestion.setWidth(1.25 * gLTTitleText.getWidth());
@@ -1166,6 +1165,16 @@ void handleEvents() {
 				//	BUTTONS FOR OPTIONS MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
 					gOptionButtons[i].setButtonText(gOptionsItems[i], gWindow, gFont, TEXT_SIZE);
+				}
+				gPowerUps = gSettingsFileContent[3];
+				for (int i = 0; i < TOTAL_FRUITS; i++) {
+					x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
+					y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
+					if (i % (TOTAL_FRUITS / gPowerUps) == 0) {
+						gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
+					} else {
+						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
+					}
 				}
 				break;
 			case 12:
