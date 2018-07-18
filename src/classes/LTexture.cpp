@@ -13,6 +13,8 @@ LTexture::LTexture() {
 	mTextureWidht = 0;
 	mPixels = NULL;
 	mPitch = 0;
+	mPosX = 0;
+	mPosY = 0;
 }
 
 bool LTexture::loadFromFile(string path, Win &vWin) {
@@ -139,6 +141,8 @@ void LTexture::free() {
 
 void LTexture::render(int posX, int posY, Win &vWin, SDL_Rect *clip, const double *scaleFactor, double angle, SDL_Point *center, SDL_RendererFlip flip) {
 	SDL_Rect rect = { posX, posY, mTextureWidht, mTextureHeight };
+	mPosX = posX;
+	mPosY = posY;
 	if (clip != NULL) {
 		if (scaleFactor != NULL) {
 			rect.w = *scaleFactor * clip->w;
@@ -246,4 +250,12 @@ void LTexture::setWidth(int w) {
 
 void LTexture::setHeight(int h) {
 	mTextureHeight = h;
+}
+
+int LTexture::getPosX() {
+	return mPosX;
+}
+
+int LTexture::getPosY() {
+	return mPosY;
 }

@@ -32,36 +32,141 @@ const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERU
 SDL_Point gEnemyStartPos[ENEMY_COUNT], gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
 string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" }, gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Save changes", "Back to main menu (no saving)" };
-string gScreenInfos[5]={"End of game?","Game paused","Game over :(","Press R to restart or Q/ESC to exit","Options"};
-string gAllTexts[17];
+string gScreenInfos[5] = { "End of game?", "Game paused", "Game over :(", "Press R to restart or Q/ESC to exit", "Options" };
 SDL_Renderer *gRenderer = NULL;
 SDL_Event event;
 Win gWindow;
 LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS], gLTOptionsText;
+LTexture gLTPosTxt;
 Snake gSnake, gEnemy[ENEMY_COUNT];
 Dot gFruit[TOTAL_FRUITS];
 SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, (int) (gLvlWidth / gRenderScaleX), (int) (gLvlHeight / gRenderScaleY) }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
-Button gButtons[TOTAL_NUMBER_OF_BUTTONS], gOptionButtons[POSITIONS_IN_OPTIONS_MENU];
+Button gButtons[TOTAL_NUMBER_OF_BUTTONS], gOptionButtons[POSITIONS_IN_OPTIONS_MENU], gButtonNextPrev[8];
 Timer stepTimer;
 int gTimer = 0, x[TOTAL_FRUITS], y[TOTAL_FRUITS], Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, gEnePosX[ENEMY_COUNT], gEnePosY[ENEMY_COUNT], powerupTime[TOTAL_POWERUPS];
+// fstream vars
+fstream gSettingsFile, gLangFile, gFileLangList;
+vector<string> gLangList;
+string gAllTexts[17], gTmpText, gChangeableOptionsPos[4], fSettingsInstructions[4] = { "/Languages, as they are present in the list", "/Enemies count", "/Fruits count", "/Powerups count, cannot be 0" };
+stringstream gPathToLangFile, gTextToShow;
+int gSettingsFileContent[4], mOptsButtonsWidth[8];
 // POWERUPS PARAMS
 void powerupCheck(Snake &vSnake, bool render = false);
 void gameReset(bool &reset);
+void fTextToShow(int &i, int xpos, int ypos, string &vText);
 int main(int argc, char* args[]) {
+//Opening lang list file
+	gFileLangList.open("./assets/lang/_LangList.txt");
+	if (gFileLangList.is_open()) {
+		while (!gFileLangList.eof()) {
+			gFileLangList >> gTmpText;
+			gLangList.push_back(gTmpText.c_str());
+		}
+		gFileLangList.close();
+	} else {
+		gFileLangList.close();
+		cout << "Unable to load language list file!\n";
+		gContinue = false;
+	}
+//Loading settings file
+	if (gContinue) {
+		gSettingsFile.open("./assets/settings.txt", ios::in);
+		if (gSettingsFile.is_open()) {
+			gPathToLangFile.str("");
+			gPathToLangFile << "./assets/lang/";
+			{
+				int i = 0;
+				while (getline(gSettingsFile, gTmpText, '/')) {
+					gSettingsFile.ignore(1024, '\n');
+					gSettingsFileContent[i] = stoi(gTmpText.c_str());
+					i++;
+				}
+			}
+			gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
+			gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
+			if (gLangFile.is_open()) {
+				int i = 0;
+				while (i < 17) {
+					getline(gLangFile, gAllTexts[i]);
+					i++;
+				}
+				gSettingsFile.close();
+				gLangFile.close();
+			} else {
+				gSettingsFile.close();
+				gLangFile.close();
+				cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+				gContinue = false;
+			}
+			gSettingsFile.close();
+			gLangFile.close();
+		} else {
+			gSettingsFile.close();
+			gLangFile.close();
+			cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+			cout << "Unable to load settings file!\n";
+			gContinue = false;
+		}
+	} else {
+		gSettingsFile.close();
+		cout << "Unable to load settings file!\n";
+		gContinue = false;
+		gLangFile.close();
+	}
+	gSettingsFile.close();
 
+	gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]].c_str();
+	gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
+	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
+	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
 
+	if (gContinue) {
+		/*for (int i = 0; i < gFruitsTotal; i++) {
+		 gSpriteNum.push_back(0);
+		 x.push_back(0);
+		 y.push_back(0);
+		 gFruit.push_back(Dot());
+		 }*/
+		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
+			gMenuItems[i] = gAllTexts[i];
+		}
+		for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
+			gOptionsItems[i] = gAllTexts[i + TOTAL_NUMBER_OF_BUTTONS];
+		}
+		for (int i = 0; i < 5; i++) {
+			gScreenInfos[i] = gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
+		}
+	}
 
-	gContinue = initSDL(&gWindow);
-	gContinue = gLTFruit.loadFromFile("./assets/images/fruits.png", gWindow);
-	gContinue = gLTSnakeHead.loadFromFile("./assets/images/face.png", gWindow);
-	gContinue = gLTSnakeTail.loadFromFile("./assets/images/dot.png", gWindow);
-	gContinue = gLTLevelTexture.loadFromFile("./assets/images/bo_play_pattern.png", gWindow);
-	gContinue = gLTMenuBackground.loadFromFile("./assets/images/escheresque.png", gWindow);
-	gContinue = gLTEnemyHead.loadFromFile("./assets/images/faces.png", gWindow);
-	gContinue = gLTEnemyTail.loadFromFile("./assets/images/tails.png", gWindow);
-	gContinue = gLTPowerupIcons.loadFromFile("./assets/images/powerups.png", gWindow);
+	if (gContinue) {
+		gContinue = initSDL(&gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTFruit.loadFromFile("./assets/images/fruits.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTSnakeHead.loadFromFile("./assets/images/face.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTSnakeTail.loadFromFile("./assets/images/dot.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTLevelTexture.loadFromFile("./assets/images/bo_play_pattern.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTMenuBackground.loadFromFile("./assets/images/escheresque.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTEnemyHead.loadFromFile("./assets/images/faces.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTEnemyTail.loadFromFile("./assets/images/tails.png", gWindow);
+	}
+	if (gContinue) {
+		gContinue = gLTPowerupIcons.loadFromFile("./assets/images/powerups.png", gWindow);
+	}
 	for (int i = 0; i < TOTAL_SPRITES; i++) {
 		gSpriteClips[i]= {gSpritePosX, gSpritePosY, SPRITE_DIMS, SPRITE_DIMS};
 		gSpritePosX+=SPRITE_DIMS;
@@ -120,6 +225,10 @@ int main(int argc, char* args[]) {
 //	BUTTONS FOR OPTIONS MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
 		gOptionButtons[i].setButtonText(gOptionsItems[i], gWindow, gFont, TEXT_SIZE);
+	}
+	for (int i = 0; i < 4; i++) {
+		gButtonNextPrev[i].setButtonText("<-", gWindow, gFont, TEXT_SIZE, 0);
+		gButtonNextPrev[i + 4].setButtonText("+>", gWindow, gFont, TEXT_SIZE, 0);
 	}
 	int gTotalTiles = 20 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
 	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
@@ -267,10 +376,11 @@ int main(int argc, char* args[]) {
 				case 5:
 					gLTOptionsText.render((gWindow.getWidth() - gLTOptionsText.getWidth()) / 2, 1.25 * gLTTitleText.getHeight(), gWindow);
 					for (int i = 0; i < (POSITIONS_IN_OPTIONS_MENU - 2); i++) {
-						gOptionButtons[i].render((gWindow.getWidth() - gOptionButtons[i].getButtonDims().w) / 2, gWindow.getHeight() / 3 + i * gOptionButtons[i].getButtonDims().h, gWindow);
+						gOptionButtons[i].render((gLTOptionsText.getPosX() + 0.5 * gLTOptionsText.getWidth() - mOptsButtonsWidth[i]/2), gWindow.getHeight() / 3 + i * gOptionButtons[i].getButtonDims().h, gWindow);
+						fTextToShow(i, gOptionButtons[i].getButtonDims().x + gOptionButtons[i].getButtonDims().w + 80, gOptionButtons[i].getButtonDims().y, gChangeableOptionsPos[i]);
 					}
-					gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].render((gWindow.getWidth()-(gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().w+100+gOptionButtons[POSITIONS_IN_OPTIONS_MENU-1].getButtonDims().w))/2, gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU-2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().h, gWindow);
-					gOptionButtons[POSITIONS_IN_OPTIONS_MENU-1].render(((gWindow.getWidth()-(gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().w+100+gOptionButtons[POSITIONS_IN_OPTIONS_MENU-1].getButtonDims().w))/2)+(gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().w+100), gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU-2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU-2].getButtonDims().h, gWindow);
+					gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].render((gWindow.getWidth() - (gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().w + 100 + gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 1].getButtonDims().w)) / 2, gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU - 2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().h, gWindow);
+					gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 1].render(((gWindow.getWidth() - (gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().w + 100 + gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 1].getButtonDims().w)) / 2) + (gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().w + 100), gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU - 2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().h, gWindow);
 
 					break;
 //					MAIN MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -369,6 +479,18 @@ int main(int argc, char* args[]) {
 	return 0;
 }
 //HERE ARE OTHER FUNCTIONS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void fTextToShow(int &i, int xpos, int ypos, string &vText) {
+	gTextToShow.str("");
+	gTextToShow << vText.c_str();
+	gLTPosTxt.loadFromText(gTextToShow.str().c_str(), gTextNormalColor, gFont, gWindow);
+	gLTPosTxt.setHeight(gButtonNextPrev[0].getButtonDims().h);
+	gLTPosTxt.setWidth(1 * gLTPosTxt.getWidth());
+	gButtonNextPrev[i].render(xpos, ypos, gWindow);
+	gLTPosTxt.render(xpos + (1.25 * gButtonNextPrev[0].getButtonDims().w), ypos, gWindow);
+	gButtonNextPrev[i + 4].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
+	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
+}
+
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle) {
 	if ((vSnake1.getSnakeFruitDistance(vSnake2.mHeadBox) < (vSnake1.mHeadBox.w * 20)) && (vSnake2.hasActivePowerup[0]) && !vSnake1.hasActivePowerup[1] && !vSnake1.hasActivePowerup[3]) {
 		if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 0 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 90) {
@@ -895,12 +1017,12 @@ void handleEvents() {
 					}
 					break;
 				case 5:
-					if (i >= 0 && i <= POSITIONS_IN_OPTIONS_MENU-1) {
+					if (i >= 0 && i <= POSITIONS_IN_OPTIONS_MENU - 1) {
 						gOptionButtons[i].eventHandler(event);
 						if (checkCollision(gOptionButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
 								gOption = gOptionButtons[i].getID();
-								cout<<gOption<<endl;
+								cout << gOption << endl;
 							}
 						}
 					}
@@ -937,7 +1059,7 @@ void handleEvents() {
 				gGameState = 1;
 				break;
 			case 12:
-				gGameState=1;
+				gGameState = 1;
 				break;
 		}
 	}

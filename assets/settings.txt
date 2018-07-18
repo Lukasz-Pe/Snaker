@@ -1,4 +1,4 @@
-English
-15
-300
-50
+1	/Languages, as they are present in the list
+22	/Enemies count
+20	/Fruits count
+1	/Powerups count, cannot be 0

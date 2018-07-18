@@ -17,7 +17,7 @@ public:
 	int getID();
 	void eventHandler(SDL_Event &event);
 	SDL_Rect getButtonDims();
-	void setButtonText(string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE);
+	void setButtonText(string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen=1);
 	void setPosition(int x, int y);
 	void render(int x, int y, Win &vWin);
 	virtual ~Button();
