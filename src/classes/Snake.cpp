@@ -102,6 +102,14 @@ double Snake::getHeadToFruitAngle(SDL_Rect &vFruit) {
 		a = 180 + (180 / M_PI) * atan(x / y);
 	}
 
+	if(a<0){
+		a+=360;
+	}
+	if(a>360){
+		int m=a/360;
+		a=a-m*360;
+	}
+
 	return a;
 }
 

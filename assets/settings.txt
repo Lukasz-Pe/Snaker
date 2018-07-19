@@ -1,4 +1,4 @@
 1	/Languages, as they are present in the list
-50	/Enemies count
-600	/Fruits count
-50	/Powerups count, cannot be 0
+2	/Enemies count
+25	/Fruits count
+2	/Powerups count, cannot be 0

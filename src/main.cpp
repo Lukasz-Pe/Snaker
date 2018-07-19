@@ -14,7 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 3, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int const MULTIPLIER = 1, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
 int gPowerUpsQuantity, gFruitsQuantity, gEnemyQuantity;
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
@@ -132,9 +132,9 @@ int main(int argc, char* args[]) {
 	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
 	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
 
-	gEnemyQuantity=gSettingsFileContent[1];
-	gFruitsQuantity=gSettingsFileContent[2];
-	gPowerUpsQuantity=gSettingsFileContent[3];
+	gEnemyQuantity = gSettingsFileContent[1];
+	gFruitsQuantity = gSettingsFileContent[2];
+	gPowerUpsQuantity = gSettingsFileContent[3];
 
 	if (gContinue) {
 		for (int i = 0; i < gFruitsQuantity; i++) {
@@ -577,8 +577,8 @@ void gameReset(bool &reset) {
 
 void playerAndBotsCollisions() {
 	for (int i = 0; i < gEnemyQuantity; i++) {
-		if (escapeFromDanger(gEnemy[i], gSnake, gAngle[i])) {
-			break;
+		if ((!(gEnemy[i].hasActivePowerup[1] || gEnemy[i].hasActivePowerup[3])) || (gSnake.hasActivePowerup[0] && !gEnemy[i].hasActivePowerup[0])) { //ACTIVATE IF ENEMY HAS NO GHOST OR SHIELD ON OR PLAYER HAS PACMAN ****************
+			escapeFromDanger(gEnemy[i], gSnake, gAngle[i]);
 		}
 		gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
 		if (gEnemy[i].hasActivePowerup[1] || gSnake.hasActivePowerup[1]) { //GHOST ON ****************
@@ -601,7 +601,7 @@ void playerAndBotsCollisions() {
 				gSnake.resetLength();
 				break;
 			}
-			if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+			if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
 				break;
 			}
 			gGameState = 4;
@@ -627,7 +627,7 @@ void playerAndBotsCollisions() {
 						break;
 					}
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+					if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
 						break;
 					}
 					gEnemy[i].resetLength();
@@ -651,7 +651,7 @@ void playerAndBotsCollisions() {
 						break;
 					}
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gSnake.hasActivePowerup[3]) { //MAGNET ON ****************
+					if (gSnake.hasActivePowerup[3]) { //SHIELD ON ****************
 						break;
 					}
 					//							gSnake.resetLength();
@@ -668,8 +668,9 @@ void betweenBotsCollisions() {
 	for (int i = 0; i < gEnemyQuantity; i++) {
 		for (int j = 0; j < gEnemyQuantity; j++) {
 			if (i != j) {
-				if (escapeFromDanger(gEnemy[i], gEnemy[j], gAngle[i])) {
-					break;
+
+				if (gEnemy[i].hasActivePowerup[1] || gEnemy[j].hasActivePowerup[1]) {
+					escapeFromDanger(gEnemy[i], gEnemy[j], gAngle[i]);
 				}
 				gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
 				if (gEnemy[i].hasActivePowerup[1] || gEnemy[j].hasActivePowerup[1]) { //GHOST ON ****************
@@ -693,7 +694,7 @@ void betweenBotsCollisions() {
 						break;
 					}
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+					if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
 						break;
 					}
 					gEnemy[i].resetLength();
@@ -715,7 +716,7 @@ void betweenBotsCollisions() {
 								break;
 							}
 							gAngle[j] = 360 * ((double) rand() / RAND_MAX);
-							if (gEnemy[i].hasActivePowerup[3]) { //MAGNET ON ****************
+							if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
 								break;
 							}
 							gEnemy[j].resetLength();
@@ -730,10 +731,10 @@ void betweenBotsCollisions() {
 
 void fruitCollisions() {
 	for (int i = 0; i < gEnemyQuantity; i++) {
-//		cout<<"BFR gEnemyToTargetDistance[1]["<<i<<"] "<<gEnemyToTargetDistance[1][i]<<"\tgEnemyToTargetDistance[0]["<<i<<"] "<<gEnemyToTargetDistance[0][i]<<endl;
+//		cout << "BFR gEnemyToTargetDistance[1][" << i << "] " << gEnemyToTargetDistance[1][i] << "\tgEnemyToTargetDistance[0][" << i << "] " << gEnemyToTargetDistance[0][i] << endl;
 		gEnemyToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gEnemyToTargetDistance[1][i] = -1;
-//		cout<<"AFR gEnemyToTargetDistance[1]["<<i<<"] "<<gEnemyToTargetDistance[1][i]<<"\tgEnemyToTargetDistance[0]["<<i<<"] "<<gEnemyToTargetDistance[0][i]<<endl;
+//		cout<<"AFR gEnemyToTargetDistance[1]["<<i<<"] "<<EnemyToTargetDistance[1][i]<<"\tgEnemyToTargetDistance[0]["<<i<<"] "<<gEnemyToTargetDistance[0][i]<<endl;
 	}
 	for (int e = 0; e < gEnemyQuantity; e++) {
 		for (int f = 0; f < gFruitsQuantity; f++) {
@@ -792,12 +793,17 @@ void fruitCollisions() {
 						gEnemyToTargetDistance[1][j] = e;
 					}
 				}
+				if(gEnemyQuantity>1){
 				for (int e = 0; e < gEnemyQuantity; e++) {
-					if ((gEnemyToTargetDistance[0][j] < gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox)) && j != e) {
+//					cout<<"gEnemyToTargetDistance[0][j]"<<gEnemyToTargetDistance[0][j]<<"\tgEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox) "<<gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)<<endl;
+					if ((gEnemyToTargetDistance[0][j] < gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)) && j != e) {
 						gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
 					} else {
 						gAngle[j] = gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox);
 					}
+//					cout << "AFC gEnemyToTargetDistance[1][" << e << "] " << gEnemyToTargetDistance[1][e] << "\tgEnemyToTargetDistance[0][" << e << "] " << gEnemyToTargetDistance[0][e] <<"\tgAngle["<<j<<"] "<<gAngle[j]<< endl;
+				}}else{
+					gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
 				}
 
 				break;
@@ -923,25 +929,26 @@ void powerupCheck(Snake &vSnake, bool render) {
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 	switch (fruitSpriteNum) {
 		case 25:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			vSnake.powerupActivationTimestamp[0] = gTimer + MAX_POWERUP_TIME[0];
+			vSnake.hasActivePowerup[0] = true;
+//			cout << vSnake.hasActivePowerup[0] << "\t" << vSnake.powerupActivationTimestamp[0] << "\tCurrent time: " << gTimer << endl;
 			break;
 		case 26:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			vSnake.powerupActivationTimestamp[1] = gTimer + MAX_POWERUP_TIME[1];
+			vSnake.hasActivePowerup[1] = true;
 			break;
 		case 27:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			vSnake.powerupActivationTimestamp[2] = gTimer + MAX_POWERUP_TIME[2];
+			vSnake.hasActivePowerup[2] = true;
 			vSnake.collectDistanceMultiplier(12);
 			break;
 		case 28:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			vSnake.powerupActivationTimestamp[3] = gTimer + MAX_POWERUP_TIME[3];
+			vSnake.hasActivePowerup[3] = true;
 			break;
 		case 29:
-			vSnake.powerupActivationTimestamp[fruitSpriteNum - 25] = gTimer + MAX_POWERUP_TIME[fruitSpriteNum - 25];
-			vSnake.hasActivePowerup[fruitSpriteNum - 25] = true;
+			vSnake.powerupActivationTimestamp[4] = gTimer + MAX_POWERUP_TIME[4];
+			vSnake.hasActivePowerup[4] = true;
 			break;
 	}
 }
@@ -1254,12 +1261,12 @@ void handleEvents() {
 					gEnemyToTargetDistance[1].push_back(0);
 				}
 				for (int i = 0; i < gEnemyQuantity; i++) {
-						gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
-						gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
-						gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
-						gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
-				//		gEnemy[i].resetLength();
-					}
+					gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
+					gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
+					gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
+					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
+					//		gEnemy[i].resetLength();
+				}
 				break;
 			case 12:
 				gGameState = 1;
