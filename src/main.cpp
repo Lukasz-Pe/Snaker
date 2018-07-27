@@ -35,14 +35,14 @@ vector<SDL_Point> gEnemyStartPos;
 vector<Snake> gEnemy;
 
 bool gContinue = true, gCollision = false, gReset = false;
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 6;
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
 double timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1;
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
-string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" }, gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Save changes", "Back to main menu (no saving)" };
+string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" }, gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Snake speed", "Save changes", "Back to main menu (no saving)" };
 string gScreenInfos[5] = { "End of game?", "Game paused", "Game over :(", "Press R to restart or Q/ESC to exit", "Options" };
 SDL_Renderer *gRenderer = NULL;
 SDL_Event event;
@@ -53,15 +53,16 @@ Snake gSnake;
 SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, (int) (gLvlWidth / gRenderScaleX), (int) (gLvlHeight / gRenderScaleY) }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
-Button gButtons[TOTAL_NUMBER_OF_BUTTONS], gOptionButtons[POSITIONS_IN_OPTIONS_MENU], gButtonNextPrev[8];
-Timer stepTimer;
-int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, powerupTime[TOTAL_POWERUPS];
+Button gButtons[TOTAL_NUMBER_OF_BUTTONS], gOptionButtons[POSITIONS_IN_OPTIONS_MENU], gButtonNextPrev[10];
+Timer stepTimer, frameTimer;
+double gFrameTimer = 0;
+int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, powerupTime[TOTAL_POWERUPS], gTmpVal = 0;
 // fstream vars
 fstream gSettingsFile, gLangFile, gFileLangList;
 vector<string> gLangList;
-string gAllTexts[17], gTmpText, gChangeableOptionsPos[4], fSettingsInstructions[4] = { "/Languages, as they are present in the list", "/Enemies count", "/Fruits count", "/Powerups count, cannot be 0" };
+string gAllTexts[18], gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - orirginal 20", "/Fruits count - orirginal 200", "/Powerups count, cannot be 0 - orirginal 25", "/Snake speed - orirginal 300" };
 stringstream gPathToLangFile, gTextToShow;
-int gSettingsFileContent[4], mOptsButtonsWidth[8];
+int gSettingsFileContent[5], mOptsButtonsWidth[10];
 // POWERUPS PARAMS
 void powerupCheck(Snake &vSnake, bool render = false);
 void gameReset(bool &reset);
@@ -97,8 +98,8 @@ int main(int argc, char* args[]) {
 			gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
 			gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
 			if (gLangFile.is_open()) {
-				int i = 0;
-				while (i < 17) {
+				unsigned int i = 0;
+				while (i < sizeof(gAllTexts)/sizeof(string)) {
 					getline(gLangFile, gAllTexts[i]);
 					i++;
 				}
@@ -131,6 +132,7 @@ int main(int argc, char* args[]) {
 	gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
 	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
 	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
+	gChangeableOptionsPos[4] = to_string(gSettingsFileContent[4]);
 
 	gEnemyQuantity = gSettingsFileContent[1];
 	gFruitsQuantity = gSettingsFileContent[2];
@@ -251,9 +253,9 @@ int main(int argc, char* args[]) {
 	for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
 		gOptionButtons[i].setButtonText(gOptionsItems[i], gWindow, gFont, TEXT_SIZE);
 	}
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 5; i++) {
 		gButtonNextPrev[i].setButtonText("<-", gWindow, gFont, TEXT_SIZE, 0);
-		gButtonNextPrev[i + 4].setButtonText("+>", gWindow, gFont, TEXT_SIZE, 0);
+		gButtonNextPrev[i + 5].setButtonText("+>", gWindow, gFont, TEXT_SIZE, 0);
 	}
 	int gTotalTiles = 20 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
 	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
@@ -314,6 +316,14 @@ int main(int argc, char* args[]) {
 		gEnemyToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gEnemyToTargetDistance[1][i] = i;
 	}
+	gTmpVal = gSettingsFileContent[4];
+	for (int i = 1; i < 5; i++) {
+		gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
+	}
+	gSnake.changeSpeed(gSettingsFileContent[4]);
+	for (int i = 0; i < gEnemyQuantity; i++) {
+		gEnemy[i].changeSpeed(gSettingsFileContent[4]);
+	}
 	while (gContinue) {
 //		HERE RESIDES GAME MENU +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		handleEvents();
@@ -332,10 +342,20 @@ int main(int argc, char* args[]) {
 		if (gSettingsFileContent[3] <= 1) {
 			gSettingsFileContent[3] = 1;
 		}
+		if (gSettingsFileContent[4] <= 1) {
+			gSettingsFileContent[4] = 1;
+		}
 		gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]];
-		gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
-		gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
-		gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
+		for (int i = 1; i < 5; i++) {
+			gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
+		}
+		if (gTmpVal != gSettingsFileContent[4]) {
+			gTmpVal = gSettingsFileContent[4];
+			gSnake.changeSpeed(gSettingsFileContent[4]);
+			for (int i = 0; i < gEnemyQuantity; i++) {
+				gEnemy[i].changeSpeed(gSettingsFileContent[4]);
+			}
+		}
 //		cout << gSnake.getHeadBox().x << " " << gSnake.getHeadBox().y << " " << gLevelBorders.w << " " << gLevelBorders.h << " " << gLvlWidth << " " << gLvlHeight << endl;
 //		ACTIONS TAKEN WHEN WINDOW DIMS ARE CHANGED >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		if (gScreenWidth != gWindow.getWidth() || gScreenHeight != gWindow.getHeight()) {
@@ -378,7 +398,7 @@ int main(int argc, char* args[]) {
 				y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
 			}
 		}
-//		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//		HERE IS GAME MENU ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState >= 1) {
 			if (gRenderScaleX < 1 && gRenderScaleY < 1) {
 				tempScale = gRenderScaleX;
@@ -492,11 +512,13 @@ int main(int argc, char* args[]) {
 				gLTScoreText.setHeight(TEXT_SIZE);
 			}
 //			MOVEMENT AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			gSnake.move(gLevelBorders, gLTSnakeTail);
+			gFrameTimer = frameTimer.getSeconds<double>();
+			gSnake.move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
 			for (int i = 0; i < gEnemyQuantity; i++) {
 				gEnemy[i].setAngle(gAngle[i]);
-				gEnemy[i].move(gLevelBorders, gLTSnakeTail);
+				gEnemy[i].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
 			}
+			frameTimer.start();
 //			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			powerupCheck(gSnake, true);
 			for (int i = 0; i < gEnemyQuantity; i++) {
@@ -510,6 +532,7 @@ int main(int argc, char* args[]) {
 			gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
 			gLTScoreText.render(0, 0, gWindow);
 			gWindow.render();
+
 		}
 	}
 
@@ -531,7 +554,7 @@ void fTextToShow(int &i, int xpos, int ypos, string &vText) {
 	gLTPosTxt.setWidth(1 * gLTPosTxt.getWidth());
 	gButtonNextPrev[i].render(xpos, ypos, gWindow);
 	gLTPosTxt.render(xpos + (1.25 * gButtonNextPrev[0].getButtonDims().w), ypos, gWindow);
-	gButtonNextPrev[i + 4].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
+	gButtonNextPrev[i + 5].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
 	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
 }
 
@@ -793,16 +816,17 @@ void fruitCollisions() {
 						gEnemyToTargetDistance[1][j] = e;
 					}
 				}
-				if(gEnemyQuantity>1){
-				for (int e = 0; e < gEnemyQuantity; e++) {
+				if (gEnemyQuantity > 1) {
+					for (int e = 0; e < gEnemyQuantity; e++) {
 //					cout<<"gEnemyToTargetDistance[0][j]"<<gEnemyToTargetDistance[0][j]<<"\tgEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox) "<<gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)<<endl;
-					if ((gEnemyToTargetDistance[0][j] < gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)) && j != e) {
-						gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
-					} else {
-						gAngle[j] = gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox);
-					}
+						if ((gEnemyToTargetDistance[0][j] < gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)) && j != e) {
+							gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
+						} else {
+							gAngle[j] = gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox);
+						}
 //					cout << "AFC gEnemyToTargetDistance[1][" << e << "] " << gEnemyToTargetDistance[1][e] << "\tgEnemyToTargetDistance[0][" << e << "] " << gEnemyToTargetDistance[0][e] <<"\tgAngle["<<j<<"] "<<gAngle[j]<< endl;
-				}}else{
+					}
+				} else {
 					gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
 				}
 
@@ -1045,7 +1069,7 @@ void handleEvents() {
 		}
 		gWindow.eventHandler(event);
 		gSnake.eventHandler(event, &gWindow, &gCamera);
-		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
+		for (int i = 0; i < (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU); i++) {
 			switch (gGameState) {
 				case 1:
 					if (i >= 0 && i <= MAIN_MENU_OPTS - 1) {
@@ -1080,14 +1104,14 @@ void handleEvents() {
 					break;
 			}
 		}
-		for (int j = 0; j < 8; j++) {
+		for (int j = 0; j < 10; j++) {
 			switch (gGameState) {
 				case 5:
 					gButtonNextPrev[j].eventHandler(event);
 					if (checkCollision(gButtonNextPrev[j].getButtonDims(), gMouse)) {
 						if (event.type == SDL_MOUSEBUTTONUP) {
 							gOption = gButtonNextPrev[j].getID();
-							//							cout<<gOption<<endl;
+//							cout << gOption << endl;
 						}
 						if (event.type == SDL_MOUSEWHEEL) {
 							if (event.wheel.y < 0) {
@@ -1130,7 +1154,7 @@ void handleEvents() {
 			case TOTAL_NUMBER_OF_BUTTONS: //No - get back to main menu
 				gGameState = 1;
 				break;
-			case 11:
+			case 12:
 				if (gSettingsFileContent[0] < 0) {
 					gSettingsFileContent[0] = 0;
 				}
@@ -1146,8 +1170,11 @@ void handleEvents() {
 				if (gSettingsFileContent[3] <= 1) {
 					gSettingsFileContent[3] = 1;
 				}
+				if (gSettingsFileContent[4] <= 1) {
+					gSettingsFileContent[4] = 1;
+				}
 				gSettingsFile.open("./assets/settings.txt", ios::out);
-				for (int i = 0; i < 4; i++) {
+				for (int i = 0; i < 5; i++) {
 					gSettingsFile << gSettingsFileContent[i] << "\t" << fSettingsInstructions[i] << endl;
 				}
 				gSettingsFile.close();
@@ -1267,33 +1294,77 @@ void handleEvents() {
 					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
 					//		gEnemy[i].resetLength();
 				}
-				break;
-			case 12:
 				gGameState = 1;
 				break;
 			case 13:
-				gSettingsFileContent[0]--;
-				break;
-			case 17:
-				gSettingsFileContent[0]++;
+				gSettingsFile.open("./assets/settings.txt", ios::in);
+				if (gSettingsFile.is_open()) {
+					gPathToLangFile.str("");
+					gPathToLangFile << "./assets/lang/";
+					{
+						int i = 0;
+						while (getline(gSettingsFile, gTmpText, '/')) {
+							gSettingsFile.ignore(1024, '\n');
+							gSettingsFileContent[i] = stoi(gTmpText.c_str());
+							i++;
+						}
+					}
+					gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
+					gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
+					if (gLangFile.is_open()) {
+						int i = 0;
+						while (i < 17) {
+							getline(gLangFile, gAllTexts[i]);
+							i++;
+						}
+						gSettingsFile.close();
+						gLangFile.close();
+					} else {
+						gSettingsFile.close();
+						gLangFile.close();
+						cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+						gContinue = false;
+					}
+					gSettingsFile.close();
+					gLangFile.close();
+				} else {
+					gSettingsFile.close();
+					gLangFile.close();
+					cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+					cout << "Unable to load settings file!\n";
+					gContinue = false;
+				}
+				gGameState = 1;
 				break;
 			case 14:
-				gSettingsFileContent[1]--;
-				break;
-			case 18:
-				gSettingsFileContent[1]++;
-				break;
-			case 15:
-				gSettingsFileContent[2]--;
+				gSettingsFileContent[0]--;
 				break;
 			case 19:
-				gSettingsFileContent[2]++;
+				gSettingsFileContent[0]++;
 				break;
-			case 16:
-				gSettingsFileContent[3]--;
+			case 15:
+				gSettingsFileContent[1]--;
 				break;
 			case 20:
+				gSettingsFileContent[1]++;
+				break;
+			case 16:
+				gSettingsFileContent[2]--;
+				break;
+			case 21:
+				gSettingsFileContent[2]++;
+				break;
+			case 17:
+				gSettingsFileContent[3]--;
+				break;
+			case 22:
 				gSettingsFileContent[3]++;
+				break;
+			case 18:
+				gSettingsFileContent[4]--;
+				break;
+			case 23:
+				gSettingsFileContent[4]++;
 				break;
 		}
 	}

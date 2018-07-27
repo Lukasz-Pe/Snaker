@@ -8,6 +8,7 @@ Zmień język
 Ilość botów
 Ilość owoców
 Ilość dopalaczy
+Prędkość węża
 Zapisz zmiany
 Powrót do menu głównego (bez zapisu)
 Koniec gry?

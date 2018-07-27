@@ -8,6 +8,7 @@ Change language
 Bots quantity
 Fruits quantity
 Powerups quantity
+Snake speed
 Save changes
 Back to main menu (no saving)
 End of game?
@@ -15,4 +16,3 @@ Game paused
 Game over :(
 Press R to restart or Q/ESC to exit
 Options
-After saving restart the game in order for the changes to take effect.

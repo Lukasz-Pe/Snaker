@@ -18,7 +18,7 @@ public:
 	void addLength();
 	void eventHandler(SDL_Event event, Win *vWin=NULL, SDL_Rect *vCam=NULL);
 	void setStartPos(int sPosX, int sPosY);
-	void move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double timeStep=1.0);
+	void move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double *timeStep=NULL);
 	void render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL);
 	void setCamera(const int &vLWidth, const int &vLHeight, SDL_Rect &vCam);
 	bool collectFruit(Dot &vFruit);
@@ -35,6 +35,7 @@ public:
 	void updateTail(LTexture &vTex);
 	bool hasActivePowerup[5]={false,false,false,false,false};
 	int powerupActivationTimestamp[5]={0,0,0,0,0};
+	void changeSpeed(int &speed);
 	virtual ~Snake();
 	SDL_Point mNewFruitPos;
 	SDL_Rect mHeadBox;

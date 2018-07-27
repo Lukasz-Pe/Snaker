@@ -85,9 +85,9 @@ void Dot::move(Win &vWin) {
 	}
 }
 
-void Dot::moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[]) {
-	mBox.x += mVelX;
-	mBox.y += mVelY;
+void Dot::moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[], double timeStep) {
+	mBox.x += mVelX*timeStep;
+	mBox.y += mVelY*timeStep;
 	if ((mBox.x < 0) || ((mBox.x + mDotRadius) > LevelWidht)
 	/*|| touchesWall(mBox, vTiles)*/) {
 		mBox.x -= mVelX;

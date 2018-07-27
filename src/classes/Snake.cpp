@@ -12,7 +12,7 @@ Snake::Snake() {
 	mHeadX = 0;
 	mHeadY = 0;
 	mHeadAngle = 0.0;
-	mSpeed = 3;
+	mSpeed = 300;
 	mPrevHeadX = 0;
 	mPrevHeadY = 0;
 	mPrevHeadAngle = 0;
@@ -20,7 +20,7 @@ Snake::Snake() {
 	mTargetY = 0;
 	hasMouseFocus = false;
 	mTemp = mSpeed;
-	mVeryFast = 3 * mSpeed;
+	mVeryFast = 2 * mSpeed;
 	mHeadBox= {0,0,20,20};
 	mCollectDist = 10;
 	mCollectAngle = 120;
@@ -33,6 +33,12 @@ Snake::Snake() {
 	yFruitToHead = 0;
 	mAngleFruitToHead = 0;
 	mCollectDistanceMultiplier = 4;
+}
+
+void Snake::changeSpeed(int &speed){
+	mSpeed = speed;
+	mTemp = speed;
+	mVeryFast = 2 * speed;
 }
 
 void Snake::collectDistanceMultiplier(int dist) {
@@ -164,7 +170,7 @@ void Snake::eventHandler(SDL_Event event, Win *vWin, SDL_Rect *vCam) {
 	}
 	if (event.type == SDL_MOUSEBUTTONDOWN && (SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(1))) {
 
-		mSpeed = 10;
+		mSpeed = mVeryFast;
 	}
 	if (event.type == SDL_MOUSEBUTTONUP) {
 		mSpeed = mTemp;
@@ -194,12 +200,15 @@ void Snake::eventHandler(SDL_Event event, Win *vWin, SDL_Rect *vCam) {
 	}
 }
 
-void Snake::move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double timeStep) {
+void Snake::move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double *timeStep) {
+	if(timeStep==NULL){
+		*timeStep=1.0;
+	}
 	mPrevHeadX = mHeadX;
 	mPrevHeadY = mHeadY;
 	mPrevHeadAngle = mHeadAngle;
-	mHeadY -= mSpeed * cos(mHeadAngle * (M_PI / 180.0)) * timeStep;
-	mHeadX += mSpeed * sin(mHeadAngle * (M_PI / 180.0)) * timeStep;
+	mHeadY -= mSpeed * cos(mHeadAngle * (M_PI / 180.0)) * *timeStep;
+	mHeadX += mSpeed * sin(mHeadAngle * (M_PI / 180.0)) * *timeStep;
 	if (mTailLength > 0) {
 		updateTail(vTexTail);
 	}
