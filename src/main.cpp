@@ -325,7 +325,7 @@ int main(int argc, char* args[]) {
 		gEnemy[i].changeSpeed(gSettingsFileContent[4]);
 	}
 	while (gContinue) {
-//		HERE RESIDES GAME MENU +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+//		EVENTS HANDLER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		handleEvents();
 		if (gSettingsFileContent[0] < 0) {
 			gSettingsFileContent[0] = 0;
@@ -400,6 +400,9 @@ int main(int argc, char* args[]) {
 		}
 //		HERE IS GAME MENU ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		if (gGameState >= 1) {
+			if(gGameState!=3){
+				frameTimer.stop();
+			}
 			if (gRenderScaleX < 1 && gRenderScaleY < 1) {
 				tempScale = gRenderScaleX;
 				gRenderScaleX = 1.0;
@@ -427,6 +430,7 @@ int main(int argc, char* args[]) {
 					break;
 //					PAUSE DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				case 3:
+					frameTimer.pause();
 					SDL_RenderFillRect(gRenderer, &gBoxPause);
 					gLTPause.render(gBoxPause.x, gBoxPause.y, gWindow);
 					break;
@@ -936,6 +940,7 @@ void powerupCheck(Snake &vSnake, bool render) {
 					break;
 				case 2:
 					vSnake.collectDistanceMultiplier(4);
+					vSnake.setCollectAngle(120);
 					break;
 				case 3:
 					break;
@@ -964,7 +969,8 @@ void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 		case 27:
 			vSnake.powerupActivationTimestamp[2] = gTimer + MAX_POWERUP_TIME[2];
 			vSnake.hasActivePowerup[2] = true;
-			vSnake.collectDistanceMultiplier(12);
+			vSnake.collectDistanceMultiplier(16);
+			vSnake.setCollectAngle(60);
 			break;
 		case 28:
 			vSnake.powerupActivationTimestamp[3] = gTimer + MAX_POWERUP_TIME[3];

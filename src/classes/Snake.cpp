@@ -35,6 +35,10 @@ Snake::Snake() {
 	mCollectDistanceMultiplier = 4;
 }
 
+void Snake::setCollectAngle(int angle){
+	mCollectAngle=angle;
+}
+
 void Snake::changeSpeed(int &speed){
 	mSpeed = speed;
 	mTemp = speed;

@@ -39,6 +39,7 @@ public:
 	virtual ~Snake();
 	SDL_Point mNewFruitPos;
 	SDL_Rect mHeadBox;
+	void setCollectAngle(int angle);
 private:
 	unsigned int mTailLength, mSpeed, mTemp, mVeryFast;
 	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist, mCollectAngle,xHeadToFruit,yHeadToFruit, mAngleHeadToFruit, mMinCollectAngle,mMaxCollectAngle, xFruitToHead, yFruitToHead, mAngleFruitToHead, mCollectDistanceMultiplier;
