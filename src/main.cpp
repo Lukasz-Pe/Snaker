@@ -1189,8 +1189,8 @@ void handleEvents() {
 				gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
 				gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
 				if (gLangFile.is_open()) {
-					int i = 0;
-					while (i < 17) {
+					unsigned int i = 0;
+					while (i < sizeof(gAllTexts)/sizeof(string)) {
 						getline(gLangFile, gAllTexts[i]);
 						i++;
 					}
@@ -1318,8 +1318,8 @@ void handleEvents() {
 					gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
 					gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
 					if (gLangFile.is_open()) {
-						int i = 0;
-						while (i < 17) {
+						unsigned int i = 0;
+						while (i < sizeof(gAllTexts)/sizeof(string)) {
 							getline(gLangFile, gAllTexts[i]);
 							i++;
 						}
