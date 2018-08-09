@@ -33,7 +33,6 @@ vector<int> gCurrentTime, gTimeElapsed, gEnemySprite, gEnePosX, gEnePosY;
 vector<vector<int> > gEnemyToTargetDistance(2, vector<int>());
 vector<SDL_Point> gEnemyStartPos;
 vector<Snake> gEnemy;
-
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
 double timeStep;
@@ -262,6 +261,7 @@ int main(int argc, char* args[]) {
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
 	gSnake.setStartPos(gLvlWidth * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, gLvlHeight * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
 //	gSnake.resetLength();
+//	PLACING ENEMIES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	for (int i = 0; i < gEnemyQuantity; i++) {
 		gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
 		gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
@@ -271,6 +271,7 @@ int main(int argc, char* args[]) {
 	}
 	gWindow.setTitle("Snaker");
 	gRenderer = gWindow.getRenderer();
+//	PLACING FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	for (int i = 0; i < gFruitsQuantity; i++) {
 		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
