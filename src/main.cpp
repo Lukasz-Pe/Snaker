@@ -262,16 +262,18 @@ int main(int argc, char* args[]) {
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
 	gSnake.setStartPos(gLvlWidth * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, gLvlHeight * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
 //	gSnake.resetLength();
-	for (int i = 0; i < gEnemyQuantity; i++) {
+//	PLACING ENEMIES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	/*for (int i = 0; i < gEnemyQuantity; i++) {
 		gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
 		gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
 		gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
 		gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
 //		gEnemy[i].resetLength();
-	}
+	}*/
 	gWindow.setTitle("Snaker");
 	gRenderer = gWindow.getRenderer();
-	for (int i = 0; i < gFruitsQuantity; i++) {
+//	PLACING FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	/*for (int i = 0; i < gFruitsQuantity; i++) {
 		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
 		if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
@@ -279,7 +281,7 @@ int main(int argc, char* args[]) {
 		} else {
 			gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 		}
-	}
+	}*/
 	int tilePosX = 0, tilePosY = 0;
 	for (int i = 0; i < gTotalTiles; i++) {
 		tileSet[i] = new Tile(tilePosX, tilePosY, gLTLevelTexture.getWidth(), gLTLevelTexture.getHeight());
