@@ -364,8 +364,8 @@ int main(int argc, char* args[]) {
 			gScreenWidth = gWindow.getWidth();
 			gScreenHeight = gWindow.getHeight();
 //			cout<<gScreenWidth<<"x"<<gScreenHeight<<endl;
-			gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
-			gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+//			gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+//			gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
 			gCamera.w = gScreenWidth;
 			gCamera.h = gScreenHeight;
 			gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
@@ -411,8 +411,8 @@ int main(int argc, char* args[]) {
 				gRenderScaleY = gRenderScaleX;
 //				gCamera.w = (int) (gScreenWidth / gRenderScaleX);
 //				gCamera.w = (int) (gScreenHeight / gRenderScaleY);
-				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
-				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+//				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+//				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
 				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
 				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
 			}
@@ -469,8 +469,8 @@ int main(int argc, char* args[]) {
 				gRenderScaleX = tempScale;
 				gRenderScaleY = tempScale;
 				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
-				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
-				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+//				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+//				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
 				gLvlWidth += 50;
 				gLvlHeight += 50;
 				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
@@ -798,8 +798,8 @@ void fruitCollisions() {
 			if (gSpriteNum[i] == 29) {
 				SDL_RenderSetScale(gRenderer, 0.95, 0.95);
 				SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
-				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX) + 50;
-				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY) + 50;
+//				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX) + 50;
+//				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY) + 50;
 				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
 				gLvlWidth -= 50;
 				gLvlHeight -= 50;
