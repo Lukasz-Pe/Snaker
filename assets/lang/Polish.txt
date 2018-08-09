@@ -1,5 +1,6 @@
 Start :D (s)
 Restartuj grę (r)
+Gra sieciowa (i)
 Opcje (o)
 Zakończ grę :( (q/ESC)
 Muszę... :( (t)
