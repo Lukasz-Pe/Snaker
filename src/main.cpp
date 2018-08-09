@@ -464,6 +464,7 @@ int main(int argc, char* args[]) {
 		}
 //		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		switch (gGameState) {
+//			OFFLINE GAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			case 0:
 				gTimer = stepTimer.getSeconds<int>();
 				if (tempScale < 1) {
@@ -540,7 +541,31 @@ int main(int argc, char* args[]) {
 				gLTScoreText.render(0, 0, gWindow);
 				gWindow.render();
 				break;
+//			ONLINE GAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			case -1:
+				gTimer = stepTimer.getSeconds<int>();
+				if (tempScale < 1) {
+					gRenderScaleX = tempScale;
+					gRenderScaleY = tempScale;
+					SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+					//					gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+					//					gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+					gLvlWidth += 50;
+					gLvlHeight += 50;
+					gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+					gLvlWidth -= 50;
+					gLvlHeight -= 50;
+				}
+//			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				//TODO Write scoreboard for network game.
+				if (gCurrentScore != gSnake.getLength() || gCurrentScore >= 0) {
+					gScore.str("");
+					gScore << " Length: " << gSnake.getLength();
+					gLTScoreText.loadFromText(gScore.str().c_str(), gTextColor, gFont, gWindow);
+					gCurrentScore = gSnake.getLength();
+					gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
+					gLTScoreText.setHeight(TEXT_SIZE);
+				}
 				break;
 		}
 	}
