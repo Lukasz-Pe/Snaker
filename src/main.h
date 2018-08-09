@@ -25,6 +25,7 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_thread.h>
+#include <SDL2/SDL_net.h>
 //--------------------------------namespace
 using namespace std;
 

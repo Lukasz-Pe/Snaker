@@ -60,7 +60,7 @@ int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruit
 // fstream vars
 fstream gSettingsFile, gLangFile, gFileLangList;
 vector<string> gLangList;
-string gAllTexts[TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+5], gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
+string gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5], gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
 stringstream gPathToLangFile, gTextToShow;
 int gSettingsFileContent[5], mOptsButtonsWidth[10];
 // POWERUPS PARAMS
@@ -1167,7 +1167,7 @@ void handleEvents() {
 			case TOTAL_NUMBER_OF_BUTTONS: //No - get back to main menu
 				gGameState = 1;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU-1):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU - 1):
 				if (gSettingsFileContent[0] < 0) {
 					gSettingsFileContent[0] = 0;
 				}
@@ -1309,7 +1309,7 @@ void handleEvents() {
 				}
 				gGameState = 1;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU):
 				gSettingsFile.open("./assets/settings.txt", ios::in);
 				if (gSettingsFile.is_open()) {
 					gPathToLangFile.str("");
@@ -1349,34 +1349,34 @@ void handleEvents() {
 				}
 				gGameState = 1;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+1):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 1):
 				gSettingsFileContent[0]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+1+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 1 + 5):
 				gSettingsFileContent[0]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+2):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 2):
 				gSettingsFileContent[1]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+2+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 2 + 5):
 				gSettingsFileContent[1]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+3):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 3):
 				gSettingsFileContent[2]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+3+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 3 + 5):
 				gSettingsFileContent[2]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+4):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 4):
 				gSettingsFileContent[3]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+4+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 4 + 5):
 				gSettingsFileContent[3]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5):
 				gSettingsFileContent[4]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+5+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5 + 5):
 				gSettingsFileContent[4]++;
 				break;
 		}
@@ -1395,6 +1395,9 @@ bool initSDL(Win *window) {
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
 		printf("Warning: Linear texture filtering not enabled!");
 		return false;
+	}
+	if (SDLNet_Init() < 0) {
+		std::cout << "SDLNet_Init: %s\n" << SDLNet_GetError() << std::endl;
 	}
 	window->setWidth(gScreenWidth);
 	window->setHeight(gScreenHeight);
