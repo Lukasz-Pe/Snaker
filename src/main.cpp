@@ -1424,7 +1424,7 @@ void close(Win *window) {
 	gLTExitQuestion.free();
 	gLTMenuBackground.free();
 	gLTTitleText.free();
-
+	SDLNet_Quit();
 	if (window != NULL) {
 		window->close();
 	}
