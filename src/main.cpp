@@ -14,7 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 4, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
+int const MULTIPLIER = 1, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
 int gPowerUpsQuantity, gFruitsQuantity, gEnemyQuantity;
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
@@ -37,7 +37,7 @@ bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 7, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
 double timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
-int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1;
+int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = 10000/*MULTIPLIER * gScreenWidth*/, gLvlHeight = 10000/*MULTIPLIER * gScreenHeight*/, gCurrentScore = 0, gOption = -1, gGameState = 1;
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemy1Pos, gEnemy2Pos, gSnakePos;
 stringstream gScore, gTimeLeft;
@@ -257,8 +257,8 @@ int main(int argc, char* args[]) {
 		gButtonNextPrev[i].setButtonText("<-", gWindow, gFont, TEXT_SIZE, 0);
 		gButtonNextPrev[i + 5].setButtonText("+>", gWindow, gFont, TEXT_SIZE, 0);
 	}
-	int gTotalTiles = 20 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
-	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
+	int gTotalTiles = 3 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
+	int gTotalMenuTiles = 3 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
 	gSnake.setStartPos(gLvlWidth * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, gLvlHeight * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
 //	gSnake.resetLength();
@@ -327,6 +327,7 @@ int main(int argc, char* args[]) {
 		gEnemy[i].changeSpeed(gSettingsFileContent[4]);
 	}
 	while (gContinue) {
+//		cout<<gLvlWidth<<"x"<<gLvlHeight<<endl;
 //		EVENTS HANDLER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		handleEvents();
 		if (gSettingsFileContent[0] < 0) {
@@ -473,11 +474,11 @@ int main(int argc, char* args[]) {
 					SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
 //					gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
 //					gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
-					gLvlWidth += 50;
-					gLvlHeight += 50;
+//					gLvlWidth += 50;
+//					gLvlHeight += 50;
 					gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
-					gLvlWidth -= 50;
-					gLvlHeight -= 50;
+//					gLvlWidth -= 50;
+//					gLvlHeight -= 50;
 				}
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				gameReset(gReset);
@@ -550,11 +551,11 @@ int main(int argc, char* args[]) {
 					SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
 					//					gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
 					//					gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
-					gLvlWidth += 50;
-					gLvlHeight += 50;
+//					gLvlWidth += 50;
+//					gLvlHeight += 50;
 					gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
-					gLvlWidth -= 50;
-					gLvlHeight -= 50;
+//					gLvlWidth -= 50;
+//					gLvlHeight -= 50;
 				}
 //			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				//TODO Write scoreboard for network game.
@@ -829,8 +830,8 @@ void fruitCollisions() {
 //				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX) + 50;
 //				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY) + 50;
 				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
-				gLvlWidth -= 50;
-				gLvlHeight -= 50;
+//				gLvlWidth -= 50;
+//				gLvlHeight -= 50;
 			}
 			if (gSpriteNum[i] < 25) {
 				gSnake.addLength();
