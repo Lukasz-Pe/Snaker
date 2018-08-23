@@ -2,7 +2,7 @@
  * Timer.h
  *
  *  Created on: 7 lip 2018
- *      Author: lukasz
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef SRC_TIMER_H_

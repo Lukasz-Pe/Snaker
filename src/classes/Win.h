@@ -2,7 +2,7 @@
  * T39-Win.h
  *
  *  Created on: 25.06.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef SRC_T49_WIN_H_

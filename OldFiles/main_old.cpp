@@ -543,7 +543,7 @@ int main(int argc, char* args[]) {
 				gWindow.render();
 				break;
 //			ONLINE GAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			case -1:
+				case -1:
 				gTimer = stepTimer.getSeconds<int>();
 				if (tempScale < 1) {
 					gRenderScaleX = tempScale;
@@ -567,9 +567,13 @@ int main(int argc, char* args[]) {
 					gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
 					gLTScoreText.setHeight(TEXT_SIZE);
 				}
+
+				gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
+				gLTScoreText.render(0, 0, gWindow);
+				gWindow.render();
 				break;
+			}
 		}
-	}
 
 	for (int i = 0; i < gTotalTiles; i++) {
 		delete tileSet[i];

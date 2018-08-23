@@ -2,7 +2,7 @@
  * Menu.cpp
  *
  *  Created on: 5 lip 2018
- *      Author: lukasz
+ *      Author: Łukasz Pękalski
  */
 
 #include "Menu.h"

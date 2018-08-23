@@ -2,7 +2,7 @@
  * Snake.cpp
  *
  *  Created on: 03.07.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #include "Snake.h"

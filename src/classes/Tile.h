@@ -2,7 +2,7 @@
  * T39-Tile.h
  *
  *  Created on: 26.06.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef SRC_T49_TILE_H_

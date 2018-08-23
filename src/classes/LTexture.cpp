@@ -2,7 +2,7 @@
  * T39-LTexture.cpp
  *
  *  Created on: 25.06.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #include "LTexture.h"

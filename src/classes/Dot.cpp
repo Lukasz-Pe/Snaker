@@ -2,7 +2,7 @@
  * T39-Dot.cpp
  *
  *  Created on: 25 cze 2018
- *      Author: lukasz
+ *      Author: Łukasz Pękalski
  */
 
 #include "Dot.h"

@@ -2,7 +2,7 @@
  * T39-Dot.h
  *
  *  Created on: 25 cze 2018
- *      Author: lukasz
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef T39_DOT_H_
