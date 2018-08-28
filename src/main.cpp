@@ -65,8 +65,8 @@ string gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5], gTmpT
 stringstream gPathToLangFile, gTextToShow;
 int gSettingsFileContent[5], mOptsButtonsWidth[10];
 // POWERUPS PARAMS
-void powerupCheck(Snake &vSnake, bool render = false);
-void gameReset(bool &reset);
+//void powerupCheck(Snake &vSnake, bool render = false);
+//void gameReset(bool &reset);
 void fTextToShow(int &i, int xpos, int ypos, string &vText);
 
 int main(int argc, char* args[]) {
@@ -262,8 +262,206 @@ int main(int argc, char* args[]) {
 	int gTotalTiles = 3 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
 	int gTotalMenuTiles = 3 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
+	for (unsigned int i = 0; i < gPlayer.size(); i++) {
+		gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
+		gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
+		gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
+	}
+	gWindow.setTitle("Snaker");
+	gRenderer = gWindow.getRenderer();
+//	PLACING FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	for (int i = 0; i < gFruitsQuantity; i++) {
+		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
+		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
+		if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
+			gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
+		} else {
+			gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
+		}
+	}
+//	BACKGROUND POSITIONING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	int tilePosX = 0, tilePosY = 0;
+	for (int i = 0; i < gTotalTiles; i++) {
+		tileSet[i] = new Tile(tilePosX, tilePosY, gLTLevelTexture.getWidth(), gLTLevelTexture.getHeight());
+		tilePosX += gLTLevelTexture.getWidth();
+		if (tilePosX >= 1.5 * gLvlWidth) {
+			tilePosX = 0;
+			tilePosY += gLTLevelTexture.getHeight();
+		}
+	}
+	tilePosX = 0;
+	tilePosY = 0;
+	for (int i = 0; i < gTotalMenuTiles; i++) {
+		gMenuBackground[i] = new Tile(tilePosX, tilePosY, gLTMenuBackground.getWidth(), gLTMenuBackground.getHeight());
+		tilePosX += gLTMenuBackground.getWidth();
+		if (tilePosX >= 1.5 * gScreenWidth) {
+			tilePosX = 0;
+			tilePosY += gLTMenuBackground.getHeight();
+		}
+	}
+//TEXT POSITIONING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	gBoxExitQuestion.x = ((gWindow.getWidth() - gLTExitQuestion.getWidth()) / 2);
+	gBoxExitQuestion.y = (gWindow.getHeight() - gBoxExitQuestion.h) / 2;
+	gBoxExitQuestion.h = 1.25 * gLTExitQuestion.getHeight() + gButtons[4].getButtonDims().h;
+	gBoxExitQuestion.w = gLTExitQuestion.getWidth();
+	gBoxPause.x = (gWindow.getWidth() - gLTPause.getWidth()) / 2;
+	gBoxPause.y = (gWindow.getHeight() - gLTPause.getHeight()) / 2;
+	gBoxPause.w = gLTPause.getWidth();
+	gBoxPause.h = gLTPause.getHeight();
+	gGameOverBox.x = (gWindow.getWidth() - gLTPressToReset.getWidth()) / 2;
+	gGameOverBox.y = (gWindow.getHeight() - gLTGameOver.getHeight()) / 2;
+	gGameOverBox.w = gLTPressToReset.getWidth();
+	gGameOverBox.h = 1.1 * (gLTGameOver.getHeight() + gLTPressToReset.getHeight());
+	stepTimer.start();
+	for (int i = 0; i <= gEnemyQuantity; i++) {
+		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
+		gPlayerToTargetDistance[1][i] = i;
+	}
+	for (int i = 1; i < 5; i++) {
+		gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
+	}
+	gTmpVal = gSettingsFileContent[4];
+	for (int i = 0; i <= gEnemyQuantity; i++) {
+		gPlayer[i].changeSpeed(gSettingsFileContent[4]);
+	}
+// MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	while (gContinue) {
+//		EVENTS HANDLER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		handleEvents();
+		if (gSettingsFileContent[0] < 0) {
+			gSettingsFileContent[0] = 0;
+		}
+		if ((unsigned) gSettingsFileContent[0] > gLangList.size() - 1) {
+			gSettingsFileContent[0] = gLangList.size() - 1;
+		}
+		if (gSettingsFileContent[1] <= 0) {
+			gSettingsFileContent[1] = 0;
+		}
+		if (gSettingsFileContent[2] <= 2) {
+			gSettingsFileContent[2] = 2;
+		}
+		if (gSettingsFileContent[3] <= 1) {
+			gSettingsFileContent[3] = 1;
+		}
+		if (gSettingsFileContent[4] <= 1) {
+			gSettingsFileContent[4] = 1;
+		}
+		gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]];
+		for (int i = 1; i < 5; i++) {
+			gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
+		}
+		if (gTmpVal != gSettingsFileContent[4]) {
+			gTmpVal = gSettingsFileContent[4];
+			for (int i = 0; i <= gEnemyQuantity; i++) {
+				gPlayer[i].changeSpeed(gSettingsFileContent[4]);
+			}
+		}
+//		ACTIONS TAKEN WHEN WINDOW DIMS ARE CHANGED >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+		if (gScreenWidth != gWindow.getWidth() || gScreenHeight != gWindow.getHeight()) {
+			gScreenWidth = gWindow.getWidth();
+			gScreenHeight = gWindow.getHeight();
+			gCamera.w = gScreenWidth;
+			gCamera.h = gScreenHeight;
+			gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+			gBoxPause.x = (gWindow.getWidth() - gLTPause.getWidth()) / 2;
+			gBoxPause.y = (gWindow.getHeight() - gLTPause.getHeight()) / 2;
+			gBoxExitQuestion.x = ((gWindow.getWidth() - gLTExitQuestion.getWidth()) / 2);
+			gBoxExitQuestion.y = (gWindow.getHeight() - gBoxExitQuestion.h) / 2;
+			gGameOverBox.x = (gWindow.getWidth() - gLTPressToReset.getWidth()) / 2;
+			gGameOverBox.y = (gWindow.getHeight() - gLTGameOver.getHeight()) / 2;
+			tilePosX = 0;
+			tilePosY = 0;
+			for (int i = 0; i < gTotalTiles; i++) {
+				tileSet[i]->setNewPos(tilePosX, tilePosY);
+				tilePosX += gLTLevelTexture.getWidth();
+				if (tilePosX >= gLvlWidth) {
+					tilePosX = 0;
+					tilePosY += gLTLevelTexture.getHeight();
+				}
+			}
+			tilePosX = 0;
+			tilePosY = 0;
+			for (int i = 0; i < gTotalMenuTiles; i++) {
+				gMenuBackground[i]->setNewPos(tilePosX, tilePosY);
+				tilePosX += gLTMenuBackground.getWidth();
+				if (tilePosX >= gScreenWidth) {
+					tilePosX = 0;
+					tilePosY += gLTMenuBackground.getHeight();
+				}
+			}
+			for (int i = 0; i < gFruitsQuantity; i++) {
+				x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
+				y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
+			}
+		}
+//		HERE IS GAME MENU ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		if (gGameState >= 1) {
+			if (gGameState != 3) {
+				frameTimer.stop();
+			}
+			if (gRenderScaleX < 1 && gRenderScaleY < 1) {
+				tempScale = gRenderScaleX;
+				gRenderScaleX = 1.0;
+				gRenderScaleY = gRenderScaleX;
+				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+			}
+			gWindow.prepareRenderer(0, 0, 0);
+//			GETTING MENU BACKGROUND ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < gTotalMenuTiles; i++) {
+				gMenuBackground[i]->render(gMenuCamera, gWindow, gLTMenuBackground);
+			}
+			gLTTitleText.render((gWindow.getWidth() - gLTTitleText.getWidth()) / 2, 0, gWindow);
+			switch (gGameState) {
+//				QUIT DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 2:
+					SDL_RenderFillRect(gRenderer, &gBoxExitQuestion);
+					gLTExitQuestion.render(gBoxExitQuestion.x, gBoxExitQuestion.y, gWindow);
+					gButtons[MAIN_MENU_OPTS].render(gBoxExitQuestion.x, gBoxExitQuestion.y + 1.25 * gLTExitQuestion.getHeight(), gWindow);
+					gButtons[MAIN_MENU_OPTS + 1].render(gBoxExitQuestion.x + gLTExitQuestion.getWidth() - gButtons[3].getButtonDims().w, gBoxExitQuestion.y + 1.25 * gLTExitQuestion.getHeight(), gWindow);
+					break;
+//					PAUSE DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 3:
+					frameTimer.pause();
+					SDL_RenderFillRect(gRenderer, &gBoxPause);
+					gLTPause.render(gBoxPause.x, gBoxPause.y, gWindow);
+					break;
+//					GAME OVER DIALOGUE >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 4:
+					SDL_RenderFillRect(gRenderer, &gGameOverBox);
+					gLTGameOver.render(gGameOverBox.x, gGameOverBox.y, gWindow);
+					gLTPressToReset.render(gGameOverBox.x + gGameOverBox.w - gLTPressToReset.getWidth(), gGameOverBox.y + gGameOverBox.h - gLTPressToReset.getHeight(), gWindow);
+					break;
+//					OPTIONS MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				case 5:
+					gLTOptionsText.render((gWindow.getWidth() - gLTOptionsText.getWidth()) / 2, 1.25 * gLTTitleText.getHeight(), gWindow);
+					for (int i = 0; i < (POSITIONS_IN_OPTIONS_MENU - 2); i++) {
+						gOptionButtons[i].render((gLTOptionsText.getPosX() + 0.5 * gLTOptionsText.getWidth() - mOptsButtonsWidth[i] / 2), gWindow.getHeight() / 3 + i * gOptionButtons[i].getButtonDims().h, gWindow);
+						fTextToShow(i, gOptionButtons[i].getButtonDims().x + gOptionButtons[i].getButtonDims().w + 80, gOptionButtons[i].getButtonDims().y, gChangeableOptionsPos[i]);
+					}
+					gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].render((gWindow.getWidth() - (gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().w + 100 + gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 1].getButtonDims().w)) / 2, gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU - 2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().h, gWindow);
+					gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 1].render(((gWindow.getWidth() - (gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().w + 100 + gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 1].getButtonDims().w)) / 2) + (gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().w + 100), gWindow.getHeight() / 3 + (POSITIONS_IN_OPTIONS_MENU - 2) * gOptionButtons[POSITIONS_IN_OPTIONS_MENU - 2].getButtonDims().h, gWindow);
 
+					break;
+//					MAIN MENU >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+				default:
+					for (int i = 0; i < MAIN_MENU_OPTS; i++) {
+						gButtons[i].render((gWindow.getWidth() - gButtons[i].getButtonDims().w) / 2, gWindow.getHeight() / 3 + i * gButtons[i].getButtonDims().h, gWindow);
+					}
+					break;
+			}
+			gWindow.render();
+		}
+//		HERE IS END OF GAME MENU AND START OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		if(gGameState==0){
+
+		}
+//		END OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+	}
+// END OF MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+return 0;
 }
+
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++EventHandler
 void handleEvents() {
 	if (gReset) {
@@ -341,7 +539,7 @@ void handleEvents() {
 			SDL_GetMouseState(&gMouse.x, &gMouse.y);
 		}
 		gWindow.eventHandler(event);
-		gSnake.eventHandler(event, &gWindow, &gCamera);
+		gPlayer[0].eventHandler(event, &gWindow, &gCamera);
 		for (int i = 0; i < (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU); i++) {
 			switch (gGameState) {
 				case 1:
@@ -547,28 +745,26 @@ void handleEvents() {
 				gAngle.clear();
 				gCurrentTime.clear();
 				gTimeElapsed.clear();
-				gEnemySprite.clear();
-				gEnemyStartPos.clear();
-				gEnemy.clear();
-				gEnemyToTargetDistance[0].clear();
-				gEnemyToTargetDistance[1].clear();
+				gPlayerSprite.clear();
+				gPlayerStartPos.clear();
+				gPlayer.clear();
+				gPlayerToTargetDistance[0].clear();
+				gPlayerToTargetDistance[1].clear();
 				for (int i = 0; i < gEnemyQuantity; i++) {
 					gAngle.push_back(0.0);
 					gCurrentTime.push_back(0);
 					gTimeElapsed.push_back(0);
-					gEnemySprite.push_back(0);
-					gEnemyStartPos.push_back( { 0, 0 });
-					gEnemy.push_back(Snake());
-					gEnemyToTargetDistance[0].push_back(0);
-					gEnemyToTargetDistance[1].push_back(0);
+					gPlayerSprite.push_back(0);
+					gPlayerStartPos.push_back( { 0, 0 });
+					gPlayer.push_back(Snake());
+					gPlayerToTargetDistance[0].push_back(0);
+					gPlayerToTargetDistance[1].push_back(0);
 				}
-				for (int i = 0; i < gEnemyQuantity; i++) {
-					gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
-					gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
-					gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
-					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
-					//		gEnemy[i].resetLength();
-				}
+				for (unsigned int i = 0; i < gPlayer.size(); i++) {
+						gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
+						gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
+						gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
+					}
 				gGameState = 1;
 				break;
 			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU):
@@ -643,4 +839,82 @@ void handleEvents() {
 				break;
 		}
 	}
+}
+// OPTIONS MENU STEERING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void fTextToShow(int &i, int xpos, int ypos, string &vText) {
+	gTextToShow.str("");
+	gTextToShow << vText.c_str();
+	gLTPosTxt.loadFromText(gTextToShow.str().c_str(), gTextNormalColor, gFont, gWindow);
+	gLTPosTxt.setHeight(gButtonNextPrev[0].getButtonDims().h);
+	gLTPosTxt.setWidth(1 * gLTPosTxt.getWidth());
+	gButtonNextPrev[i].render(xpos, ypos, gWindow);
+	gLTPosTxt.render(xpos + (1.25 * gButtonNextPrev[0].getButtonDims().w), ypos, gWindow);
+	gButtonNextPrev[i + 5].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
+	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
+}
+// COLLISION CHECKING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+bool checkCollision(SDL_Rect a, SDL_Rect b) {
+//The sides of the rectangles
+	int leftA, leftB;
+	int rightA, rightB;
+	int topA, topB;
+	int bottomA, bottomB;
+
+//Calculate the sides of rect A
+	leftA = a.x;
+	rightA = a.x + a.w;
+	topA = a.y;
+	bottomA = a.y + a.h;
+
+//Calculate the sides of rect B
+	leftB = b.x;
+	rightB = b.x + b.w;
+	topB = b.y;
+	bottomB = b.y + b.h;
+
+//If any of the sides from A are outside of B
+	if (bottomA <= topB) {
+		return false;
+	}
+
+	if (topA >= bottomB) {
+		return false;
+	}
+
+	if (rightA <= leftB) {
+		return false;
+	}
+
+	if (leftA >= rightB) {
+		return false;
+	}
+
+//If none of the sides from A are outside B
+	return true;
+}
+// SDL INITIALIZZATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+bool initSDL(Win *window) {
+	if (window == NULL) {
+		cout << "Window not set!\n";
+		return false;
+	}
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+		return false;
+	}
+	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
+		printf("Warning: Linear texture filtering not enabled!");
+		return false;
+	}
+	if (SDLNet_Init() < 0) {
+		std::cout << "SDLNet_Init: %s\n" << SDLNet_GetError() << std::endl;
+	}
+	window->setWidth(gScreenWidth);
+	window->setHeight(gScreenHeight);
+	if (!window->init()) {
+		printf("Failed to properly initialize Window object.");
+		return false;
+	}
+
+	return true;
 }
