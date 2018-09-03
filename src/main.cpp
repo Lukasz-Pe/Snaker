@@ -508,11 +508,6 @@ int main(int argc, char* args[]) {
 				gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
 				gLTScoreText.setHeight(TEXT_SIZE);
 			}
-//			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			//powerupCheck(gPlayer[0], true);
-			for (int i = 0; i <= gPlayerQuantity; i++) {
-				powerupCheck(gPlayer[i]);
-			}
 //			MOVEMENT AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gFrameTimer = frameTimer.getSeconds<double>();
 			gPlayer[0].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
@@ -521,6 +516,11 @@ int main(int argc, char* args[]) {
 				gPlayer[i].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
 			}
 			frameTimer.start();
+//			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			powerupCheck(gPlayer[0], true);
+			for (int i = 1; i <= gPlayerQuantity; i++) {
+				powerupCheck(gPlayer[i]);
+			}
 //			RENDERING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 			for (int i = 1; i <= gPlayerQuantity; i++) {
 				gPlayer[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gPlayerSprite[i]]);
