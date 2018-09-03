@@ -15,7 +15,7 @@
 #include "classes/Timer.h"
 
 int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000, gLvlHeight = gLvlWidth;
-int gPowerUpsQuantity, gFruitsQuantity, gEnemyQuantity;
+int gPowerUpsQuantity, gFruitsQuantity, gPlayerQuantity;
 
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
@@ -24,6 +24,7 @@ void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
 void print();
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
+void betweenPlayersCollisions();
 //----------------------------------------------------------------Deklaracje zmiennych
 //Fruits vars
 vector<int> gSpriteNum, x, y;
@@ -65,8 +66,9 @@ string gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5], gTmpT
 stringstream gPathToLangFile, gTextToShow;
 int gSettingsFileContent[5], mOptsButtonsWidth[10];
 // POWERUPS PARAMS
-//void powerupCheck(Snake &vSnake, bool render = false);
+void powerupCheck(Snake &vSnake, bool render = false);
 //void gameReset(bool &reset);
+
 void fTextToShow(int &i, int xpos, int ypos, string &vText);
 
 int main(int argc, char* args[]) {
@@ -136,7 +138,7 @@ int main(int argc, char* args[]) {
 	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
 	gChangeableOptionsPos[4] = to_string(gSettingsFileContent[4]);
 
-	gEnemyQuantity = gSettingsFileContent[1];
+	gPlayerQuantity = gSettingsFileContent[1];
 	gFruitsQuantity = gSettingsFileContent[2];
 	gPowerUpsQuantity = gSettingsFileContent[3];
 
@@ -156,7 +158,7 @@ int main(int argc, char* args[]) {
 		for (int i = 0; i < 5; i++) {
 			gScreenInfos[i] = gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
 		}
-		for (int i = 0; i <= gEnemyQuantity; i++) {
+		for (int i = 0; i <= gPlayerQuantity; i++) {
 			gAngle.push_back(0.0);
 			gCurrentTime.push_back(0);
 			gTimeElapsed.push_back(0);
@@ -313,7 +315,7 @@ int main(int argc, char* args[]) {
 	gGameOverBox.w = gLTPressToReset.getWidth();
 	gGameOverBox.h = 1.1 * (gLTGameOver.getHeight() + gLTPressToReset.getHeight());
 	stepTimer.start();
-	for (int i = 0; i <= gEnemyQuantity; i++) {
+	for (int i = 0; i <= gPlayerQuantity; i++) {
 		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gPlayerToTargetDistance[1][i] = i;
 	}
@@ -321,7 +323,7 @@ int main(int argc, char* args[]) {
 		gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
 	}
 	gTmpVal = gSettingsFileContent[4];
-	for (int i = 0; i <= gEnemyQuantity; i++) {
+	for (int i = 0; i <= gPlayerQuantity; i++) {
 		gPlayer[i].changeSpeed(gSettingsFileContent[4]);
 	}
 // MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -352,7 +354,7 @@ int main(int argc, char* args[]) {
 		}
 		if (gTmpVal != gSettingsFileContent[4]) {
 			gTmpVal = gSettingsFileContent[4];
-			for (int i = 0; i <= gEnemyQuantity; i++) {
+			for (int i = 0; i <= gPlayerQuantity; i++) {
 				gPlayer[i].changeSpeed(gSettingsFileContent[4]);
 			}
 		}
@@ -453,13 +455,85 @@ int main(int argc, char* args[]) {
 			gWindow.render();
 		}
 //		HERE IS END OF GAME MENU AND START OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-		if(gGameState==0){
+		if (gGameState == 0) {
+			gTimer = stepTimer.getSeconds<int>();
+			if (tempScale < 1) {
+				gRenderScaleX = tempScale;
+				gRenderScaleY = tempScale;
+				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+				//					gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+				//					gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+				//					gLvlWidth += 50;
+				//					gLvlHeight += 50;
+				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+				//					gLvlWidth -= 50;
+				//					gLvlHeight -= 50;
+			}
+//			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			gameReset(gReset);
+//			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			gWindow.prepareRenderer(0, 0, 0);
+			gPlayer[0].setCamera(gLvlWidth, gLvlHeight, gCamera);
+//			RENDERING OF BACKGROUND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < gTotalTiles; i++) {
+				tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
+			}
+//			SETTING STARTING POS OF FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 0; i < gFruitsQuantity; i++) {
+				if (gSpriteNum[i] < 25) {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				} else {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
+				}
+			}
 
-		}
+//			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+//			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			fruitCollisions();
+//			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			for (int i = 1; i < gPlayerQuantity; i++) {
+				if (gPlayer[i].getHeadBox().x < 1 || gPlayer[i].getHeadBox().y < 1 || (gPlayer[i].getHeadBox().w + gPlayer[i].getHeadBox().x) >= (gLvlWidth) || (gPlayer[i].getHeadBox().h + gPlayer[i].getHeadBox().y) >= (gLvlHeight)) {
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+				}
+			}
+			gCollision = false;
+//			COLLISIONS BETWEEN PLAYERS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			betweenPlayersCollisions();
+//			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			if (gCurrentScore != gPlayer[0].getLength() || gCurrentScore >= 0) {
+				gScore.str("");
+				gScore << " Length: " << gPlayer[0].getLength();
+				gLTScoreText.loadFromText(gScore.str().c_str(), gTextColor, gFont, gWindow);
+				gCurrentScore = gPlayer[0].getLength();
+				gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
+				gLTScoreText.setHeight(TEXT_SIZE);
+			}
+//			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			//powerupCheck(gPlayer[0], true);
+			for (int i = 0; i <= gPlayerQuantity; i++) {
+				powerupCheck(gPlayer[i]);
+			}
+//			MOVEMENT AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			gFrameTimer = frameTimer.getSeconds<double>();
+			gPlayer[0].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
+			for (int i = 1; i <= gPlayerQuantity; i++) {
+				gPlayer[i].setAngle(gAngle[i]);
+				gPlayer[i].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
+			}
+			frameTimer.start();
+//			RENDERING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+			for (int i = 1; i <= gPlayerQuantity; i++) {
+				gPlayer[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gPlayerSprite[i]]);
+			}
+
+			gPlayer[0].render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
+			gLTScoreText.render(0, 0, gWindow);
+			gWindow.render();
 //		END OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		}
 	}
 // END OF MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-return 0;
+	return 0;
 }
 
 //++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++EventHandler
@@ -741,7 +815,7 @@ void handleEvents() {
 						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 					}
 				}
-				gEnemyQuantity = gSettingsFileContent[1];
+				gPlayerQuantity = gSettingsFileContent[1];
 				gAngle.clear();
 				gCurrentTime.clear();
 				gTimeElapsed.clear();
@@ -750,7 +824,7 @@ void handleEvents() {
 				gPlayer.clear();
 				gPlayerToTargetDistance[0].clear();
 				gPlayerToTargetDistance[1].clear();
-				for (int i = 0; i < gEnemyQuantity; i++) {
+				for (int i = 0; i < gPlayerQuantity; i++) {
 					gAngle.push_back(0.0);
 					gCurrentTime.push_back(0);
 					gTimeElapsed.push_back(0);
@@ -761,10 +835,10 @@ void handleEvents() {
 					gPlayerToTargetDistance[1].push_back(0);
 				}
 				for (unsigned int i = 0; i < gPlayer.size(); i++) {
-						gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
-						gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
-						gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
-					}
+					gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
+					gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
+					gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
+				}
 				gGameState = 1;
 				break;
 			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU):
@@ -917,4 +991,302 @@ bool initSDL(Win *window) {
 	}
 
 	return true;
+}
+// COLLISIONS WITH FRUITS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void fruitCollisions() {
+
+	for (int i = 0; i <= gPlayerQuantity; i++) {
+		//		cout << "BFR gPlayerToTargetDistance[1][" << i << "] " << gPlayerToTargetDistance[1][i] << "\tgPlayerToTargetDistance[0][" << i << "] " << gPlayerToTargetDistance[0][i] << endl;
+		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
+		gPlayerToTargetDistance[1][i] = -1;
+		//		cout<<"AFR gPlayerToTargetDistance[1]["<<i<<"] "<<EnemyToTargetDistance[1][i]<<"\tgPlayerToTargetDistance[0]["<<i<<"] "<<gPlayerToTargetDistance[0][i]<<endl;
+	}
+	for (int i = 0; i < gFruitsQuantity; i++) {
+		for (int e = 0; e <= gPlayerQuantity; e++) {
+			if (gPlayer[e].collectFruit(gFruit[i])) {
+				x[i] = gPlayer[e].mNewFruitPos.x;
+				y[i] = gPlayer[e].mNewFruitPos.y;
+			}
+		}
+		for (int j = 0; j <= gPlayerQuantity; j++) {
+			gCollision = checkCollision(gFruit[i].getRect(), gPlayer[j].getHeadBox());
+			if (gPlayer[j].hasActivePowerup[0] && (gPlayer[0].hasActivePowerup[0] || gPlayer[0].hasActivePowerup[1] || gPlayer[0].hasActivePowerup[3])) {
+				gPlayer[j].hasActivePowerup[0] = false;
+			}
+			if (gPlayer[j].hasActivePowerup[0]) {
+				gPlayerToTargetDistance[0][j] = gPlayer[j].getSnakeFruitDistance(gPlayer[0].mHeadBox);
+				gPlayerToTargetDistance[1][j] = -1;
+				for (int e = 0; e <= gPlayerQuantity; e++) {
+					if ((gPlayerToTargetDistance[0][j] > gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
+						gPlayerToTargetDistance[1][j] = e;
+					}
+				}
+				if (gPlayerQuantity > 1) {
+					for (int e = 0; e <= gPlayerQuantity; e++) {
+						//					cout<<"gPlayerToTargetDistance[0][j]"<<gPlayerToTargetDistance[0][j]<<"\tgPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox) "<<gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)<<endl;
+						if ((gPlayerToTargetDistance[0][j] < gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
+							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
+						} else {
+							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[e].mHeadBox);
+						}
+						//					cout << "AFC gPlayerToTargetDistance[1][" << e << "] " << gPlayerToTargetDistance[1][e] << "\tgPlayerToTargetDistance[0][" << e << "] " << gPlayerToTargetDistance[0][e] <<"\tgAngle["<<j<<"] "<<gAngle[j]<< endl;
+					}
+				} else {
+					gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
+				}
+
+				break;
+			}
+			if (gCollision) {
+				//				cout << "gPlayerToTargetDistance[0][j] " << gPlayerToTargetDistance[0][j] << "\tgPlayerToTargetDistence[1][j] " << gPlayerToTargetDistance[1][j] << endl;
+				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
+				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
+				if (gSpriteNum[i] < 25) {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				} else {
+					//					cout<<gSpriteNum[i]<<endl;
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
+				}
+				//				gAngle[j] = gPlayer[j].getHeadToFruitAngle(gFruit[gPlayerToTargetDistence[1][j]].mBox);
+				//				cout << "j " << j << "\t " << gPlayerToTargetDistence[1][j] << endl;
+				activatePowerup(gSpriteNum[i], gPlayer[j]);
+				if (gSpriteNum[i] < 25) {
+					gPlayer[j].addLength();
+				}
+				gAngle[j] = gPlayer[j].getHeadToFruitAngle(gFruit[gPlayerToTargetDistance[1][j]].mBox);
+			}
+		}
+	}
+}
+// POWERUP ACTIVATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
+	switch (fruitSpriteNum) {
+		case 25:
+			vSnake.powerupActivationTimestamp[0] = gTimer + MAX_POWERUP_TIME[0];
+			vSnake.hasActivePowerup[0] = true;
+//			cout << vSnake.hasActivePowerup[0] << "\t" << vSnake.powerupActivationTimestamp[0] << "\tCurrent time: " << gTimer << endl;
+			break;
+		case 26:
+			vSnake.powerupActivationTimestamp[1] = gTimer + MAX_POWERUP_TIME[1];
+			vSnake.hasActivePowerup[1] = true;
+			break;
+		case 27:
+			vSnake.powerupActivationTimestamp[2] = gTimer + MAX_POWERUP_TIME[2];
+			vSnake.hasActivePowerup[2] = true;
+			vSnake.collectDistanceMultiplier(16);
+			vSnake.setCollectAngle(60);
+			break;
+		case 28:
+			vSnake.powerupActivationTimestamp[3] = gTimer + MAX_POWERUP_TIME[3];
+			vSnake.hasActivePowerup[3] = true;
+			break;
+		case 29:
+			vSnake.powerupActivationTimestamp[4] = gTimer + MAX_POWERUP_TIME[4];
+			vSnake.hasActivePowerup[4] = true;
+			break;
+	}
+}
+// POWERUP CHECKING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void powerupCheck(Snake &vSnake, bool render) {
+
+	for (int i = 0; i < TOTAL_POWERUPS; i++) {
+//		cout<<i<<" "<<vSnake.powerupActivationTimestamp[i]<<endl;
+		if (vSnake.powerupActivationTimestamp[i] < gTimer) {
+			vSnake.hasActivePowerup[i] = false;
+		}
+		if (vSnake.hasActivePowerup[i]) {
+			if (!render) {
+				break;
+			}
+			int iconPosX = (int) ((gWindow.getWidth() - 50) / gRenderScaleX);
+			switch (i) {
+				case 0:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 1:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 2:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 3:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 4:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+			}
+		} else {
+			switch (i) {
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					vSnake.collectDistanceMultiplier(4);
+					vSnake.setCollectAngle(120);
+					break;
+				case 3:
+					break;
+				case 4:
+					if (render) {
+						SDL_RenderSetScale(gRenderer, 1, 1);
+						SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
+					}
+					break;
+			}
+		}
+	}
+}
+// GAME RESETTING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void gameReset(bool &reset) {
+	if (reset) {
+		for (int p = 0; p < TOTAL_POWERUPS; p++) {
+			for (int i = 0; i <= gPlayerQuantity; i++) {
+				gPlayer[i].hasActivePowerup[p] = false;
+//			gSnake.powerupActivationTimestamp[p] = gTime;
+			}
+		}
+//		gPlayer[0].resetLength();
+//		gPlayer[0].setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
+		for (int i = 0; i <= gPlayerQuantity; i++) {
+			gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
+			gPlayer[i].resetLength();
+			for (int p = 0; p < TOTAL_POWERUPS; p++) {
+				gPlayer[i].hasActivePowerup[p] = false;
+//				gEnemy[i].powerupActivationTimestamp[p] = gTime;
+			}
+		}
+		reset = false;
+
+	}
+}
+// COLLISIONS BETWEEN PLAYERS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+void betweenPlayersCollisions() {
+	for (int i = 0; i < gPlayerQuantity; i++) {
+		for (int j = 0; j < gPlayerQuantity; j++) {
+			if (i != j) {
+
+				if (gPlayer[i].hasActivePowerup[1] || gPlayer[j].hasActivePowerup[1]) {
+					escapeFromDanger(gPlayer[i], gPlayer[j], gAngle[i]);
+				}
+				gCollision = checkCollision(gPlayer[i].getHeadBox(), gPlayer[j].getHeadBox());
+				if (gPlayer[i].hasActivePowerup[1] || gPlayer[j].hasActivePowerup[1]) { //GHOST ON ****************
+					gCollision = false;
+				}
+				if (gCollision) {
+					if (gPlayer[i].hasActivePowerup[0]) {
+						for (int et = 0; et < gPlayer[j].getLength(); et++) {
+							gPlayer[i].addLength();
+							gPlayer[i].updateTail(gLTEnemyTail);
+						}
+						gPlayer[j].resetLength();
+						break;
+					}
+					if (gPlayer[j].hasActivePowerup[0]) {
+						for (int et = 0; et < gPlayer[i].getLength(); et++) {
+							gPlayer[j].addLength();
+							gPlayer[j].updateTail(gLTEnemyTail);
+						}
+						gPlayer[i].resetLength();
+						break;
+					}
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+					if (gPlayer[i].hasActivePowerup[3]) { //SHIELD ON ****************
+						break;
+					}
+					gPlayer[i].resetLength();
+					//						gPlayer[i].setStartPos(gPlayer[i].getHeadBox().x+gWindow.getWidth()+10, gPlayer[i].getHeadBox().y+gWindow.getHeight()+10);
+				}
+				if (gPlayer[i].getLength() != 0 && i != j) {
+					for (int t = 0; t < gPlayer[i].getLength(); t++) {
+						gCollision = checkCollision(gPlayer[i].getTailBox(t), gPlayer[j].getHeadBox());
+						if (gPlayer[j].hasActivePowerup[1]) { //GHOST ON ****************
+							gCollision = false;
+						}
+						if (gCollision) {
+							if (gPlayer[j].hasActivePowerup[0]) {
+								for (int et = 0; et < gPlayer[i].getLength(); et++) {
+									gPlayer[j].addLength();
+									gPlayer[j].updateTail(gLTEnemyTail);
+								}
+								gPlayer[i].resetLength();
+								break;
+							}
+							gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+							if (gPlayer[i].hasActivePowerup[3]) { //SHIELD ON ****************
+								break;
+							}
+							gPlayer[j].resetLength();
+							//								gPlayer[i].setStartPos(gPlayer[i].getHeadBox().x+gWindow.getWidth()+10, gPlayer[i].getHeadBox().y+gWindow.getHeight()+10);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+//	ESCAPE FROM DANGER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle) {
+	if ((vSnake1.getSnakeFruitDistance(vSnake2.mHeadBox) < (vSnake1.mHeadBox.w * 20)) && (vSnake2.hasActivePowerup[0]) && !vSnake1.hasActivePowerup[1] && !vSnake1.hasActivePowerup[3]) {
+		if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 0 || vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) < 90) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 90 || vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) < 180) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 180 || vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) < 270) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		}
+	}
+	return false;
 }
