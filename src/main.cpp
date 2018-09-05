@@ -1,7 +1,7 @@
 /*
  * main.cpp
  *
- *  Created on: 03.07.2018
+ *  Created on: 23.08.2018
  *      Author: Łukasz Pękalski
  */
 
@@ -14,8 +14,9 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const MULTIPLIER = 4, TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 };
-int gPowerUpsQuantity, gFruitsQuantity, gEnemyQuantity;
+int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000 / 2, gLvlHeight = gLvlWidth;
+int gPowerUpsQuantity, gFruitsQuantity, gPlayerQuantity;
+
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
@@ -23,23 +24,25 @@ void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
 void print();
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
+void betweenPlayersCollisions();
 //----------------------------------------------------------------Deklaracje zmiennych
 //Fruits vars
 vector<int> gSpriteNum, x, y;
 vector<Dot> gFruit;
-//Enemies vars
+//Players vars
 vector<double> gAngle;
-vector<int> gCurrentTime, gTimeElapsed, gEnemySprite, gEnePosX, gEnePosY;
-vector<vector<int> > gEnemyToTargetDistance(2, vector<int>());
-vector<SDL_Point> gEnemyStartPos;
-vector<Snake> gEnemy;
+vector<int> gCurrentTime, gTimeElapsed, gPlayerSprite, gPlayerPosX, gPlayerPosY;
+vector<vector<int> > gPlayerToTargetDistance(2, vector<int>());
+vector<SDL_Point> gPlayerStartPos;
+vector<Snake> gPlayer;
+//-------Other vars
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 7, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
 double timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
-int gScreenWidth = 1024, gScreenHeight = 768, gLvlWidth = MULTIPLIER * gScreenWidth, gLvlHeight = MULTIPLIER * gScreenHeight, gCurrentScore = 0, gOption = -1, gGameState = 1;
+int gScreenWidth = 1024, gScreenHeight = 768, gCurrentScore = 0, gOption = -1, gGameState = 1;
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
-SDL_Point gEnemy1Pos, gEnemy2Pos, gSnakePos;
+SDL_Point gEnemy1Pos, gEnemy2Pos;
 stringstream gScore, gTimeLeft;
 string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Network game (i)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
 string gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Snake speed", "Save changes", "Back to main menu (no saving)" };
@@ -49,7 +52,6 @@ SDL_Event event;
 Win gWindow;
 LTexture gLTFruit, gLTSnakeHead, gLTSnakeTail, gLTLevelTexture, gLTScoreText, gLTTitleText, gLTExitQuestion, gLTMenuBackground, gLTPause, gLTEnemyHead, gLTEnemyTail, gLTGameOver, gLTPressToReset, gLTPowerupIcons, gLTPowerupsTimeText[TOTAL_POWERUPS], gLTOptionsText;
 LTexture gLTPosTxt;
-Snake gSnake;
 SDL_Rect gCamera = { 0, 0, (int) (gScreenWidth / gRenderScaleX), (int) (gScreenHeight / gRenderScaleY) }, gLevelBorders = { 0, 0, (int) (gLvlWidth / gRenderScaleX), (int) (gLvlHeight / gRenderScaleY) }, gBoxExitQuestion = { 0, 0, 0, 0 }, gBoxPause = { 0, 0, 0, 0 }, gMenuCamera = { 0, 0, gScreenWidth, gScreenHeight }, gMouse = { 0, 0, 1, 1 }, gSpriteClips[TOTAL_SPRITES], gFruitSpriteClips[TOTAL_FRUIT_SPRITES], gGameOverBox = { 0, 0, 0, 0 }, gPowerupClip[TOTAL_POWERUPS];
 TTF_Font *gFont = NULL, *gTitleFont = NULL;
 SDL_Color gTextColor = { 255, 0, 0 }, gTextPauseColor = { 255, 255, 0 }, gTextNormalColor = { 0, 255, 0 };
@@ -60,13 +62,15 @@ int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruit
 // fstream vars
 fstream gSettingsFile, gLangFile, gFileLangList;
 vector<string> gLangList;
-string gAllTexts[TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+5], gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
+string gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5], gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
 stringstream gPathToLangFile, gTextToShow;
 int gSettingsFileContent[5], mOptsButtonsWidth[10];
 // POWERUPS PARAMS
 void powerupCheck(Snake &vSnake, bool render = false);
-void gameReset(bool &reset);
+//void gameReset(bool &reset);
+
 void fTextToShow(int &i, int xpos, int ypos, string &vText);
+
 int main(int argc, char* args[]) {
 //Opening lang list file
 	gFileLangList.open("./assets/lang/_LangList.txt");
@@ -134,7 +138,7 @@ int main(int argc, char* args[]) {
 	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
 	gChangeableOptionsPos[4] = to_string(gSettingsFileContent[4]);
 
-	gEnemyQuantity = gSettingsFileContent[1];
+	gPlayerQuantity = gSettingsFileContent[1];
 	gFruitsQuantity = gSettingsFileContent[2];
 	gPowerUpsQuantity = gSettingsFileContent[3];
 
@@ -154,15 +158,15 @@ int main(int argc, char* args[]) {
 		for (int i = 0; i < 5; i++) {
 			gScreenInfos[i] = gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
 		}
-		for (int i = 0; i < gEnemyQuantity; i++) {
+		for (int i = 0; i <= gPlayerQuantity; i++) {
 			gAngle.push_back(0.0);
 			gCurrentTime.push_back(0);
 			gTimeElapsed.push_back(0);
-			gEnemySprite.push_back(0);
-			gEnemyStartPos.push_back( { 0, 0 });
-			gEnemy.push_back(Snake());
-			gEnemyToTargetDistance[0].push_back(0);
-			gEnemyToTargetDistance[1].push_back(0);
+			gPlayerSprite.push_back(0);
+			gPlayerStartPos.push_back( { 0, 0 });
+			gPlayer.push_back(Snake());
+			gPlayerToTargetDistance[0].push_back(0);
+			gPlayerToTargetDistance[1].push_back(0);
 		}
 	}
 
@@ -257,18 +261,13 @@ int main(int argc, char* args[]) {
 		gButtonNextPrev[i].setButtonText("<-", gWindow, gFont, TEXT_SIZE, 0);
 		gButtonNextPrev[i + 5].setButtonText("+>", gWindow, gFont, TEXT_SIZE, 0);
 	}
-	int gTotalTiles = 20 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
-	int gTotalMenuTiles = 20 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
+	int gTotalTiles = 3 * ((gLvlWidth / 0.9) / gLTLevelTexture.getWidth()) * ((gLvlHeight / 0.9) / gLTLevelTexture.getHeight());
+	int gTotalMenuTiles = 3 * ((gScreenWidth / gLTMenuBackground.getWidth()) * (gScreenHeight / gLTMenuBackground.getHeight()));
 	Tile *tileSet[gTotalTiles], *gMenuBackground[gTotalMenuTiles];
-	gSnake.setStartPos(gLvlWidth * (((double) rand() / RAND_MAX))/*LEVEL_WIDTH / 2*/, gLvlHeight * (((double) rand() / RAND_MAX))/*LEVEL_HEIGHT / 2*/);
-//	gSnake.resetLength();
-//	PLACING ENEMIES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	for (int i = 0; i < gEnemyQuantity; i++) {
-		gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
-		gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
-		gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
-		gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
-//		gEnemy[i].resetLength();
+	for (unsigned int i = 0; i < gPlayer.size(); i++) {
+		gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
+		gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
+		gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
 	}
 	gWindow.setTitle("Snaker");
 	gRenderer = gWindow.getRenderer();
@@ -282,6 +281,7 @@ int main(int argc, char* args[]) {
 			gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 		}
 	}
+//	BACKGROUND POSITIONING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	int tilePosX = 0, tilePosY = 0;
 	for (int i = 0; i < gTotalTiles; i++) {
 		tileSet[i] = new Tile(tilePosX, tilePosY, gLTLevelTexture.getWidth(), gLTLevelTexture.getHeight());
@@ -301,6 +301,7 @@ int main(int argc, char* args[]) {
 			tilePosY += gLTMenuBackground.getHeight();
 		}
 	}
+//TEXT POSITIONING >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	gBoxExitQuestion.x = ((gWindow.getWidth() - gLTExitQuestion.getWidth()) / 2);
 	gBoxExitQuestion.y = (gWindow.getHeight() - gBoxExitQuestion.h) / 2;
 	gBoxExitQuestion.h = 1.25 * gLTExitQuestion.getHeight() + gButtons[4].getButtonDims().h;
@@ -314,18 +315,18 @@ int main(int argc, char* args[]) {
 	gGameOverBox.w = gLTPressToReset.getWidth();
 	gGameOverBox.h = 1.1 * (gLTGameOver.getHeight() + gLTPressToReset.getHeight());
 	stepTimer.start();
-	for (int i = 0; i < gEnemyQuantity; i++) {
-		gEnemyToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
-		gEnemyToTargetDistance[1][i] = i;
+	for (int i = 0; i <= gPlayerQuantity; i++) {
+		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
+		gPlayerToTargetDistance[1][i] = i;
 	}
-	gTmpVal = gSettingsFileContent[4];
 	for (int i = 1; i < 5; i++) {
 		gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
 	}
-	gSnake.changeSpeed(gSettingsFileContent[4]);
-	for (int i = 0; i < gEnemyQuantity; i++) {
-		gEnemy[i].changeSpeed(gSettingsFileContent[4]);
+	gTmpVal = gSettingsFileContent[4];
+	for (int i = 0; i <= gPlayerQuantity; i++) {
+		gPlayer[i].changeSpeed(gSettingsFileContent[4]);
 	}
+// MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	while (gContinue) {
 //		EVENTS HANDLER +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		handleEvents();
@@ -353,19 +354,14 @@ int main(int argc, char* args[]) {
 		}
 		if (gTmpVal != gSettingsFileContent[4]) {
 			gTmpVal = gSettingsFileContent[4];
-			gSnake.changeSpeed(gSettingsFileContent[4]);
-			for (int i = 0; i < gEnemyQuantity; i++) {
-				gEnemy[i].changeSpeed(gSettingsFileContent[4]);
+			for (int i = 0; i <= gPlayerQuantity; i++) {
+				gPlayer[i].changeSpeed(gSettingsFileContent[4]);
 			}
 		}
-//		cout << gSnake.getHeadBox().x << " " << gSnake.getHeadBox().y << " " << gLevelBorders.w << " " << gLevelBorders.h << " " << gLvlWidth << " " << gLvlHeight << endl;
 //		ACTIONS TAKEN WHEN WINDOW DIMS ARE CHANGED >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		if (gScreenWidth != gWindow.getWidth() || gScreenHeight != gWindow.getHeight()) {
 			gScreenWidth = gWindow.getWidth();
 			gScreenHeight = gWindow.getHeight();
-//			cout<<gScreenWidth<<"x"<<gScreenHeight<<endl;
-			gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
-			gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
 			gCamera.w = gScreenWidth;
 			gCamera.h = gScreenHeight;
 			gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
@@ -409,10 +405,6 @@ int main(int argc, char* args[]) {
 				tempScale = gRenderScaleX;
 				gRenderScaleX = 1.0;
 				gRenderScaleY = gRenderScaleX;
-//				gCamera.w = (int) (gScreenWidth / gRenderScaleX);
-//				gCamera.w = (int) (gScreenHeight / gRenderScaleY);
-				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
-				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
 				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
 				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
 			}
@@ -462,27 +454,26 @@ int main(int argc, char* args[]) {
 			}
 			gWindow.render();
 		}
-//		HERE IS GAME MECHANICS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-		switch (gGameState) {
-			case 0:
-				gTimer = stepTimer.getSeconds<int>();
-				if (tempScale < 1) {
-					gRenderScaleX = tempScale;
-					gRenderScaleY = tempScale;
-					SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
-					gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
-					gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
-					gLvlWidth += 50;
-					gLvlHeight += 50;
-					gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
-					gLvlWidth -= 50;
-					gLvlHeight -= 50;
-				}
+//		HERE IS END OF GAME MENU AND START OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+		if (gGameState == 0) {
+			gTimer = stepTimer.getSeconds<int>();
+			if (tempScale < 1) {
+				gRenderScaleX = tempScale;
+				gRenderScaleY = tempScale;
+				SDL_RenderSetScale(gRenderer, gRenderScaleX, gRenderScaleY);
+				//					gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX);
+				//					gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY);
+				//					gLvlWidth += 50;
+				//					gLvlHeight += 50;
+				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
+				//					gLvlWidth -= 50;
+				//					gLvlHeight -= 50;
+			}
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				gameReset(gReset);
 //			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				gWindow.prepareRenderer(0, 0, 0);
-				gSnake.setCamera(gLvlWidth, gLvlHeight, gCamera);
+			gWindow.prepareRenderer(0, 0, 0);
+			gPlayer[0].setCamera(gLvlWidth, gLvlHeight, gCamera);
 //			RENDERING OF BACKGROUND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				for (int i = 0; i < gTotalTiles; i++) {
 					tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
@@ -495,514 +486,58 @@ int main(int argc, char* args[]) {
 						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
 					}
 				}
+			}
+
 //			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 				fruitCollisions();
 //			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				for (int i = 0; i < gEnemyQuantity; i++) {
-					if (gEnemy[i].getHeadBox().x < 1 || gEnemy[i].getHeadBox().y < 1 || (gEnemy[i].getHeadBox().w + gEnemy[i].getHeadBox().x) >= (gLvlWidth) || (gEnemy[i].getHeadBox().h + gEnemy[i].getHeadBox().y) >= (gLvlHeight)) {
-						gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					}
+			for (int i = 1; i < gPlayerQuantity; i++) {
+				if (gPlayer[i].getHeadBox().x < 1 || gPlayer[i].getHeadBox().y < 1 || (gPlayer[i].getHeadBox().w + gPlayer[i].getHeadBox().x) >= (gLvlWidth) || (gPlayer[i].getHeadBox().h + gPlayer[i].getHeadBox().y) >= (gLvlHeight)) {
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 				}
-				gCollision = false;
-//			COLLISIONS BETWEEN BOTS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				betweenBotsCollisions();
-//			COLLISIONS WITH PLAYER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				playerAndBotsCollisions();
+			}
+			gCollision = false;
+//			COLLISIONS BETWEEN PLAYERS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+			betweenPlayersCollisions();
 //			GETTING POINT/LENGTH ON SCREEN >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				if (gCurrentScore != gSnake.getLength() || gCurrentScore >= 0) {
-					gScore.str("");
-					gScore << " Length: " << gSnake.getLength();
-					gLTScoreText.loadFromText(gScore.str().c_str(), gTextColor, gFont, gWindow);
-					gCurrentScore = gSnake.getLength();
-					gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
-					gLTScoreText.setHeight(TEXT_SIZE);
-				}
+			if (gCurrentScore != gPlayer[0].getLength() || gCurrentScore >= 0) {
+				gScore.str("");
+				gScore << " Length: " << gPlayer[0].getLength();
+				gLTScoreText.loadFromText(gScore.str().c_str(), gTextColor, gFont, gWindow);
+				gCurrentScore = gPlayer[0].getLength();
+				gLTScoreText.setWidth(3 * gLTScoreText.getWidth());
+				gLTScoreText.setHeight(TEXT_SIZE);
+			}
 //			MOVEMENT AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				gFrameTimer = frameTimer.getSeconds<double>();
-				gSnake.move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
-				for (int i = 0; i < gEnemyQuantity; i++) {
-					gEnemy[i].setAngle(gAngle[i]);
-					gEnemy[i].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
-				}
-				frameTimer.start();
+			gFrameTimer = frameTimer.getSeconds<double>();
+			gPlayer[0].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
+			for (int i = 1; i <= gPlayerQuantity; i++) {
+				gPlayer[i].setAngle(gAngle[i]);
+				gPlayer[i].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
+			}
+			frameTimer.start();
 //			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				powerupCheck(gSnake, true);
-				for (int i = 0; i < gEnemyQuantity; i++) {
-					powerupCheck(gEnemy[i]);
-				}
+			powerupCheck(gPlayer[0], true);
+			for (int i = 1; i <= gPlayerQuantity; i++) {
+				powerupCheck(gPlayer[i]);
+			}
 //			RENDERING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-				for (int i = 0; i < gEnemyQuantity; i++) {
-					gEnemy[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gEnemySprite[i]]);
-				}
+			for (int i = 1; i <= gPlayerQuantity; i++) {
+				gPlayer[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gPlayerSprite[i]]);
+			}
 
-				gSnake.render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
-				gLTScoreText.render(0, 0, gWindow);
-				gWindow.render();
-				break;
-			case -1:
-				break;
+			gPlayer[0].render(gWindow, gLTSnakeHead, gLTSnakeTail, gCamera);
+			gLTScoreText.render(0, 0, gWindow);
+			gWindow.render();
+//		END OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		}
 	}
-
-	for (int i = 0; i < gTotalTiles; i++) {
-		delete tileSet[i];
-	}
-	for (int i = 0; i < gTotalMenuTiles; i++) {
-		delete gMenuBackground[i];
-	}
-	close(&gWindow);
+// END OF MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 	return 0;
 }
-//HERE ARE OTHER FUNCTIONS ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void fTextToShow(int &i, int xpos, int ypos, string &vText) {
-	gTextToShow.str("");
-	gTextToShow << vText.c_str();
-	gLTPosTxt.loadFromText(gTextToShow.str().c_str(), gTextNormalColor, gFont, gWindow);
-	gLTPosTxt.setHeight(gButtonNextPrev[0].getButtonDims().h);
-	gLTPosTxt.setWidth(1 * gLTPosTxt.getWidth());
-	gButtonNextPrev[i].render(xpos, ypos, gWindow);
-	gLTPosTxt.render(xpos + (1.25 * gButtonNextPrev[0].getButtonDims().w), ypos, gWindow);
-	gButtonNextPrev[i + 5].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
-	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
-}
 
-bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle) {
-	if ((vSnake1.getSnakeFruitDistance(vSnake2.mHeadBox) < (vSnake1.mHeadBox.w * 20)) && (vSnake2.hasActivePowerup[0]) && !vSnake1.hasActivePowerup[1] && !vSnake1.hasActivePowerup[3]) {
-		if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 0 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 90) {
-			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
-			return true;
-		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 90 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 180) {
-			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
-			return true;
-		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 180 || vSnake1.getHeadToFruitAngle(gSnake.mHeadBox) < 270) {
-			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
-			return true;
-		} else {
-			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
-			return true;
-		}
-	}
-	return false;
-}
-
-void gameReset(bool &reset) {
-	if (reset) {
-		for (int p = 0; p < TOTAL_POWERUPS; p++) {
-			gSnake.hasActivePowerup[p] = false;
-//			gSnake.powerupActivationTimestamp[p] = gTime;
-		}
-		gSnake.resetLength();
-		gSnake.setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
-		for (int i = 0; i < gEnemyQuantity; i++) {
-			gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
-			gEnemy[i].resetLength();
-			for (int p = 0; p < TOTAL_POWERUPS; p++) {
-				gEnemy[i].hasActivePowerup[p] = false;
-//				gEnemy[i].powerupActivationTimestamp[p] = gTime;
-			}
-		}
-		reset = false;
-
-	}
-}
-
-void playerAndBotsCollisions() {
-	for (int i = 0; i < gEnemyQuantity; i++) {
-		if ((!(gEnemy[i].hasActivePowerup[1] || gEnemy[i].hasActivePowerup[3])) || (gSnake.hasActivePowerup[0] && !gEnemy[i].hasActivePowerup[0])) { //ACTIVATE IF ENEMY HAS NO GHOST OR SHIELD ON OR PLAYER HAS PACMAN ****************
-			escapeFromDanger(gEnemy[i], gSnake, gAngle[i]);
-		}
-		gCollision = checkCollision(gSnake.getHeadBox(), gEnemy[i].getHeadBox());
-		if (gEnemy[i].hasActivePowerup[1] || gSnake.hasActivePowerup[1]) { //GHOST ON ****************
-			gCollision = false;
-		}
-		if (gCollision && (gSnake.getLength() != 0 || gEnemy[i].getLength() != 0)) {
-			if (gSnake.hasActivePowerup[0]) {
-				for (int et = 0; et < gEnemy[i].getLength(); et++) {
-					gSnake.addLength();
-					gSnake.updateTail(gLTSnakeTail);
-				}
-				gEnemy[i].resetLength();
-				break;
-			}
-			if (gEnemy[i].hasActivePowerup[0]) {
-				for (int et = 0; et < gSnake.getLength(); et++) {
-					gEnemy[i].addLength();
-					gEnemy[i].updateTail(gLTEnemyTail);
-				}
-				gSnake.resetLength();
-				break;
-			}
-			if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
-				break;
-			}
-			gGameState = 4;
-			//					gSnake.resetLength();
-			//					gSnake.setStartPos(0.5 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.5 * gLvlHeight * (((double) rand() / RAND_MAX)));
-			gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-			gEnemy[i].resetLength();
-			//					gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-		}
-		if (gSnake.getLength() != 0) {
-			for (int t = 0; t < gSnake.getLength(); t++) {
-				gCollision = checkCollision(gSnake.getTailBox(t), gEnemy[i].getHeadBox());
-				if (gEnemy[i].hasActivePowerup[1]) { //GHOST ON ****************
-					gCollision = false;
-				}
-				if (gCollision) {
-					if (gEnemy[i].hasActivePowerup[0]) {
-						for (int et = 0; et < gSnake.getLength(); et++) {
-							gEnemy[i].addLength();
-							gEnemy[i].updateTail(gLTEnemyTail);
-						}
-						gSnake.resetLength();
-						break;
-					}
-					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
-						break;
-					}
-					gEnemy[i].resetLength();
-					//							gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-				}
-			}
-		}
-		if (gEnemy[i].getLength() != 0) {
-			for (int t = 0; t < gEnemy[i].getLength(); t++) {
-				gCollision = checkCollision(gEnemy[i].getTailBox(t), gSnake.getHeadBox());
-				if (gSnake.hasActivePowerup[1]) { //GHOST ON ****************
-					gCollision = false;
-				}
-				if (gCollision) {
-					if (gSnake.hasActivePowerup[0]) {
-						for (int et = 0; et < gEnemy[i].getLength(); et++) {
-							gSnake.addLength();
-							gSnake.updateTail(gLTSnakeTail);
-						}
-						gEnemy[i].resetLength();
-						break;
-					}
-					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gSnake.hasActivePowerup[3]) { //SHIELD ON ****************
-						break;
-					}
-					//							gSnake.resetLength();
-					gGameState = 4;
-					//							gSnake.setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-				}
-			}
-		}
-
-	}
-}
-
-void betweenBotsCollisions() {
-	for (int i = 0; i < gEnemyQuantity; i++) {
-		for (int j = 0; j < gEnemyQuantity; j++) {
-			if (i != j) {
-
-				if (gEnemy[i].hasActivePowerup[1] || gEnemy[j].hasActivePowerup[1]) {
-					escapeFromDanger(gEnemy[i], gEnemy[j], gAngle[i]);
-				}
-				gCollision = checkCollision(gEnemy[i].getHeadBox(), gEnemy[j].getHeadBox());
-				if (gEnemy[i].hasActivePowerup[1] || gEnemy[j].hasActivePowerup[1]) { //GHOST ON ****************
-					gCollision = false;
-				}
-				if (gCollision) {
-					if (gEnemy[i].hasActivePowerup[0]) {
-						for (int et = 0; et < gEnemy[j].getLength(); et++) {
-							gEnemy[i].addLength();
-							gEnemy[i].updateTail(gLTEnemyTail);
-						}
-						gEnemy[j].resetLength();
-						break;
-					}
-					if (gEnemy[j].hasActivePowerup[0]) {
-						for (int et = 0; et < gEnemy[i].getLength(); et++) {
-							gEnemy[j].addLength();
-							gEnemy[j].updateTail(gLTEnemyTail);
-						}
-						gEnemy[i].resetLength();
-						break;
-					}
-					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
-					if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
-						break;
-					}
-					gEnemy[i].resetLength();
-					//						gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-				}
-				if (gEnemy[i].getLength() != 0 && i != j) {
-					for (int t = 0; t < gEnemy[i].getLength(); t++) {
-						gCollision = checkCollision(gEnemy[i].getTailBox(t), gEnemy[j].getHeadBox());
-						if (gEnemy[j].hasActivePowerup[1]) { //GHOST ON ****************
-							gCollision = false;
-						}
-						if (gCollision) {
-							if (gEnemy[j].hasActivePowerup[0]) {
-								for (int et = 0; et < gEnemy[i].getLength(); et++) {
-									gEnemy[j].addLength();
-									gEnemy[j].updateTail(gLTEnemyTail);
-								}
-								gEnemy[i].resetLength();
-								break;
-							}
-							gAngle[j] = 360 * ((double) rand() / RAND_MAX);
-							if (gEnemy[i].hasActivePowerup[3]) { //SHIELD ON ****************
-								break;
-							}
-							gEnemy[j].resetLength();
-							//								gEnemy[i].setStartPos(gEnemy[i].getHeadBox().x+gWindow.getWidth()+10, gEnemy[i].getHeadBox().y+gWindow.getHeight()+10);
-						}
-					}
-				}
-			}
-		}
-	}
-}
-
-void fruitCollisions() {
-	for (int i = 0; i < gEnemyQuantity; i++) {
-//		cout << "BFR gEnemyToTargetDistance[1][" << i << "] " << gEnemyToTargetDistance[1][i] << "\tgEnemyToTargetDistance[0][" << i << "] " << gEnemyToTargetDistance[0][i] << endl;
-		gEnemyToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
-		gEnemyToTargetDistance[1][i] = -1;
-//		cout<<"AFR gEnemyToTargetDistance[1]["<<i<<"] "<<EnemyToTargetDistance[1][i]<<"\tgEnemyToTargetDistance[0]["<<i<<"] "<<gEnemyToTargetDistance[0][i]<<endl;
-	}
-	for (int e = 0; e < gEnemyQuantity; e++) {
-		for (int f = 0; f < gFruitsQuantity; f++) {
-			if (gEnemyToTargetDistance[0][e] > gEnemy[e].getSnakeFruitDistance(gFruit[f].mBox)) {
-				gEnemyToTargetDistance[0][e] = gEnemy[e].getSnakeFruitDistance(gFruit[f].mBox);
-				gEnemyToTargetDistance[1][e] = f;
-			}
-		}
-//		cout<<"AFC gEnemyToTargetDistance[1]["<<e<<"] "<<gEnemyToTargetDistance[1][e]<<"\tgEnemyToTargetDistance[0]["<<e<<"] "<<gEnemyToTargetDistance[0][e]<<endl;
-	}
-	for (int i = 0; i < gFruitsQuantity; i++) {
-		if (gSnake.collectFruit(gFruit[i])) {
-			x[i] = gSnake.mNewFruitPos.x;
-			y[i] = gSnake.mNewFruitPos.y;
-		}
-		for (int e = 0; e < gEnemyQuantity; e++) {
-			if (gEnemy[e].collectFruit(gFruit[i])) {
-				x[i] = gEnemy[e].mNewFruitPos.x;
-				y[i] = gEnemy[e].mNewFruitPos.y;
-			}
-		}
-		gCollision = checkCollision(gFruit[i].getRect(), gSnake.getHeadBox());
-		if (gCollision) {
-			x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
-			y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
-			if (gSpriteNum[i] < 25) {
-				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
-			} else {
-				gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
-			}
-			activatePowerup(gSpriteNum[i], gSnake);
-			if (gSpriteNum[i] == 29) {
-				SDL_RenderSetScale(gRenderer, 0.95, 0.95);
-				SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
-				gLvlWidth = MULTIPLIER * (int) (gScreenWidth / gRenderScaleX) + 50;
-				gLvlHeight = MULTIPLIER * (int) (gScreenHeight / gRenderScaleY) + 50;
-				gLevelBorders = {0, 0, gLvlWidth, gLvlHeight};
-				gLvlWidth -= 50;
-				gLvlHeight -= 50;
-			}
-			if (gSpriteNum[i] < 25) {
-				gSnake.addLength();
-			}
-		}
-
-		for (int j = 0; j < gEnemyQuantity; j++) {
-			gCollision = checkCollision(gFruit[i].getRect(), gEnemy[j].getHeadBox());
-			if (gEnemy[j].hasActivePowerup[0] && (gSnake.hasActivePowerup[1] || gSnake.hasActivePowerup[3] || gSnake.hasActivePowerup[0])) {
-				gEnemy[j].hasActivePowerup[0] = false;
-			}
-			if (gEnemy[j].hasActivePowerup[0]) {
-				gEnemyToTargetDistance[0][j] = gEnemy[j].getSnakeFruitDistance(gSnake.mHeadBox);
-				gEnemyToTargetDistance[1][j] = -1;
-				for (int e = 0; e < gEnemyQuantity; e++) {
-					if ((gEnemyToTargetDistance[0][j] > gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)) && j != e) {
-						gEnemyToTargetDistance[1][j] = e;
-					}
-				}
-				if (gEnemyQuantity > 1) {
-					for (int e = 0; e < gEnemyQuantity; e++) {
-//					cout<<"gEnemyToTargetDistance[0][j]"<<gEnemyToTargetDistance[0][j]<<"\tgEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox) "<<gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)<<endl;
-						if ((gEnemyToTargetDistance[0][j] < gEnemy[j].getSnakeFruitDistance(gEnemy[e].mHeadBox)) && j != e) {
-							gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
-						} else {
-							gAngle[j] = gEnemy[j].getHeadToFruitAngle(gEnemy[e].mHeadBox);
-						}
-//					cout << "AFC gEnemyToTargetDistance[1][" << e << "] " << gEnemyToTargetDistance[1][e] << "\tgEnemyToTargetDistance[0][" << e << "] " << gEnemyToTargetDistance[0][e] <<"\tgAngle["<<j<<"] "<<gAngle[j]<< endl;
-					}
-				} else {
-					gAngle[j] = gEnemy[j].getHeadToFruitAngle(gSnake.mHeadBox);
-				}
-
-				break;
-			}
-			if (gCollision) {
-//				cout << "gEnemyToTargetDistance[0][j] " << gEnemyToTargetDistance[0][j] << "\tgEnemyToTargetDistence[1][j] " << gEnemyToTargetDistance[1][j] << endl;
-				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
-				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
-				if (gSpriteNum[i] < 25) {
-					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
-				} else {
-//					cout<<gSpriteNum[i]<<endl;
-					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
-				}
-//				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gFruit[gEnemyToTargetDistence[1][j]].mBox);
-//				cout << "j " << j << "\t " << gEnemyToTargetDistence[1][j] << endl;
-				activatePowerup(gSpriteNum[i], gEnemy[j]);
-				if (gSpriteNum[i] < 25) {
-					gEnemy[j].addLength();
-				}
-				gAngle[j] = gEnemy[j].getHeadToFruitAngle(gFruit[gEnemyToTargetDistance[1][j]].mBox);
-			}
-		}
-	}
-}
-
-void powerupCheck(Snake &vSnake, bool render) {
-
-	for (int i = 0; i < TOTAL_POWERUPS; i++) {
-//		cout<<i<<" "<<vSnake.powerupActivationTimestamp[i]<<endl;
-		if (vSnake.powerupActivationTimestamp[i] < gTimer) {
-			vSnake.hasActivePowerup[i] = false;
-		}
-		if (vSnake.hasActivePowerup[i]) {
-			if (!render) {
-				break;
-			}
-			int iconPosX = (int) ((gWindow.getWidth() - 50) / gRenderScaleX);
-			switch (i) {
-				case 0:
-					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
-						gTimeLeft << "0";
-					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
-					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
-					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
-					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
-					break;
-				case 1:
-					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
-						gTimeLeft << "0";
-					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
-					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
-					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
-					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
-					break;
-				case 2:
-					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
-						gTimeLeft << "0";
-					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
-					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
-					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
-					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
-					break;
-				case 3:
-					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
-						gTimeLeft << "0";
-					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
-					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
-					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
-					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
-					break;
-				case 4:
-					gTimeLeft.str("");
-					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
-						gTimeLeft << "0";
-					}
-					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
-					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
-					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
-					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
-					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
-					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
-					break;
-			}
-		} else {
-			switch (i) {
-				case 0:
-					break;
-				case 1:
-					break;
-				case 2:
-					vSnake.collectDistanceMultiplier(4);
-					vSnake.setCollectAngle(120);
-					break;
-				case 3:
-					break;
-				case 4:
-					if (render) {
-						SDL_RenderSetScale(gRenderer, 1, 1);
-						SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
-					}
-					break;
-			}
-		}
-	}
-}
-
-void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
-	switch (fruitSpriteNum) {
-		case 25:
-			vSnake.powerupActivationTimestamp[0] = gTimer + MAX_POWERUP_TIME[0];
-			vSnake.hasActivePowerup[0] = true;
-//			cout << vSnake.hasActivePowerup[0] << "\t" << vSnake.powerupActivationTimestamp[0] << "\tCurrent time: " << gTimer << endl;
-			break;
-		case 26:
-			vSnake.powerupActivationTimestamp[1] = gTimer + MAX_POWERUP_TIME[1];
-			vSnake.hasActivePowerup[1] = true;
-			break;
-		case 27:
-			vSnake.powerupActivationTimestamp[2] = gTimer + MAX_POWERUP_TIME[2];
-			vSnake.hasActivePowerup[2] = true;
-			vSnake.collectDistanceMultiplier(16);
-			vSnake.setCollectAngle(60);
-			break;
-		case 28:
-			vSnake.powerupActivationTimestamp[3] = gTimer + MAX_POWERUP_TIME[3];
-			vSnake.hasActivePowerup[3] = true;
-			break;
-		case 29:
-			vSnake.powerupActivationTimestamp[4] = gTimer + MAX_POWERUP_TIME[4];
-			vSnake.hasActivePowerup[4] = true;
-			break;
-	}
-}
-double distanceCalc(SDL_Point &a, SDL_Point &b) {
-	return sqrt(pow((a.x - b.x), 2) + pow((a.y - b.y), 2));
-}
-
-void print() {
-	cout << "Print drukuje: \n";
-	cout << "gSHx: " << gSnake.getHeadBox().x << "\tgSHBy: " << gSnake.getHeadBox().y; //<<endl;
-	cout << "\tgSHBw: " << gSnake.getHeadBox().w << "\tgSHBh: " << gSnake.getHeadBox().h << endl;
-	for (int i = 0; i < gEnemyQuantity; i++) {
-		cout << "gEHx: " << gEnemy[i].getHeadBox().x << "\tgEHBy: " << gEnemy[i].getHeadBox().y; // << endl;
-		cout << "\tgEHw: " << gEnemy[i].getHeadBox().w << "\tgEHh: " << gEnemy[i].getHeadBox().h << endl;
-	}
-	cout << "Koniec Printa\n";
-	gContinue = false;
-}
-
+//++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++EventHandler
 void handleEvents() {
 	if (gReset) {
 		gReset = false;
@@ -1079,7 +614,7 @@ void handleEvents() {
 			SDL_GetMouseState(&gMouse.x, &gMouse.y);
 		}
 		gWindow.eventHandler(event);
-		gSnake.eventHandler(event, &gWindow, &gCamera);
+		gPlayer[0].eventHandler(event, &gWindow, &gCamera);
 		for (int i = 0; i < (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU); i++) {
 			switch (gGameState) {
 				case 1:
@@ -1167,7 +702,7 @@ void handleEvents() {
 			case TOTAL_NUMBER_OF_BUTTONS: //No - get back to main menu
 				gGameState = 1;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU-1):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU - 1):
 				if (gSettingsFileContent[0] < 0) {
 					gSettingsFileContent[0] = 0;
 				}
@@ -1281,35 +816,33 @@ void handleEvents() {
 						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 					}
 				}
-				gEnemyQuantity = gSettingsFileContent[1];
+				gPlayerQuantity = gSettingsFileContent[1];
 				gAngle.clear();
 				gCurrentTime.clear();
 				gTimeElapsed.clear();
-				gEnemySprite.clear();
-				gEnemyStartPos.clear();
-				gEnemy.clear();
-				gEnemyToTargetDistance[0].clear();
-				gEnemyToTargetDistance[1].clear();
-				for (int i = 0; i < gEnemyQuantity; i++) {
+				gPlayerSprite.clear();
+				gPlayerStartPos.clear();
+				gPlayer.clear();
+				gPlayerToTargetDistance[0].clear();
+				gPlayerToTargetDistance[1].clear();
+				for (int i = 0; i < gPlayerQuantity; i++) {
 					gAngle.push_back(0.0);
 					gCurrentTime.push_back(0);
 					gTimeElapsed.push_back(0);
-					gEnemySprite.push_back(0);
-					gEnemyStartPos.push_back( { 0, 0 });
-					gEnemy.push_back(Snake());
-					gEnemyToTargetDistance[0].push_back(0);
-					gEnemyToTargetDistance[1].push_back(0);
+					gPlayerSprite.push_back(0);
+					gPlayerStartPos.push_back( { 0, 0 });
+					gPlayer.push_back(Snake());
+					gPlayerToTargetDistance[0].push_back(0);
+					gPlayerToTargetDistance[1].push_back(0);
 				}
-				for (int i = 0; i < gEnemyQuantity; i++) {
-					gEnemyStartPos[i].x = 100 + 0.5 * gLvlWidth * ((double) rand() / RAND_MAX);
-					gEnemyStartPos[i].y = 100 + 0.5 * gLvlHeight * ((double) rand() / RAND_MAX);
-					gEnemySprite[i] = (int) (TOTAL_SPRITES * ((float) rand() / RAND_MAX));
-					gEnemy[i].setStartPos(gEnemyStartPos[i].x, gEnemyStartPos[i].y);
-					//		gEnemy[i].resetLength();
+				for (unsigned int i = 0; i < gPlayer.size(); i++) {
+					gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
+					gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
+					gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
 				}
 				gGameState = 1;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU):
 				gSettingsFile.open("./assets/settings.txt", ios::in);
 				if (gSettingsFile.is_open()) {
 					gPathToLangFile.str("");
@@ -1349,85 +882,52 @@ void handleEvents() {
 				}
 				gGameState = 1;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+1):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 1):
 				gSettingsFileContent[0]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+1+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 1 + 5):
 				gSettingsFileContent[0]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+2):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 2):
 				gSettingsFileContent[1]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+2+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 2 + 5):
 				gSettingsFileContent[1]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+3):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 3):
 				gSettingsFileContent[2]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+3+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 3 + 5):
 				gSettingsFileContent[2]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+4):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 4):
 				gSettingsFileContent[3]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+4+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 4 + 5):
 				gSettingsFileContent[3]++;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5):
 				gSettingsFileContent[4]--;
 				break;
-			case (TOTAL_NUMBER_OF_BUTTONS+POSITIONS_IN_OPTIONS_MENU+5+5):
+			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5 + 5):
 				gSettingsFileContent[4]++;
 				break;
 		}
 	}
 }
-
-bool initSDL(Win *window) {
-	if (window == NULL) {
-		cout << "Window not set!\n";
-		return false;
-	}
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-		return false;
-	}
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
-		printf("Warning: Linear texture filtering not enabled!");
-		return false;
-	}
-	window->setWidth(gScreenWidth);
-	window->setHeight(gScreenHeight);
-	if (!window->init()) {
-		printf("Failed to properly initialize Window object.");
-		return false;
-	}
-
-	return true;
+// OPTIONS MENU STEERING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void fTextToShow(int &i, int xpos, int ypos, string &vText) {
+	gTextToShow.str("");
+	gTextToShow << vText.c_str();
+	gLTPosTxt.loadFromText(gTextToShow.str().c_str(), gTextNormalColor, gFont, gWindow);
+	gLTPosTxt.setHeight(gButtonNextPrev[0].getButtonDims().h);
+	gLTPosTxt.setWidth(1 * gLTPosTxt.getWidth());
+	gButtonNextPrev[i].render(xpos, ypos, gWindow);
+	gLTPosTxt.render(xpos + (1.25 * gButtonNextPrev[0].getButtonDims().w), ypos, gWindow);
+	gButtonNextPrev[i + 5].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
+	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
 }
-
-void close(Win *window) {
-	/*for (int i = 0; i < TOTAL_FRUITS; i++) {
-	 delete gFruit[i];
-	 }*/
-	gLTFruit.free();
-	gLTSnakeHead.free();
-	gLTSnakeTail.free();
-	gLTLevelTexture.free();
-	gLTPause.free();
-	if (gLTScoreText.getWidth() != 0) {
-		gLTScoreText.free();
-	}
-	gLTExitQuestion.free();
-	gLTMenuBackground.free();
-	gLTTitleText.free();
-
-	if (window != NULL) {
-		window->close();
-	}
-
-}
-
+// COLLISION CHECKING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 bool checkCollision(SDL_Rect a, SDL_Rect b) {
 //The sides of the rectangles
 	int leftA, leftB;
@@ -1467,4 +967,330 @@ bool checkCollision(SDL_Rect a, SDL_Rect b) {
 //If none of the sides from A are outside B
 	return true;
 }
+// SDL INITIALIZZATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+bool initSDL(Win *window) {
+	if (window == NULL) {
+		cout << "Window not set!\n";
+		return false;
+	}
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
+		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+		return false;
+	}
+	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
+		printf("Warning: Linear texture filtering not enabled!");
+		return false;
+	}
+	if (SDLNet_Init() < 0) {
+		std::cout << "SDLNet_Init: %s\n" << SDLNet_GetError() << std::endl;
+	}
+	window->setWidth(gScreenWidth);
+	window->setHeight(gScreenHeight);
+	if (!window->init()) {
+		printf("Failed to properly initialize Window object.");
+		return false;
+	}
 
+	return true;
+}
+// COLLISIONS WITH FRUITS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void fruitCollisions() {
+
+	for (int i = 0; i <= gPlayerQuantity; i++) {
+		//		cout << "BFR gPlayerToTargetDistance[1][" << i << "] " << gPlayerToTargetDistance[1][i] << "\tgPlayerToTargetDistance[0][" << i << "] " << gPlayerToTargetDistance[0][i] << endl;
+		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
+		gPlayerToTargetDistance[1][i] = -1;
+		//		cout<<"AFR gPlayerToTargetDistance[1]["<<i<<"] "<<EnemyToTargetDistance[1][i]<<"\tgPlayerToTargetDistance[0]["<<i<<"] "<<gPlayerToTargetDistance[0][i]<<endl;
+	}
+	for (int i = 0; i < gFruitsQuantity; i++) {
+		for (int e = 0; e <= gPlayerQuantity; e++) {
+			if (gPlayer[e].collectFruit(gFruit[i])) {
+				x[i] = gPlayer[e].mNewFruitPos.x;
+				y[i] = gPlayer[e].mNewFruitPos.y;
+			}
+		}
+		for (int j = 0; j <= gPlayerQuantity; j++) {
+			gCollision = checkCollision(gFruit[i].getRect(), gPlayer[j].getHeadBox());
+			if (gPlayer[j].hasActivePowerup[0] && (gPlayer[0].hasActivePowerup[0] || gPlayer[0].hasActivePowerup[1] || gPlayer[0].hasActivePowerup[3])) {
+				gPlayer[j].hasActivePowerup[0] = false;
+			}
+			if (gPlayer[j].hasActivePowerup[0] && j != 0) {
+				gPlayerToTargetDistance[0][j] = gPlayer[j].getSnakeFruitDistance(gPlayer[0].mHeadBox);
+				gPlayerToTargetDistance[1][j] = -1;
+				for (int e = 0; e <= gPlayerQuantity; e++) {
+					if ((gPlayerToTargetDistance[0][j] > gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
+						gPlayerToTargetDistance[1][j] = e;
+					}
+				}
+				if (gPlayerQuantity > 0) {
+					for (int e = 1; e <= gPlayerQuantity; e++) {
+						//					cout<<"gPlayerToTargetDistance[0][j]"<<gPlayerToTargetDistance[0][j]<<"\tgPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox) "<<gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)<<endl;
+						if ((gPlayerToTargetDistance[0][j] < gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
+							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
+						} else {
+							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[e].mHeadBox);
+						}
+						//					cout << "AFC gPlayerToTargetDistance[1][" << e << "] " << gPlayerToTargetDistance[1][e] << "\tgPlayerToTargetDistance[0][" << e << "] " << gPlayerToTargetDistance[0][e] <<"\tgAngle["<<j<<"] "<<gAngle[j]<< endl;
+					}
+				} else {
+					gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
+				}
+
+				break;
+			}
+			if (gCollision) {
+				//				cout << "gPlayerToTargetDistance[0][j] " << gPlayerToTargetDistance[0][j] << "\tgPlayerToTargetDistence[1][j] " << gPlayerToTargetDistance[1][j] << endl;
+				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
+				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
+				if (gSpriteNum[i] < 25) {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				} else {
+					//					cout<<gSpriteNum[i]<<endl;
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
+				}
+				//				gAngle[j] = gPlayer[j].getHeadToFruitAngle(gFruit[gPlayerToTargetDistence[1][j]].mBox);
+				//				cout << "j " << j << "\t " << gPlayerToTargetDistence[1][j] << endl;
+				activatePowerup(gSpriteNum[i], gPlayer[j]);
+				if (gSpriteNum[i] < 25) {
+					gPlayer[j].addLength();
+				}
+				gAngle[j] = gPlayer[j].getHeadToFruitAngle(gFruit[gPlayerToTargetDistance[1][j]].mBox);
+			}
+		}
+	}
+}
+// POWERUP ACTIVATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
+	switch (fruitSpriteNum) {
+		case 25:
+			vSnake.powerupActivationTimestamp[0] = gTimer + MAX_POWERUP_TIME[0];
+			vSnake.hasActivePowerup[0] = true;
+//			cout << vSnake.hasActivePowerup[0] << "\t" << vSnake.powerupActivationTimestamp[0] << "\tCurrent time: " << gTimer << endl;
+			break;
+		case 26:
+			vSnake.powerupActivationTimestamp[1] = gTimer + MAX_POWERUP_TIME[1];
+			vSnake.hasActivePowerup[1] = true;
+			break;
+		case 27:
+			vSnake.powerupActivationTimestamp[2] = gTimer + MAX_POWERUP_TIME[2];
+			vSnake.hasActivePowerup[2] = true;
+			vSnake.collectDistanceMultiplier(16);
+			vSnake.setCollectAngle(60);
+			break;
+		case 28:
+			vSnake.powerupActivationTimestamp[3] = gTimer + MAX_POWERUP_TIME[3];
+			vSnake.hasActivePowerup[3] = true;
+			break;
+		case 29:
+			vSnake.powerupActivationTimestamp[4] = gTimer + MAX_POWERUP_TIME[4];
+			vSnake.hasActivePowerup[4] = true;
+			break;
+	}
+}
+// POWERUP CHECKING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void powerupCheck(Snake &vSnake, bool render) {
+
+	for (int i = 0; i < TOTAL_POWERUPS; i++) {
+//		cout<<i<<" "<<vSnake.powerupActivationTimestamp[i]<<endl;
+		if (vSnake.powerupActivationTimestamp[i] < gTimer) {
+			vSnake.hasActivePowerup[i] = false;
+		}
+		if (vSnake.hasActivePowerup[i]) {
+			if (!render) {
+				break;
+			}
+			int iconPosX = (int) ((gWindow.getWidth() - 50) / gRenderScaleX);
+			switch (i) {
+				case 0:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 1:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 2:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 3:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+				case 4:
+					gTimeLeft.str("");
+					if (((vSnake.powerupActivationTimestamp[i] - gTimer) < 10) && ((vSnake.powerupActivationTimestamp[i] - gTimer) >= 0)) {
+						gTimeLeft << "0";
+					}
+					gTimeLeft << vSnake.powerupActivationTimestamp[i] - gTimer;
+					gLTPowerupsTimeText[i].loadFromText(gTimeLeft.str().c_str(), gTextColor, gFont, gWindow);
+					gLTPowerupsTimeText[i].setWidth(0.25 * gLTScoreText.getWidth());
+					gLTPowerupsTimeText[i].setHeight(TEXT_SIZE);
+					gLTPowerupIcons.render(iconPosX, i * 50, gWindow, &gPowerupClip[i]);
+					gLTPowerupsTimeText[i].render(iconPosX - gLTPowerupsTimeText[i].getWidth(), i * gLTPowerupsTimeText[i].getHeight(), gWindow);
+					break;
+			}
+		} else {
+			switch (i) {
+				case 0:
+					break;
+				case 1:
+					break;
+				case 2:
+					vSnake.collectDistanceMultiplier(4);
+					vSnake.setCollectAngle(120);
+					break;
+				case 3:
+					break;
+				case 4:
+					if (render) {
+						SDL_RenderSetScale(gRenderer, 1, 1);
+						SDL_RenderGetScale(gRenderer, &gRenderScaleX, &gRenderScaleY);
+					}
+					break;
+			}
+		}
+	}
+}
+// GAME RESETTING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+void gameReset(bool &reset) {
+	if (reset) {
+		for (int p = 0; p < TOTAL_POWERUPS; p++) {
+			for (int i = 0; i <= gPlayerQuantity; i++) {
+				gPlayer[i].hasActivePowerup[p] = false;
+//			gSnake.powerupActivationTimestamp[p] = gTime;
+			}
+		}
+//		gPlayer[0].resetLength();
+//		gPlayer[0].setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
+		for (int i = 0; i <= gPlayerQuantity; i++) {
+			gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
+			gPlayer[i].resetLength();
+			for (int p = 0; p < TOTAL_POWERUPS; p++) {
+				gPlayer[i].hasActivePowerup[p] = false;
+//				gEnemy[i].powerupActivationTimestamp[p] = gTime;
+			}
+		}
+		reset = false;
+
+	}
+}
+// COLLISIONS BETWEEN PLAYERS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+void betweenPlayersCollisions() {
+	for (int i = 0; i <= gPlayerQuantity; i++) {
+		for (int j = 0; j <= gPlayerQuantity; j++) {
+			if (i != j) {
+
+				if (gPlayer[i].hasActivePowerup[1] || gPlayer[j].hasActivePowerup[1]) {
+					escapeFromDanger(gPlayer[i], gPlayer[j], gAngle[i]);
+				}
+				gCollision = checkCollision(gPlayer[i].getHeadBox(), gPlayer[j].getHeadBox());
+				if (gPlayer[i].hasActivePowerup[1] || gPlayer[j].hasActivePowerup[1]) { //GHOST ON ****************
+					gCollision = false;
+				}
+				if (gCollision) {
+					if (gPlayer[i].hasActivePowerup[0]) {
+						for (int et = 0; et < gPlayer[j].getLength(); et++) {
+							gPlayer[i].addLength();
+							gPlayer[i].updateTail(gLTEnemyTail);
+						}
+						gPlayer[j].resetLength();
+						break;
+					}
+					if (gPlayer[j].hasActivePowerup[0]) {
+						for (int et = 0; et < gPlayer[i].getLength(); et++) {
+							gPlayer[j].addLength();
+							gPlayer[j].updateTail(gLTEnemyTail);
+						}
+						gPlayer[i].resetLength();
+						break;
+					}
+					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
+					if (gPlayer[i].hasActivePowerup[3]) { //SHIELD ON ****************
+						break;
+					}
+					gPlayer[i].resetLength();
+					if (i == 0 && gGameState == 0) {
+						gGameState = 4;
+					}
+					//						gPlayer[i].setStartPos(gPlayer[i].getHeadBox().x+gWindow.getWidth()+10, gPlayer[i].getHeadBox().y+gWindow.getHeight()+10);
+				}
+				if (gPlayer[i].getLength() != 0 && i != j) {
+					for (int t = 0; t < gPlayer[i].getLength(); t++) {
+						gCollision = checkCollision(gPlayer[i].getTailBox(t), gPlayer[j].getHeadBox());
+						if (gPlayer[j].hasActivePowerup[1]) { //GHOST ON ****************
+							gCollision = false;
+						}
+						if (gCollision) {
+							if (gPlayer[j].hasActivePowerup[0]) {
+								for (int et = 0; et < gPlayer[i].getLength(); et++) {
+									gPlayer[j].addLength();
+									gPlayer[j].updateTail(gLTEnemyTail);
+								}
+								gPlayer[i].resetLength();
+								break;
+							}
+							gAngle[j] = 360 * ((double) rand() / RAND_MAX);
+							if (gPlayer[i].hasActivePowerup[3]) { //SHIELD ON ****************
+								break;
+							}
+							gPlayer[j].resetLength();
+							//								gPlayer[i].setStartPos(gPlayer[i].getHeadBox().x+gWindow.getWidth()+10, gPlayer[i].getHeadBox().y+gWindow.getHeight()+10);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+//	ESCAPE FROM DANGER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle) {
+	if ((vSnake1.getSnakeFruitDistance(vSnake2.mHeadBox) < (vSnake1.mHeadBox.w * 20)) && (vSnake2.hasActivePowerup[0]) && !vSnake1.hasActivePowerup[1] && !vSnake1.hasActivePowerup[3]) {
+		if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 0 || vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) < 90) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 90 || vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) < 180) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else if (vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) >= 180 || vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) < 270) {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		} else {
+			vAngle = vSnake1.getHeadToFruitAngle(vSnake2.mHeadBox) + 90 + 180 * ((double) rand() / RAND_MAX);
+			return true;
+		}
+	}
+	return false;
+}

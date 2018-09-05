@@ -2,7 +2,7 @@
  * main.h
  *
  *  Created on: 03.07.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef MAIN_H_
@@ -25,17 +25,14 @@
 #include <SDL2/SDL_ttf.h>
 #include <SDL2/SDL_mixer.h>
 #include <SDL2/SDL_thread.h>
+#include <SDL2/SDL_net.h>
 //--------------------------------namespace
 using namespace std;
 
 bool checkCollision(SDL_Rect a, SDL_Rect b);
 double distanceCalc(SDL_Point &a, SDL_Point &b);
 void fruitCollisions();
-void betweenBotsCollisions();
-void playerAndBotsCollisions();
+//void betweenBotsCollisions();
+//void playerAndBotsCollisions();
 void gameReset(bool &reset);
-void spritesGenerator();
-void boxesSetup();
-void resolutionChange();
-void gameMenu(int &gGameState);
 #endif /* MAIN_H_ */

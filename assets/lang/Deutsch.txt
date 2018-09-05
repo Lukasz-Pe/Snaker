@@ -1,0 +1,19 @@
+Starten :D (s)
+Das Spiel neu starten (r)
+Netzwerkspiel (i)
+Optionen (o)
+Das Spiel beenden :( (q/ESC)
+Ich muss... :( (t)
+Vielleicht nicht... :) (n/ESC)
+Sprache ändern
+Bots Menge
+Obstmenge
+Powerups Quantität
+Schlange Geschwindigkeit
+Änderungen speichern
+Zurück zum Hauptmenü (keine Einsparung)
+Ende des Spiels?
+Spiel pausiert
+Spiel über:(
+Drücken Sie R zum Neustart oder Q/ESC um Spiel zu beenden
+Optionen

@@ -2,7 +2,7 @@
  * Menu.h
  *
  *  Created on: 5 lip 2018
- *      Author: lukasz
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef SRC_MENU_H_

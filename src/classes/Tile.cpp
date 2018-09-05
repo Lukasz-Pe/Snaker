@@ -2,7 +2,7 @@
  * T39-Tile.cpp
  *
  *  Created on: 26.06.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #include "Tile.h"

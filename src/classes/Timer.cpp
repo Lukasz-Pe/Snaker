@@ -2,7 +2,7 @@
  * Timer.cpp
  *
  *  Created on: 7 lip 2018
- *      Author: lukasz
+ *      Author: Łukasz Pękalski
  */
 
 #include "Timer.h"

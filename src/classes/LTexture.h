@@ -2,7 +2,7 @@
  * T39-LTexture.h
  *
  *  Created on: 25.06.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef SRC_T49_LTEXTURE_H_

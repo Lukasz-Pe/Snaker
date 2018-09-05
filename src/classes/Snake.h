@@ -2,7 +2,7 @@
  * Snake.h
  *
  *  Created on: 03.07.2018
- *      Author: lpekalski
+ *      Author: Łukasz Pękalski
  */
 
 #ifndef SNAKE_H_
