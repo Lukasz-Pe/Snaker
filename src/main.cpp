@@ -470,27 +470,26 @@ int main(int argc, char* args[]) {
 				//					gLvlHeight -= 50;
 			}
 //			RESETTING AFTER CHOOSING OPTION IN MENU OR INGAME >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				gameReset(gReset);
+			gameReset(gReset);
 //			PREPARING FOR RENDER >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gWindow.prepareRenderer(0, 0, 0);
 			gPlayer[0].setCamera(gLvlWidth, gLvlHeight, gCamera);
 //			RENDERING OF BACKGROUND >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				for (int i = 0; i < gTotalTiles; i++) {
-					tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
-				}
+			for (int i = 0; i < gTotalTiles; i++) {
+				tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
+			}
 //			SETTING STARTING POS OF FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				for (int i = 0; i < gFruitsQuantity; i++) {
-					if (gSpriteNum[i] < 25) {
-						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
-					} else {
-						gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
-					}
+			for (int i = 0; i < gFruitsQuantity; i++) {
+				if (gSpriteNum[i] < 25) {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
+				} else {
+					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
 				}
 			}
 
 //			COLLISIONS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 //			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-				fruitCollisions();
+			fruitCollisions();
 //			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			for (int i = 1; i < gPlayerQuantity; i++) {
 				if (gPlayer[i].getHeadBox().x < 1 || gPlayer[i].getHeadBox().y < 1 || (gPlayer[i].getHeadBox().w + gPlayer[i].getHeadBox().x) >= (gLvlWidth) || (gPlayer[i].getHeadBox().h + gPlayer[i].getHeadBox().y) >= (gLvlHeight)) {
@@ -532,8 +531,8 @@ int main(int argc, char* args[]) {
 			gWindow.render();
 //		END OF GAME LOGIC ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 		}
-	}
 // END OF MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+	}
 	return 0;
 }
 
