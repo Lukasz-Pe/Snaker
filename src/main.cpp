@@ -1013,7 +1013,7 @@ void fruitCollisions() {
 			if (gPlayer[j].hasActivePowerup[0] && (gPlayer[0].hasActivePowerup[0] || gPlayer[0].hasActivePowerup[1] || gPlayer[0].hasActivePowerup[3])) {
 				gPlayer[j].hasActivePowerup[0] = false;
 			}
-			if (gPlayer[j].hasActivePowerup[0]) {
+			if (gPlayer[j].hasActivePowerup[0] && j!=0) {
 				gPlayerToTargetDistance[0][j] = gPlayer[j].getSnakeFruitDistance(gPlayer[0].mHeadBox);
 				gPlayerToTargetDistance[1][j] = -1;
 				for (int e = 0; e <= gPlayerQuantity; e++) {
@@ -1021,8 +1021,8 @@ void fruitCollisions() {
 						gPlayerToTargetDistance[1][j] = e;
 					}
 				}
-				if (gPlayerQuantity > 1) {
-					for (int e = 0; e <= gPlayerQuantity; e++) {
+				if (gPlayerQuantity > 0) {
+					for (int e = 1; e <= gPlayerQuantity; e++) {
 						//					cout<<"gPlayerToTargetDistance[0][j]"<<gPlayerToTargetDistance[0][j]<<"\tgPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox) "<<gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)<<endl;
 						if ((gPlayerToTargetDistance[0][j] < gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
 							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
