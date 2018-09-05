@@ -267,6 +267,7 @@ int main(int argc, char* args[]) {
 	for (unsigned int i = 0; i < gPlayer.size(); i++) {
 		gPlayerStartPos[i].x = static_cast<int>(gLvlWidth * (static_cast<double>(rand()) / RAND_MAX));
 		gPlayerStartPos[i].y = static_cast<int>(gLvlHeight * (static_cast<double>(rand()) / RAND_MAX));
+		gPlayerSprite[i] = static_cast<int>(TOTAL_SPRITES * ((float) rand() / RAND_MAX));
 		gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
 	}
 	gWindow.setTitle("Snaker");
