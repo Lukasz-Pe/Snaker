@@ -14,7 +14,7 @@
 #include "classes/Menu.h"
 #include "classes/Timer.h"
 
-int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000, gLvlHeight = gLvlWidth;
+int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000 / 2, gLvlHeight = gLvlWidth;
 int gPowerUpsQuantity, gFruitsQuantity, gPlayerQuantity;
 
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
@@ -1013,7 +1013,7 @@ void fruitCollisions() {
 			if (gPlayer[j].hasActivePowerup[0] && (gPlayer[0].hasActivePowerup[0] || gPlayer[0].hasActivePowerup[1] || gPlayer[0].hasActivePowerup[3])) {
 				gPlayer[j].hasActivePowerup[0] = false;
 			}
-			if (gPlayer[j].hasActivePowerup[0] && j!=0) {
+			if (gPlayer[j].hasActivePowerup[0] && j != 0) {
 				gPlayerToTargetDistance[0][j] = gPlayer[j].getSnakeFruitDistance(gPlayer[0].mHeadBox);
 				gPlayerToTargetDistance[1][j] = -1;
 				for (int e = 0; e <= gPlayerQuantity; e++) {
@@ -1208,8 +1208,8 @@ void gameReset(bool &reset) {
 }
 // COLLISIONS BETWEEN PLAYERS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 void betweenPlayersCollisions() {
-	for (int i = 0; i < gPlayerQuantity; i++) {
-		for (int j = 0; j < gPlayerQuantity; j++) {
+	for (int i = 0; i <= gPlayerQuantity; i++) {
+		for (int j = 0; j <= gPlayerQuantity; j++) {
 			if (i != j) {
 
 				if (gPlayer[i].hasActivePowerup[1] || gPlayer[j].hasActivePowerup[1]) {
@@ -1241,6 +1241,9 @@ void betweenPlayersCollisions() {
 						break;
 					}
 					gPlayer[i].resetLength();
+					if (i == 0 && gGameState == 0) {
+						gGameState = 4;
+					}
 					//						gPlayer[i].setStartPos(gPlayer[i].getHeadBox().x+gWindow.getWidth()+10, gPlayer[i].getHeadBox().y+gWindow.getHeight()+10);
 				}
 				if (gPlayer[i].getLength() != 0 && i != j) {
