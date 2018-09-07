@@ -22,7 +22,6 @@ bool initSDL(Win *window = NULL);
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
-void print();
 bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
 void betweenPlayersCollisions();
 //----------------------------------------------------------------Deklaracje zmiennych
