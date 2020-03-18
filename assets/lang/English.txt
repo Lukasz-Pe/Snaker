@@ -1,6 +1,5 @@
 Start :D (s)
 Reset game (r)
-Network game (i)
 Options (o)
 Quit :( (q/ESC)
 I have to :( (y)

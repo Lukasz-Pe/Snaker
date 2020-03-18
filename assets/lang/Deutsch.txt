@@ -1,6 +1,5 @@
 Starten :D (s)
 Das Spiel neu starten (r)
-Netzwerkspiel (i)
 Optionen (o)
 Das Spiel beenden :( (q/ESC)
 Ich muss... :( (t)

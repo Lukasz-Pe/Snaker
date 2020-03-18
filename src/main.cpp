@@ -36,14 +36,14 @@ vector<SDL_Point> gPlayerStartPos;
 vector<Snake> gPlayer;
 //-------Other vars
 bool gContinue = true, gCollision = false, gReset = false;
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 7, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
+int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
 double timeStep;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gCurrentScore = 0, gOption = -1, gGameState = 1;
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemy1Pos, gEnemy2Pos;
 stringstream gScore, gTimeLeft;
-string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Network game (i)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
+string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
 string gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Snake speed", "Save changes", "Back to main menu (no saving)" };
 string gScreenInfos[5] = { "End of game?", "Game paused", "Game over :(", "Press R to restart or Q/ESC to exit", "Options" };
 SDL_Renderer *gRenderer = NULL;
@@ -154,7 +154,7 @@ int main(int argc, char* args[]) {
 		for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
 			gOptionsItems[i] = gAllTexts[i + TOTAL_NUMBER_OF_BUTTONS];
 		}
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS-2; i++) {
 			gScreenInfos[i] = gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
 		}
 		for (int i = 0; i <= gPlayerQuantity; i++) {
@@ -689,7 +689,7 @@ void handleEvents() {
 				gGameState = 0;
 				gReset = true;
 				break;
-			case 4: //Options
+			case TOTAL_NUMBER_OF_BUTTONS-3: //Options
 				gGameState = 5;
 				break;
 			case TOTAL_NUMBER_OF_BUTTONS - 2: //Quit game
