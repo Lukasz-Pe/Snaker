@@ -113,20 +113,20 @@ bool LTexture::loadFromFileAndChange(string path, Win &vWin) {
 
 bool LTexture::loadFromText(string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin) {
 	free();
-	SDL_Surface *textSufrace = TTF_RenderUTF8_Blended(mUsedFont, textureText.c_str(), textColor);
+	SDL_Surface *textSurface = TTF_RenderUTF8_Blended(mUsedFont, textureText.c_str(), textColor);
 	//TTF_RenderText_Solid(mUsedFont, textureText.c_str(), textColor);
-	if (textSufrace == NULL) {
+	if (textSurface == NULL) {
 		cout << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << endl;
 		return false;
 	}
-	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), textSufrace);
+	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), textSurface);
 	if (mTexture == NULL) {
 		cout << "Unable to process fonts surface to texture! SDL Error: " << SDL_GetError() << endl;
 		return false;
 	}
-	mTextureHeight = textSufrace->w;
-	mTextureWidht = textSufrace->h;
-	SDL_FreeSurface(textSufrace);
+	mTextureHeight = textSurface->w;
+	mTextureWidht = textSurface->h;
+	SDL_FreeSurface(textSurface);
 	return mTexture != NULL;
 }
 

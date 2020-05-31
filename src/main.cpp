@@ -72,7 +72,7 @@ void fTextToShow(int &i, int xpos, int ypos, string &vText);
 
 int main(int argc, char* args[]) {
 //Opening lang list file
-	gFileLangList.open("./assets/lang/_LangList.txt");
+	gFileLangList.open("../assets/lang/_LangList.txt");
 	if (gFileLangList.is_open()) {
 		while (!gFileLangList.eof()) {
 			gFileLangList >> gTmpText;
@@ -86,10 +86,10 @@ int main(int argc, char* args[]) {
 	}
 //Loading settings file
 	if (gContinue) {
-		gSettingsFile.open("./assets/settings.txt", ios::in);
+		gSettingsFile.open("../assets/settings.txt", ios::in);
 		if (gSettingsFile.is_open()) {
 			gPathToLangFile.str("");
-			gPathToLangFile << "./assets/lang/";
+			gPathToLangFile << "../assets/lang/";
 			{
 				int i = 0;
 				while (getline(gSettingsFile, gTmpText, '/')) {
@@ -173,28 +173,28 @@ int main(int argc, char* args[]) {
 		gContinue = initSDL(&gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTFruit.loadFromFile("./assets/images/fruits.png", gWindow);
+		gContinue = gLTFruit.loadFromFile("../assets/images/fruits.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTSnakeHead.loadFromFile("./assets/images/face.png", gWindow);
+		gContinue = gLTSnakeHead.loadFromFile("../assets/images/face.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTSnakeTail.loadFromFile("./assets/images/dot.png", gWindow);
+		gContinue = gLTSnakeTail.loadFromFile("../assets/images/dot.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTLevelTexture.loadFromFile("./assets/images/bo_play_pattern.png", gWindow);
+		gContinue = gLTLevelTexture.loadFromFile("../assets/images/bo_play_pattern.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTMenuBackground.loadFromFile("./assets/images/escheresque.png", gWindow);
+		gContinue = gLTMenuBackground.loadFromFile("../assets/images/escheresque.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTEnemyHead.loadFromFile("./assets/images/faces.png", gWindow);
+		gContinue = gLTEnemyHead.loadFromFile("../assets/images/faces.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTEnemyTail.loadFromFile("./assets/images/tails.png", gWindow);
+		gContinue = gLTEnemyTail.loadFromFile("../assets/images/tails.png", gWindow);
 	}
 	if (gContinue) {
-		gContinue = gLTPowerupIcons.loadFromFile("./assets/images/powerups.png", gWindow);
+		gContinue = gLTPowerupIcons.loadFromFile("../assets/images/powerups.png", gWindow);
 	}
 
 	for (int i = 0; i < TOTAL_SPRITES; i++) {
@@ -219,9 +219,9 @@ int main(int argc, char* args[]) {
 		gSpritePosX+=POWERUP_ICON_DIMS;
 	}
 
-	gFont = TTF_OpenFont("./assets/fonts/Horta.ttf", TEXT_SIZE);
-	gTitleFont = TTF_OpenFont("./assets/fonts/Horta.ttf", TITLE_TEXT_SIZE);
-	TTF_SetFontStyle(gTitleFont, TTF_STYLE_UNDERLINE);
+	gFont = TTF_OpenFont("../assets/fonts/Horta.ttf", TEXT_SIZE);
+	gTitleFont = TTF_OpenFont("../assets/fonts/Horta.ttf", TITLE_TEXT_SIZE);
+//	TTF_SetFontStyle(gTitleFont, TTF_STYLE_UNDERLINE);
 	if (gFont == NULL || gTitleFont == NULL) {
 		printf("Failed to load font! SDL_ttf Error: %s\n", TTF_GetError());
 		gContinue = false;
@@ -720,13 +720,13 @@ void handleEvents() {
 				if (gSettingsFileContent[4] <= 1) {
 					gSettingsFileContent[4] = 1;
 				}
-				gSettingsFile.open("./assets/settings.txt", ios::out);
+				gSettingsFile.open("../assets/settings.txt", ios::out);
 				for (int i = 0; i < 5; i++) {
 					gSettingsFile << gSettingsFileContent[i] << "\t" << fSettingsInstructions[i] << endl;
 				}
 				gSettingsFile.close();
 				gPathToLangFile.str("");
-				gPathToLangFile << "./assets/lang/";
+				gPathToLangFile << "../assets/lang/";
 				gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
 				gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
 				if (gLangFile.is_open()) {
@@ -842,10 +842,10 @@ void handleEvents() {
 				gGameState = 1;
 				break;
 			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU):
-				gSettingsFile.open("./assets/settings.txt", ios::in);
+				gSettingsFile.open("../assets/settings.txt", ios::in);
 				if (gSettingsFile.is_open()) {
 					gPathToLangFile.str("");
-					gPathToLangFile << "./assets/lang/";
+					gPathToLangFile << "../assets/lang/";
 					{
 						int i = 0;
 						while (getline(gSettingsFile, gTmpText, '/')) {
@@ -979,9 +979,6 @@ bool initSDL(Win *window) {
 	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
 		printf("Warning: Linear texture filtering not enabled!");
 		return false;
-	}
-	if (SDLNet_Init() < 0) {
-		std::cout << "SDLNet_Init: %s\n" << SDLNet_GetError() << std::endl;
 	}
 	window->setWidth(gScreenWidth);
 	window->setHeight(gScreenHeight);
