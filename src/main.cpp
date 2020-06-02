@@ -930,19 +930,14 @@ void fTextToShow(int &i, int xpos, int ypos, string &vText) {
 	gButtonNextPrev[i + 5].render(xpos + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10, ypos, gWindow);
 	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
 }
-// COLLISION CHECKING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
-// SDL INITIALIZZATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 // COLLISIONS WITH FRUITS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void fruitCollisions() {
-
+    //Reset of distances to fruits
 	for (int i = 0; i <= gPlayerQuantity; i++) {
-		//		cout << "BFR gPlayerToTargetDistance[1][" << i << "] " << gPlayerToTargetDistance[1][i] << "\tgPlayerToTargetDistance[0][" << i << "] " << gPlayerToTargetDistance[0][i] << endl;
 		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gPlayerToTargetDistance[1][i] = -1;
-		//		cout<<"AFR gPlayerToTargetDistance[1]["<<i<<"] "<<EnemyToTargetDistance[1][i]<<"\tgPlayerToTargetDistance[0]["<<i<<"] "<<gPlayerToTargetDistance[0][i]<<endl;
 	}
+	//After eating a fruit copy the new fruit coordinates from snake to coord vectors
 	for (int i = 0; i < gFruitsQuantity; i++) {
 		for (int e = 0; e <= gPlayerQuantity; e++) {
 			if (gPlayer[e].collectFruit(gFruit[i])) {
@@ -965,13 +960,11 @@ void fruitCollisions() {
 				}
 				if (gPlayerQuantity > 0) {
 					for (int e = 1; e <= gPlayerQuantity; e++) {
-						//					cout<<"gPlayerToTargetDistance[0][j]"<<gPlayerToTargetDistance[0][j]<<"\tgPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox) "<<gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)<<endl;
 						if ((gPlayerToTargetDistance[0][j] < gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
 							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
 						} else {
 							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[e].mHeadBox);
 						}
-						//					cout << "AFC gPlayerToTargetDistance[1][" << e << "] " << gPlayerToTargetDistance[1][e] << "\tgPlayerToTargetDistance[0][" << e << "] " << gPlayerToTargetDistance[0][e] <<"\tgAngle["<<j<<"] "<<gAngle[j]<< endl;
 					}
 				} else {
 					gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
@@ -980,17 +973,13 @@ void fruitCollisions() {
 				break;
 			}
 			if (gCollision) {
-				//				cout << "gPlayerToTargetDistance[0][j] " << gPlayerToTargetDistance[0][j] << "\tgPlayerToTargetDistence[1][j] " << gPlayerToTargetDistance[1][j] << endl;
 				x[i] = (gLvlWidth - gFruit[i].getRect().w) * ((float) rand() / RAND_MAX);
 				y[i] = (gLvlHeight - gFruit[i].getRect().h) * ((float) rand() / RAND_MAX);
 				if (gSpriteNum[i] < 25) {
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 				} else {
-					//					cout<<gSpriteNum[i]<<endl;
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]], &POWERUP_SCALE);
 				}
-				//				gAngle[j] = gPlayer[j].getHeadToFruitAngle(gFruit[gPlayerToTargetDistence[1][j]].mBox);
-				//				cout << "j " << j << "\t " << gPlayerToTargetDistence[1][j] << endl;
 				activatePowerup(gSpriteNum[i], gPlayer[j]);
 				if (gSpriteNum[i] < 25) {
 					gPlayer[j].addLength();
@@ -1006,7 +995,6 @@ void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 		case 25:
 			vSnake.powerupActivationTimestamp[0] = gTimer + MAX_POWERUP_TIME[0];
 			vSnake.hasActivePowerup[0] = true;
-//			cout << vSnake.hasActivePowerup[0] << "\t" << vSnake.powerupActivationTimestamp[0] << "\tCurrent time: " << gTimer << endl;
 			break;
 		case 26:
 			vSnake.powerupActivationTimestamp[1] = gTimer + MAX_POWERUP_TIME[1];
@@ -1032,7 +1020,6 @@ void activatePowerup(int &fruitSpriteNum, Snake &vSnake) {
 void powerupCheck(Snake &vSnake, bool render) {
 
 	for (int i = 0; i < TOTAL_POWERUPS; i++) {
-//		cout<<i<<" "<<vSnake.powerupActivationTimestamp[i]<<endl;
 		if (vSnake.powerupActivationTimestamp[i] < gTimer) {
 			vSnake.hasActivePowerup[i] = false;
 		}
@@ -1131,17 +1118,13 @@ void gameReset(bool &reset) {
 		for (int p = 0; p < TOTAL_POWERUPS; p++) {
 			for (int i = 0; i <= gPlayerQuantity; i++) {
 				gPlayer[i].hasActivePowerup[p] = false;
-//			gSnake.powerupActivationTimestamp[p] = gTime;
 			}
 		}
-//		gPlayer[0].resetLength();
-//		gPlayer[0].setStartPos(0.85 * gLvlWidth * (((double) rand() / RAND_MAX)), 0.85 * gLvlHeight * (((double) rand() / RAND_MAX)));
 		for (int i = 0; i <= gPlayerQuantity; i++) {
 			gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
 			gPlayer[i].resetLength();
 			for (int p = 0; p < TOTAL_POWERUPS; p++) {
 				gPlayer[i].hasActivePowerup[p] = false;
-//				gEnemy[i].powerupActivationTimestamp[p] = gTime;
 			}
 		}
 		reset = false;
