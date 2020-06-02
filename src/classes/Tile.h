@@ -9,7 +9,7 @@
 #define SRC_T49_TILE_H_
 
 #include "LTexture.h"
-#include "../main.h"
+#include "src/main.h"
 
 class Tile {
 public:

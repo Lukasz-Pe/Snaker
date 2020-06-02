@@ -13,12 +13,16 @@
 #include "classes/Tile.h"
 #include "classes/Menu.h"
 #include "classes/Timer.h"
+#include "functions/initsdl.h"
+//#include "functions/collisions.h"
+
+void fruitCollisions();
 
 int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000 / 2, gLvlHeight = gLvlWidth;
 int gPowerUpsQuantity, gFruitsQuantity, gPlayerQuantity;
 
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
-bool initSDL(Win *window = NULL);
+
 void close(Win *window = NULL);
 void activatePowerup(int &fruitSpriteNum, Snake &vSnake);
 void handleEvents();
@@ -170,7 +174,7 @@ int main(int argc, char* args[]) {
 	}
 
 	if (gContinue) {
-		gContinue = initSDL(&gWindow);
+		gContinue = initSDL(&gWindow, gScreenWidth, gScreenHeight);
 	}
 	if (gContinue) {
 		gContinue = gLTFruit.loadFromFile("../assets/images/fruits.png", gWindow);
@@ -927,68 +931,9 @@ void fTextToShow(int &i, int xpos, int ypos, string &vText) {
 	mOptsButtonsWidth[i] = gOptionButtons[i].getButtonDims().w + 80 + gButtonNextPrev[i].getButtonDims().w + 10 + gLTPosTxt.getWidth() + 10 + gButtonNextPrev[i + 4].getButtonDims().w;
 }
 // COLLISION CHECKING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-bool checkCollision(SDL_Rect a, SDL_Rect b) {
-//The sides of the rectangles
-	int leftA, leftB;
-	int rightA, rightB;
-	int topA, topB;
-	int bottomA, bottomB;
 
-//Calculate the sides of rect A
-	leftA = a.x;
-	rightA = a.x + a.w;
-	topA = a.y;
-	bottomA = a.y + a.h;
-
-//Calculate the sides of rect B
-	leftB = b.x;
-	rightB = b.x + b.w;
-	topB = b.y;
-	bottomB = b.y + b.h;
-
-//If any of the sides from A are outside of B
-	if (bottomA <= topB) {
-		return false;
-	}
-
-	if (topA >= bottomB) {
-		return false;
-	}
-
-	if (rightA <= leftB) {
-		return false;
-	}
-
-	if (leftA >= rightB) {
-		return false;
-	}
-
-//If none of the sides from A are outside B
-	return true;
-}
 // SDL INITIALIZZATION +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-bool initSDL(Win *window) {
-	if (window == NULL) {
-		cout << "Window not set!\n";
-		return false;
-	}
-	if (SDL_Init(SDL_INIT_EVERYTHING) < 0) {
-		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-		return false;
-	}
-	if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1")) {
-		printf("Warning: Linear texture filtering not enabled!");
-		return false;
-	}
-	window->setWidth(gScreenWidth);
-	window->setHeight(gScreenHeight);
-	if (!window->init()) {
-		printf("Failed to properly initialize Window object.");
-		return false;
-	}
 
-	return true;
-}
 // COLLISIONS WITH FRUITS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void fruitCollisions() {
 

@@ -7,7 +7,7 @@
 
 #ifndef SRC_T49_LTEXTURE_H_
 #define SRC_T49_LTEXTURE_H_
-#include "../main.h"
+#include "src/main.h"
 #include "Win.h"
 class LTexture {
 public:

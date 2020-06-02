@@ -7,7 +7,7 @@
 
 #ifndef T39_DOT_H_
 #define T39_DOT_H_
-#include "../main.h"
+#include "src/main.h"
 #include "Tile.h"
 #include "Win.h"
 //#include "Snake.h"

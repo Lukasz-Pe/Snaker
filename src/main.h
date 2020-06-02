@@ -23,15 +23,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_mixer.h>
-#include <SDL2/SDL_thread.h>
-#include <SDL2/SDL_net.h>
+//#include <SDL2/SDL_thread.h>
 //--------------------------------namespace
 using namespace std;
-
-bool checkCollision(SDL_Rect a, SDL_Rect b);
+#include "functions/collisions.h"
 double distanceCalc(SDL_Point &a, SDL_Point &b);
-void fruitCollisions();
+
 //void betweenBotsCollisions();
 //void playerAndBotsCollisions();
 void gameReset(bool &reset);
