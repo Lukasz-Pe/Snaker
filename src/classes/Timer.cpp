@@ -76,7 +76,3 @@ bool Timer::isPaused() {
 	return mPaused && mStarted;
 }
 
-Timer::~Timer() {
-
-}
-

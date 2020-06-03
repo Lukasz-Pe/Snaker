@@ -36,7 +36,6 @@ public:
 	bool hasActivePowerup[5]={false,false,false,false,false};
 	int powerupActivationTimestamp[5]={0,0,0,0,0};
 	void changeSpeed(int &speed);
-	virtual ~Snake();
 	SDL_Point mNewFruitPos;
 	SDL_Rect mHeadBox;
 	void setCollectAngle(int angle);
@@ -44,11 +43,11 @@ private:
 	unsigned int mTailLength, mSpeed, mTemp, mVeryFast;
 	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist, mCollectAngle,xHeadToFruit,yHeadToFruit, mAngleHeadToFruit, mMinCollectAngle,mMaxCollectAngle, xFruitToHead, yFruitToHead, mAngleFruitToHead, mCollectDistanceMultiplier;
 	const double mAngleDelta=5.0;
-	vector<double> mTailX;
-	vector<double> mTailY;
-	vector<double> mTailAngle;
+	std::vector<double> mTailX;
+	std::vector<double> mTailY;
+	std::vector<double> mTailAngle;
 	bool hasMouseFocus;
-	vector<SDL_Rect> mBox;
+	std::vector<SDL_Rect> mBox;
 
 
 

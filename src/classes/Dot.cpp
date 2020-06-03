@@ -129,7 +129,6 @@ void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vC
 		mPosY = y;
 	}
 	if (scaleFactor != NULL) {
-//		cout<<*scaleFactor<<endl;
 		mBox= {(int)mPosX,(int)mPosY,(int)(*scaleFactor*vClip->w), (int)(*scaleFactor*vClip->h)};
 	} else {
 		setCollisionBox(vDotTexture, vClip);
@@ -185,9 +184,5 @@ void Dot::setCollisionBox(LTexture &vTexture, SDL_Rect *vClip) {
 
 SDL_Rect Dot::getRect() {
 	return mBox;
-}
-
-Dot::~Dot() {
-
 }
 

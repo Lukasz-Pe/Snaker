@@ -17,18 +17,18 @@ LTexture::LTexture() {
 	mPosY = 0;
 }
 
-bool LTexture::loadFromFile(string path, Win &vWin) {
+bool LTexture::loadFromFile(std::string path, Win &vWin) {
 	free();
 	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
 
 	if (loadedSurface == NULL) {
-		cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << endl;
+		std::cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << "\n";
 		return false;
 	}
 	SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 128, 128, 128));
 	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), loadedSurface);
 	if (mTexture == NULL) {
-		cout << "Failed to transform " << path.c_str() << " to texture. SDL Error: " << SDL_GetError() << endl;
+		std::cout << "Failed to transform " << path.c_str() << " to texture. SDL Error: " << SDL_GetError() << "\n";
 	}
 	mTextureWidht = loadedSurface->w;
 	mTextureHeight = loadedSurface->h;
@@ -36,14 +36,14 @@ bool LTexture::loadFromFile(string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromFileForString(string path, Win &vWin) {
+bool LTexture::loadFromFileForString(std::string path, Win &vWin) {
 	free();
 	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
 	SDL_Surface *formattedSurface = NULL;
 	SDL_Texture *newTexture = NULL;
 
 	if (loadedSurface == NULL) {
-		cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << endl;
+		std::cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << "\n";
 		return false;
 	}
 	formattedSurface = SDL_ConvertSurfaceFormat(loadedSurface, SDL_PIXELFORMAT_RGBA8888, 0);
@@ -79,14 +79,14 @@ bool LTexture::loadFromFileForString(string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromFileAndChange(string path, Win &vWin) {
+bool LTexture::loadFromFileAndChange(std::string path, Win &vWin) {
 	free();
 	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
 	SDL_Surface *formattedSurface = NULL;
 	SDL_Texture *newTexture = NULL;
 
 	if (loadedSurface == NULL) {
-		cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << endl;
+		std::cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << "\n";
 		return false;
 	}
 	formattedSurface = SDL_ConvertSurfaceFormat(loadedSurface, SDL_GetWindowPixelFormat(vWin.getWindow()), 0);
@@ -111,17 +111,17 @@ bool LTexture::loadFromFileAndChange(string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromText(string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin) {
+bool LTexture::loadFromText(std::string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin) {
 	free();
 	SDL_Surface *textSurface = TTF_RenderUTF8_Blended(mUsedFont, textureText.c_str(), textColor);
 	//TTF_RenderText_Solid(mUsedFont, textureText.c_str(), textColor);
 	if (textSurface == NULL) {
-		cout << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << endl;
+		std::cout << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << "\n";
 		return false;
 	}
 	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), textSurface);
 	if (mTexture == NULL) {
-		cout << "Unable to process fonts surface to texture! SDL Error: " << SDL_GetError() << endl;
+		std::cout << "Unable to process fonts surface to texture! SDL Error: " << SDL_GetError() << "\n";
 		return false;
 	}
 	mTextureHeight = textSurface->w;
@@ -203,9 +203,9 @@ Uint32 LTexture::getPixel32(unsigned int x, unsigned int y) {
 	return pixels[(y * (mPitch / 4)) + x];
 }
 
-LTexture::~LTexture() {
-	free();
-}
+//LTexture::~LTexture() {
+//	free();
+//}
 
 bool LTexture::createBlank(int width, int height, Win &vWin, SDL_TextureAccess access) {
 	mTexture = SDL_CreateTexture(vWin.getRenderer(), SDL_PIXELFORMAT_RGBA8888, access, width, height);

@@ -11,13 +11,15 @@
 #include "classes/Snake.h"
 #include "classes/Dot.h"
 #include "classes/Tile.h"
-#include "classes/Menu.h"
+#include "classes/Button.h"
 #include "classes/Timer.h"
+#include "classes/Settings.h"
 #include "functions/initsdl.h"
 //#include "functions/collisions.h"
 
-void fruitCollisions();
+Settings game_settings;
 
+void fruitCollisions();
 int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000 / 2, gLvlHeight = gLvlWidth;
 int gPowerUpsQuantity, gFruitsQuantity, gPlayerQuantity;
 
@@ -30,14 +32,14 @@ bool escapeFromDanger(Snake &vSnake1, Snake &vSnake2, double &vAngle);
 void betweenPlayersCollisions();
 //----------------------------------------------------------------Deklaracje zmiennych
 //Fruits vars
-vector<int> gSpriteNum, x, y;
-vector<Dot> gFruit;
+std::vector<int> gSpriteNum, x, y;
+std::vector<Dot> gFruit;
 //Players vars
-vector<double> gAngle;
-vector<int> gCurrentTime, gTimeElapsed, gPlayerSprite, gPlayerPosX, gPlayerPosY;
-vector<vector<int> > gPlayerToTargetDistance(2, vector<int>());
-vector<SDL_Point> gPlayerStartPos;
-vector<Snake> gPlayer;
+std::vector<double> gAngle;
+std::vector<int> gCurrentTime, gTimeElapsed, gPlayerSprite, gPlayerPosX, gPlayerPosY;
+std::vector<std::vector<int> > gPlayerToTargetDistance(2, std::vector<int>());
+std::vector<SDL_Point> gPlayerStartPos;
+std::vector<Snake> gPlayer;
 //-------Other vars
 bool gContinue = true, gCollision = false, gReset = false;
 int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
@@ -46,10 +48,10 @@ float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gCurrentScore = 0, gOption = -1, gGameState = 1;
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
 SDL_Point gEnemy1Pos, gEnemy2Pos;
-stringstream gScore, gTimeLeft;
-string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
-string gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Snake speed", "Save changes", "Back to main menu (no saving)" };
-string gScreenInfos[5] = { "End of game?", "Game paused", "Game over :(", "Press R to restart or Q/ESC to exit", "Options" };
+std::stringstream gScore, gTimeLeft;
+std::string gMenuItems[TOTAL_NUMBER_OF_BUTTONS] = { "Start :D (s)", "Reset game (r)", "Options (o)", "Quit :( (q/ESC)", "I have to :( (y)", "Maybe not :) (n/ESC)" };
+std::string gOptionsItems[POSITIONS_IN_OPTIONS_MENU] = { "Change language", "Bots quantity", "Fruits quantity", "Powerups quantity", "Snake speed", "Save changes", "Back to main menu (no saving)" };
+std::string gScreenInfos[5] = { "End of game?", "Game paused", "Game over :(", "Press R to restart or Q/ESC to exit", "Options" };
 SDL_Renderer *gRenderer = NULL;
 SDL_Event event;
 Win gWindow;
@@ -63,34 +65,38 @@ Timer stepTimer, frameTimer;
 double gFrameTimer = 0;
 int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, powerupTime[TOTAL_POWERUPS], gTmpVal = 0;
 // fstream vars
-fstream gSettingsFile, gLangFile, gFileLangList;
-vector<string> gLangList;
-string gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + 5], gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
-stringstream gPathToLangFile, gTextToShow;
-int gSettingsFileContent[5], mOptsButtonsWidth[10];
+std::fstream gSettingsFile, gLangFile;
+std::vector<std::string> gLangList,gAllTexts;
+std::string gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
+std::stringstream gPathToLangFile, gTextToShow;
+std::vector<int> gSettingsFileContent;
+int mOptsButtonsWidth[10];
 // POWERUPS PARAMS
 void powerupCheck(Snake &vSnake, bool render = false);
 //void gameReset(bool &reset);
 
-void fTextToShow(int &i, int xpos, int ypos, string &vText);
+void fTextToShow(int &i, int xpos, int ypos, std::string &vText);
 
-int main(int argc, char* args[]) {
+int main() {
 //Opening lang list file
-	gFileLangList.open("../assets/lang/_LangList.txt");
-	if (gFileLangList.is_open()) {
-		while (!gFileLangList.eof()) {
-			gFileLangList >> gTmpText;
-			gLangList.push_back(gTmpText.c_str());
-		}
-		gFileLangList.close();
-	} else {
-		gFileLangList.close();
-		cout << "Unable to load language list file!\n";
-		gContinue = false;
-	}
+    gContinue=game_settings.loadLanguageList("../assets/lang/_LangList.txt");
+    if(gContinue){
+        gLangList=game_settings.availableTranslations();
+    }
 //Loading settings file
-	if (gContinue) {
-		gSettingsFile.open("../assets/settings.txt", ios::in);
+    gContinue=game_settings.loadSettings("../assets/settings.txt");
+    if(gContinue){
+        gSettingsFileContent=game_settings.settingsFromFile();
+        game_settings.setTranslationDirectory("../assets/lang/");
+        game_settings.selectLanguage(gSettingsFileContent[0]);
+    }
+    gContinue=game_settings.loadTanslation();
+    if(gContinue){
+        gAllTexts=game_settings.Translation();
+    }
+    
+	/*if (gContinue) {
+		gSettingsFile.open("../assets/settings.txt", std::ios::in);
 		if (gSettingsFile.is_open()) {
 			gPathToLangFile.str("");
 			gPathToLangFile << "../assets/lang/";
@@ -98,15 +104,15 @@ int main(int argc, char* args[]) {
 				int i = 0;
 				while (getline(gSettingsFile, gTmpText, '/')) {
 					gSettingsFile.ignore(1024, '\n');
-					gSettingsFileContent[i] = stoi(gTmpText.c_str());
+					gSettingsFileContent[i].push_back(std::stoi(gTmpText.c_str()));
 					i++;
 				}
 			}
 			gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
-			gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
+			gLangFile.open(gPathToLangFile.str().c_str(), std::ios::in);
 			if (gLangFile.is_open()) {
 				unsigned int i = 0;
-				while (i < sizeof(gAllTexts) / sizeof(string)) {
+				while (i < sizeof(gAllTexts) / sizeof(std::string)) {
 					getline(gLangFile, gAllTexts[i]);
 					i++;
 				}
@@ -115,7 +121,7 @@ int main(int argc, char* args[]) {
 			} else {
 				gSettingsFile.close();
 				gLangFile.close();
-				cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+				std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
 				gContinue = false;
 			}
 			gSettingsFile.close();
@@ -123,23 +129,23 @@ int main(int argc, char* args[]) {
 		} else {
 			gSettingsFile.close();
 			gLangFile.close();
-			cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
-			cout << "Unable to load settings file!\n";
+			std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+			std::cout << "Unable to load settings file!\n";
 			gContinue = false;
 		}
 	} else {
 		gSettingsFile.close();
-		cout << "Unable to load settings file!\n";
+		std::cout << "Unable to load settings file!\n";
 		gContinue = false;
 		gLangFile.close();
-	}
+	}*/
 	gSettingsFile.close();
 	gPowerUpsQuantity = gSettingsFileContent[3];
 	gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]].c_str();
-	gChangeableOptionsPos[1] = to_string(gSettingsFileContent[1]);
-	gChangeableOptionsPos[2] = to_string(gSettingsFileContent[2]);
-	gChangeableOptionsPos[3] = to_string(gSettingsFileContent[3]);
-	gChangeableOptionsPos[4] = to_string(gSettingsFileContent[4]);
+	gChangeableOptionsPos[1] = std::to_string(gSettingsFileContent[1]);
+	gChangeableOptionsPos[2] = std::to_string(gSettingsFileContent[2]);
+	gChangeableOptionsPos[3] = std::to_string(gSettingsFileContent[3]);
+	gChangeableOptionsPos[4] = std::to_string(gSettingsFileContent[4]);
 
 	gPlayerQuantity = gSettingsFileContent[1];
 	gFruitsQuantity = gSettingsFileContent[2];
@@ -324,7 +330,7 @@ int main(int argc, char* args[]) {
 		gPlayerToTargetDistance[1][i] = i;
 	}
 	for (int i = 1; i < 5; i++) {
-		gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
+		gChangeableOptionsPos[i] = std::to_string(gSettingsFileContent[i]);
 	}
 	gTmpVal = gSettingsFileContent[4];
 	for (int i = 0; i <= gPlayerQuantity; i++) {
@@ -354,7 +360,7 @@ int main(int argc, char* args[]) {
 		}
 		gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]];
 		for (int i = 1; i < 5; i++) {
-			gChangeableOptionsPos[i] = to_string(gSettingsFileContent[i]);
+			gChangeableOptionsPos[i] = std::to_string(gSettingsFileContent[i]);
 		}
 		if (gTmpVal != gSettingsFileContent[4]) {
 			gTmpVal = gSettingsFileContent[4];
@@ -626,7 +632,7 @@ void handleEvents() {
 						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
 								gOption = gButtons[i].getID();
-//								cout<<"gOption:"<<gOption<<endl;
+//								std::cout<<"gOption:"<<gOption<<"\n";
 							}
 						}
 					}
@@ -637,7 +643,7 @@ void handleEvents() {
 						if (checkCollision(gButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
 								gOption = gButtons[i].getID();
-//								cout<<"gOption:"<<gOption<<endl;
+//								std::cout<<"gOption:"<<gOption<<"\n";
 							}
 						}
 					}
@@ -648,7 +654,7 @@ void handleEvents() {
 						if (checkCollision(gOptionButtons[i].getButtonDims(), gMouse)) {
 							if (event.type == SDL_MOUSEBUTTONUP) {
 								gOption = gOptionButtons[i].getID();
-//								cout<<"gOption:"<<gOption<<endl;
+//								std::cout<<"gOption:"<<gOption<<"\n";
 							}
 						}
 					}
@@ -662,7 +668,7 @@ void handleEvents() {
 					if (checkCollision(gButtonNextPrev[j].getButtonDims(), gMouse)) {
 						if (event.type == SDL_MOUSEBUTTONUP) {
 							gOption = gButtonNextPrev[j].getID();
-//							cout<<"gOption:"<<gOption<<endl;
+//							std::cout<<"gOption:"<<gOption<<"\n";
 						}
 						if (event.type == SDL_MOUSEWHEEL) {
 							if (event.wheel.y < 0) {
@@ -724,18 +730,18 @@ void handleEvents() {
 				if (gSettingsFileContent[4] <= 1) {
 					gSettingsFileContent[4] = 1;
 				}
-				gSettingsFile.open("../assets/settings.txt", ios::out);
+				gSettingsFile.open("../assets/settings.txt", std::ios::out);
 				for (int i = 0; i < 5; i++) {
-					gSettingsFile << gSettingsFileContent[i] << "\t" << fSettingsInstructions[i] << endl;
+					gSettingsFile << gSettingsFileContent[i] << "\t" << fSettingsInstructions[i] << "\n";
 				}
 				gSettingsFile.close();
 				gPathToLangFile.str("");
 				gPathToLangFile << "../assets/lang/";
 				gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
-				gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
+				gLangFile.open(gPathToLangFile.str().c_str(), std::ios::in);
 				if (gLangFile.is_open()) {
 					unsigned int i = 0;
-					while (i < sizeof(gAllTexts) / sizeof(string)) {
+					while (i < sizeof(gAllTexts) / sizeof(std::string)) {
 						getline(gLangFile, gAllTexts[i]);
 						i++;
 					}
@@ -744,7 +750,7 @@ void handleEvents() {
 				} else {
 					gSettingsFile.close();
 					gLangFile.close();
-					cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+					std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
 					gContinue = false;
 				}
 				gLangFile.close();
@@ -846,7 +852,7 @@ void handleEvents() {
 				gGameState = 1;
 				break;
 			case (TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU):
-				gSettingsFile.open("../assets/settings.txt", ios::in);
+				gSettingsFile.open("../assets/settings.txt", std::ios::in);
 				if (gSettingsFile.is_open()) {
 					gPathToLangFile.str("");
 					gPathToLangFile << "../assets/lang/";
@@ -854,15 +860,15 @@ void handleEvents() {
 						int i = 0;
 						while (getline(gSettingsFile, gTmpText, '/')) {
 							gSettingsFile.ignore(1024, '\n');
-							gSettingsFileContent[i] = stoi(gTmpText.c_str());
+							gSettingsFileContent[i] = std::stoi(gTmpText.c_str());
 							i++;
 						}
 					}
 					gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
-					gLangFile.open(gPathToLangFile.str().c_str(), ios::in);
+					gLangFile.open(gPathToLangFile.str().c_str(), std::ios::in);
 					if (gLangFile.is_open()) {
 						unsigned int i = 0;
-						while (i < sizeof(gAllTexts) / sizeof(string)) {
+						while (i < sizeof(gAllTexts) / sizeof(std::string)) {
 							getline(gLangFile, gAllTexts[i]);
 							i++;
 						}
@@ -871,7 +877,7 @@ void handleEvents() {
 					} else {
 						gSettingsFile.close();
 						gLangFile.close();
-						cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+						std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
 						gContinue = false;
 					}
 					gSettingsFile.close();
@@ -879,8 +885,8 @@ void handleEvents() {
 				} else {
 					gSettingsFile.close();
 					gLangFile.close();
-					cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
-					cout << "Unable to load settings file!\n";
+					std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
+					std::cout << "Unable to load settings file!\n";
 					gContinue = false;
 				}
 				gGameState = 1;
@@ -919,7 +925,7 @@ void handleEvents() {
 	}
 }
 // OPTIONS MENU STEERING +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-void fTextToShow(int &i, int xpos, int ypos, string &vText) {
+void fTextToShow(int &i, int xpos, int ypos, std::string &vText) {
 	gTextToShow.str("");
 	gTextToShow << vText.c_str();
 	gLTPosTxt.loadFromText(gTextToShow.str().c_str(), gTextNormalColor, gFont, gWindow);
@@ -937,7 +943,7 @@ void fruitCollisions() {
 		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gPlayerToTargetDistance[1][i] = -1;
 	}
-	//After eating a fruit copy the new fruit coordinates from snake to coord vectors
+	//After eating a fruit copy the new fruit coordinates from snake to coord std::vectors
 	for (int i = 0; i < gFruitsQuantity; i++) {
 		for (int e = 0; e <= gPlayerQuantity; e++) {
 			if (gPlayer[e].collectFruit(gFruit[i])) {

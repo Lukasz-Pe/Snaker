@@ -54,8 +54,6 @@ int Snake::getSnakeFruitDistance(SDL_Rect &vFruit) {
 }
 
 bool Snake::collectFruit(Dot &vFruit) {
-//	cout<<"\tDist: "<<sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2))<<"\tHx: "<<mHeadX<<"\tHy: "<<mHeadY<<"\tFx: "<<vFruit.getPosX()<<"\tFy: "<<vFruit.getPosY()<<endl;
-
 	if (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)) < mCollectDistanceMultiplier * mHeadBox.w) {
 //		CALCULATING HEAD TO FRUIT ANGLE >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		xHeadToFruit = (vFruit.getPosX() + 10) - (mHeadX + 10);
@@ -85,13 +83,9 @@ bool Snake::collectFruit(Dot &vFruit) {
 		mMinCollectAngle = mAngleHeadToFruit - (mCollectAngle / 2);
 		mMaxCollectAngle = mAngleHeadToFruit + (mCollectAngle / 2);
 //		CHECKING IF ANGLE BETWEEN FRUIT AND HEAD IS IN RANGE OF COLLECTING ANGLES >>>>>>>>>>>>>>>>>>>>>>>>>>>>
-//		cout << "x " << xHeadToFruit << "\ty " << yHeadToFruit << "\tmHeadX " << mHeadX << "\tmHeadY " << mHeadY << "\tFx " << vFruit.getPosX() << "\tFy " << vFruit.getPosY() << endl;
-//		cout <<"mAngleFruitToHead "<<mAngleFruitToHead<< "\tmAngleHeadToFruit " << mAngleHeadToFruit << "\tmHeadAngle " << mHeadAngle << "\tmMinCollectAngle " << mMinCollectAngle << "\tmMaxCollectAngle " << mMaxCollectAngle << endl;
 		if (mHeadAngle >= mMinCollectAngle && mHeadAngle <= mMaxCollectAngle) {
-//			cout<<"sin(mAngleFruitToHead * (M_PI / 180.0)) "<<sin(mAngleFruitToHead * (M_PI / 180.0))<<"\tcos(mAngleFruitToHead * (M_PI / 180.0)) "<<cos(mAngleFruitToHead * (M_PI / 180.0))<<endl;
 			mNewFruitPos.x = vFruit.getPosX() + mCollectDist * sin(mAngleFruitToHead * (M_PI / 180.0));
 			mNewFruitPos.y = vFruit.getPosY() - mCollectDist * cos(mAngleFruitToHead * (M_PI / 180.0));
-//			cout<<"vFruit.getPosX() "<<vFruit.getPosX()<<"\tvFruit.getPosY() "<<vFruit.getPosY()<<"\tmNewFruitPos.x "<<mNewFruitPos.x<<"\tmNewFruitPos.y "<<mNewFruitPos.y<<endl;
 			return true;
 		}
 	}
@@ -272,7 +266,7 @@ double Snake::getAngle() {
 }
 
 void Snake::printParams() {
-	cout << "mHeadX=" << mHeadX << "\tmHeadY=" << mHeadY << "\tmHeadAngle=" << mHeadAngle << "\tSpeed*cos(x)=" << (mSpeed * cos(mHeadAngle * (M_PI / 180.0))) << "\tSpeed*sin(x)" << (mSpeed * sin(mHeadAngle * (M_PI / 180.0))) << endl;
+	std::cout << "mHeadX=" << mHeadX << "\tmHeadY=" << mHeadY << "\tmHeadAngle=" << mHeadAngle << "\tSpeed*cos(x)=" << (mSpeed * cos(mHeadAngle * (M_PI / 180.0))) << "\tSpeed*sin(x)" << (mSpeed * sin(mHeadAngle * (M_PI / 180.0))) << "\n";
 }
 
 void Snake::setCamera(const int &vLWidth, const int &vLHeight, SDL_Rect &vCam) {
@@ -321,9 +315,5 @@ SDL_Rect Snake::getTailBox(int &num) {
 		tmp = mBox[num];
 	}
 	return tmp;
-}
-
-Snake::~Snake() {
-// TODO Auto-generated destructor stub
 }
 

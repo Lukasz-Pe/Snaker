@@ -17,16 +17,15 @@ public:
 	int getID();
 	void eventHandler(SDL_Event &event);
 	SDL_Rect getButtonDims();
-	void setButtonText(string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen=1);
+	void setButtonText(std::string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen=1);
 	void setPosition(int x, int y);
 	void render(int x, int y, Win &vWin);
-	virtual ~Button();
 private:
 	static int mButtonNum;
 	int mButtonID;
 	SDL_Rect mBoxButton;
 	LTexture mButtonTexture, mSelectedButtonTexture;
-	string mButtonText;
+    std::string mButtonText;
 	SDL_Color mButtonColor, mSelectedButtonColor;
 	bool mButtonSelected;
 

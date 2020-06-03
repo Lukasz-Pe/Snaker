@@ -19,7 +19,6 @@ public:
 	void setWindowCoords(int x, int y);
 	void setNewPos(int &x, int &y);
 	SDL_Rect getBox();
-	virtual ~Tile();
 private:
 	SDL_Rect mBox;
 	int mType;

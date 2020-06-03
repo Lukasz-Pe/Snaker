@@ -13,10 +13,10 @@ class LTexture {
 public:
 	LTexture();
 	//------------------------------stany
-	bool loadFromFile(string path, Win &vWin);
-	bool loadFromFileAndChange(string path, Win &vWin);
-	bool loadFromFileForString(string path, Win &vWin);
-	bool loadFromText(string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin);
+	bool loadFromFile(std::string path, Win &vWin);
+	bool loadFromFileAndChange(std::string path, Win &vWin);
+	bool loadFromFileForString(std::string path, Win &vWin);
+	bool loadFromText(std::string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin);
 	bool createBlank(int width, int height, Win &vWin, SDL_TextureAccess access = SDL_TEXTUREACCESS_STREAMING);
 	//------------------------------inne
 	void render(int posX, int posY, Win &vWin, SDL_Rect *clip = NULL, const double *scaleFactor = NULL, double angle = 0.0, SDL_Point *center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
@@ -40,8 +40,6 @@ public:
 	Uint32 getPixel32(unsigned int x, unsigned int y);
 	void *getPixels();
 	SDL_Texture *getTexture();
-	//------------------------------Destructor
-	virtual ~LTexture();
 
 private:
 	SDL_Texture *mTexture;

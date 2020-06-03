@@ -41,8 +41,3 @@ void Tile::setWindowCoords(int x, int y) {
 	mBox.x = x;
 	mBox.y = y;
 }
-
-Tile::~Tile() {
-	// TODO Auto-generated destructor stub
-}
-

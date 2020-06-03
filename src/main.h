@@ -25,7 +25,6 @@
 #include <SDL2/SDL_ttf.h>
 //#include <SDL2/SDL_thread.h>
 //--------------------------------namespace
-using namespace std;
 #include "functions/collisions.h"
 double distanceCalc(SDL_Point &a, SDL_Point &b);
 

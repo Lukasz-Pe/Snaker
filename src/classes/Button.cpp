@@ -5,7 +5,7 @@
  *      Author: Łukasz Pękalski
  */
 
-#include "Menu.h"
+#include "Button.h"
 #include "LTexture.h"
 
 Button::Button() {
@@ -30,7 +30,6 @@ void Button::eventHandler(SDL_Event &event) {
 		if (x > mBoxButton.x && x < (mBoxButton.x + mBoxButton.w) && y > mBoxButton.y && y < (mBoxButton.y + mBoxButton.h)) {
 			mButtonSelected = true;
 		}
-		//cout << "x: " << x << "\ty: " << y <<"\tmButtonSelected: "<<mButtonSelected<<"\tmBoxButton.x: "<<mBoxButton.x<<"\tmBoxButton.y: "<<mBoxButton.y<<"\tmBoxButton.w: "<<mBoxButton.w<<"\tmBoxButton.h: "<<mBoxButton.h<< endl;
 	}
 }
 
@@ -38,7 +37,7 @@ SDL_Rect Button::getButtonDims() {
 	return mBoxButton;
 }
 
-void Button::setButtonText(string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen) {
+void Button::setButtonText(std::string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen) {
 	mButtonTexture.loadFromText(text.c_str(), mButtonColor, vFont, vWin);
 	if (widen) {
 		mButtonTexture.setWidth(4 * mButtonTexture.getWidth());
@@ -60,17 +59,12 @@ void Button::setPosition(int x, int y) {
 	mBoxButton.y = y;
 }
 
-void Button::render(int x, int y, Win &vWin) {
-	mBoxButton.x = x;
-	mBoxButton.y = y;
-	if (mButtonSelected) {
-		mSelectedButtonTexture.render(x, y, vWin);
-	} else {
-		mButtonTexture.render(x, y, vWin);
-	}
+void Button::render(int x, int y, Win &vWin){
+    mBoxButton.x=x;
+    mBoxButton.y=y;
+    if(mButtonSelected){
+        mSelectedButtonTexture.render(x, y, vWin);
+    }else{
+        mButtonTexture.render(x, y, vWin);
+    }
 }
-
-Button::~Button() {
-// TODO Auto-generated destructor stub
-}
-

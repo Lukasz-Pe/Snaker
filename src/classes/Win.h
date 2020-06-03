@@ -15,7 +15,6 @@ public:
 	Win();
 	void eventHandler(SDL_Event &event);
 	void free();
-	void focus();
 	void render();
 	void prepareRenderer(int red=255, int green=255, int blue=255);
 	void close();
@@ -25,15 +24,13 @@ public:
 	SDL_Renderer* getRenderer();
 	SDL_Window *getWindow();
 	//--------------------------------------setters
-	void setWidth(int widht);
+	void setWidth(int width);
 	void setHeight(int height);
-	void setTitle(string caption);
+	void setTitle(std::string caption);
 	//--------------------------------------checkers
 	bool init();
 	bool isMinimized();
 	bool hasMouseFocus();
-
-	virtual ~Win();
 
 private:
 	SDL_Window *mWindow;

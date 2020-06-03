@@ -23,7 +23,6 @@ class Timer {
 		zmienna getSeconds();
 		bool isStarted();
 		bool isPaused();
-		virtual ~Timer();
 	private:
 Uint32 mStartTicks, mPausedTicks;
 bool mStarted, mPaused;

@@ -15,20 +15,18 @@ Win::Win() {
 	mFullscreen = false;
 	mWidth = 0;
 	mHeight = 0;
-//	mTmpWidth=0;
-//	mTmpHeight=0;
 }
 
 bool Win::init() {
 	mWindow = SDL_CreateWindow("Default window title", SDL_WINDOWPOS_CENTERED,
 	SDL_WINDOWPOS_CENTERED, mWidth, mHeight, SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
 	if (mWindow == NULL) {
-		cout << "Window could not be created. SDL_Error: " << SDL_GetError() << endl;
+		std::cout << "Window could not be created. SDL_Error: " << SDL_GetError() << "\n";
 		return false;
 	}
 	mRenderer = SDL_CreateRenderer(mWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if (mRenderer == NULL) {
-		cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << endl;
+		std::cout << "Renderer could not be created. SDL_Error: " << SDL_GetError() << "\n";
 		SDL_DestroyWindow(mWindow);
 		mWindow = NULL;
 		return false;
@@ -137,7 +135,7 @@ SDL_Window *Win::getWindow() {
 	return mWindow;
 }
 
-void Win::setTitle(string caption) {
+void Win::setTitle(std::string caption) {
 	SDL_SetWindowTitle(mWindow, caption.c_str());
 }
 
@@ -149,9 +147,5 @@ void Win::close() {
 	TTF_Quit();
 	IMG_Quit();
 	SDL_Quit();
-}
-
-Win::~Win() {
-	// TODO Auto-generated destructor stub
 }
 
