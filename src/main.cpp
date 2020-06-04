@@ -21,7 +21,6 @@ Settings game_settings;
 
 void fruitCollisions();
 int const TOTAL_POWERUPS = 5, MAX_POWERUP_TIME[TOTAL_POWERUPS] = { 20, 20, 20, 20, 20 }, gLvlWidth = 10000 / 2, gLvlHeight = gLvlWidth;
-int gPowerUpsQuantity, gFruitsQuantity, gPlayerQuantity;
 
 const double POWERUP_SCALE = 2, SCREEN_SCALE = 0.5;
 
@@ -42,8 +41,7 @@ std::vector<SDL_Point> gPlayerStartPos;
 std::vector<Snake> gPlayer;
 //-------Other vars
 bool gContinue = true, gCollision = false, gReset = false;
-int const *pTOTAL_TILES = NULL, TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
-double timeStep;
+int const TOTAL_NUMBER_OF_BUTTONS = 6, TEXT_SIZE = 50, TITLE_TEXT_SIZE = 150, MAIN_MENU_OPTS = TOTAL_NUMBER_OF_BUTTONS - 2, POSITIONS_IN_OPTIONS_MENU = 7;
 float gRenderScaleX = 1.0, gRenderScaleY = 1.0, tempScale = 1.0;
 int gScreenWidth = 1024, gScreenHeight = 768, gCurrentScore = 0, gOption = -1, gGameState = 1;
 const int TOTAL_SPRITES = 25, TOTAL_FRUIT_SPRITES = 30, SPRITE_DIMS = 20, POWERUP_ICON_DIMS = 50;
@@ -66,8 +64,8 @@ double gFrameTimer = 0;
 int gTimer = 0, Button::mButtonNum = 0, gSpritePosX = 0, gSpritePosY = 0, gFruitSpritePosX = 0, gFruitSpritePosY = 0, powerupTime[TOTAL_POWERUPS], gTmpVal = 0;
 // fstream vars
 std::fstream gSettingsFile, gLangFile;
-std::vector<std::string> gLangList,gAllTexts;
-std::string gTmpText, gChangeableOptionsPos[5], fSettingsInstructions[5] = { "/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" };
+std::vector<std::string> gLangList;
+std::string gTmpText, gChangeableOptionsPos[5];
 std::stringstream gPathToLangFile, gTextToShow;
 std::vector<int> gSettingsFileContent;
 int mOptsButtonsWidth[10];
@@ -86,88 +84,33 @@ int main() {
 //Loading settings file
     gContinue=game_settings.loadSettings("../assets/settings.txt");
     if(gContinue){
-        gSettingsFileContent=game_settings.settingsFromFile();
         game_settings.setTranslationDirectory("../assets/lang/");
-        game_settings.selectLanguage(gSettingsFileContent[0]);
+        game_settings.selectLanguage(game_settings.settingsFromFile()[0]);
     }
     gContinue=game_settings.loadTanslation();
-    if(gContinue){
-        gAllTexts=game_settings.Translation();
-    }
-    
-	/*if (gContinue) {
-		gSettingsFile.open("../assets/settings.txt", std::ios::in);
-		if (gSettingsFile.is_open()) {
-			gPathToLangFile.str("");
-			gPathToLangFile << "../assets/lang/";
-			{
-				int i = 0;
-				while (getline(gSettingsFile, gTmpText, '/')) {
-					gSettingsFile.ignore(1024, '\n');
-					gSettingsFileContent[i].push_back(std::stoi(gTmpText.c_str()));
-					i++;
-				}
-			}
-			gPathToLangFile << gLangList[gSettingsFileContent[0]].c_str() << ".txt";
-			gLangFile.open(gPathToLangFile.str().c_str(), std::ios::in);
-			if (gLangFile.is_open()) {
-				unsigned int i = 0;
-				while (i < sizeof(gAllTexts) / sizeof(std::string)) {
-					getline(gLangFile, gAllTexts[i]);
-					i++;
-				}
-				gSettingsFile.close();
-				gLangFile.close();
-			} else {
-				gSettingsFile.close();
-				gLangFile.close();
-				std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
-				gContinue = false;
-			}
-			gSettingsFile.close();
-			gLangFile.close();
-		} else {
-			gSettingsFile.close();
-			gLangFile.close();
-			std::cout << "Unable to load translations from " << gPathToLangFile.str().c_str() << "!\n";
-			std::cout << "Unable to load settings file!\n";
-			gContinue = false;
-		}
-	} else {
-		gSettingsFile.close();
-		std::cout << "Unable to load settings file!\n";
-		gContinue = false;
-		gLangFile.close();
-	}*/
-	gSettingsFile.close();
-	gPowerUpsQuantity = gSettingsFileContent[3];
 	gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]].c_str();
 	gChangeableOptionsPos[1] = std::to_string(gSettingsFileContent[1]);
 	gChangeableOptionsPos[2] = std::to_string(gSettingsFileContent[2]);
 	gChangeableOptionsPos[3] = std::to_string(gSettingsFileContent[3]);
 	gChangeableOptionsPos[4] = std::to_string(gSettingsFileContent[4]);
 
-	gPlayerQuantity = gSettingsFileContent[1];
-	gFruitsQuantity = gSettingsFileContent[2];
-	gPowerUpsQuantity = gSettingsFileContent[3];
-
 	if (gContinue) {
-		for (int i = 0; i < gFruitsQuantity; i++) {
+		for (int i = 0; i < gSettingsFileContent[2]; i++) {
 			gSpriteNum.push_back(0);
 			x.push_back(0);
 			y.push_back(0);
 			gFruit.push_back(Dot());
 		}
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
-			gMenuItems[i] = gAllTexts[i];
+			gMenuItems[i] = game_settings.Translation()[i];
 		}
 		for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
-			gOptionsItems[i] = gAllTexts[i + TOTAL_NUMBER_OF_BUTTONS];
+			gOptionsItems[i] = game_settings.Translation()[i + TOTAL_NUMBER_OF_BUTTONS];
 		}
 		for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS-2; i++) {
-			gScreenInfos[i] = gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
+			gScreenInfos[i] = game_settings.Translation()[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
 		}
-		for (int i = 0; i <= gPlayerQuantity; i++) {
+		for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 			gAngle.push_back(0.0);
 			gCurrentTime.push_back(0);
 			gTimeElapsed.push_back(0);
@@ -282,10 +225,10 @@ int main() {
 	gWindow.setTitle("Snaker");
 	gRenderer = gWindow.getRenderer();
 //	PLACING FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-	for (int i = 0; i < gFruitsQuantity; i++) {
+	for (int i = 0; i < gSettingsFileContent[2]; i++) {
 		x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 		y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
-		if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
+		if (i % (gSettingsFileContent[2] / gSettingsFileContent[3]) == 0) {
 			gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
 		} else {
 			gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
@@ -325,7 +268,7 @@ int main() {
 	gGameOverBox.w = gLTPressToReset.getWidth();
 	gGameOverBox.h = 1.1 * (gLTGameOver.getHeight() + gLTPressToReset.getHeight());
 	stepTimer.start();
-	for (int i = 0; i <= gPlayerQuantity; i++) {
+	for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gPlayerToTargetDistance[1][i] = i;
 	}
@@ -333,7 +276,7 @@ int main() {
 		gChangeableOptionsPos[i] = std::to_string(gSettingsFileContent[i]);
 	}
 	gTmpVal = gSettingsFileContent[4];
-	for (int i = 0; i <= gPlayerQuantity; i++) {
+	for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 		gPlayer[i].changeSpeed(gSettingsFileContent[4]);
 	}
 // MAIN GAME LOOP >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -343,8 +286,8 @@ int main() {
 		if (gSettingsFileContent[0] < 0) {
 			gSettingsFileContent[0] = 0;
 		}
-		if ((unsigned) gSettingsFileContent[0] > gLangList.size() - 1) {
-			gSettingsFileContent[0] = gLangList.size() - 1;
+		if ((unsigned) gSettingsFileContent[0] > game_settings.availableTranslations().size() - 1) {
+			gSettingsFileContent[0] = game_settings.availableTranslations().size() - 1;
 		}
 		if (gSettingsFileContent[1] <= 0) {
 			gSettingsFileContent[1] = 0;
@@ -358,13 +301,13 @@ int main() {
 		if (gSettingsFileContent[4] <= 1) {
 			gSettingsFileContent[4] = 1;
 		}
-		gChangeableOptionsPos[0] = gLangList[gSettingsFileContent[0]];
+		gChangeableOptionsPos[0] = game_settings.availableTranslations()[gSettingsFileContent[0]];
 		for (int i = 1; i < 5; i++) {
 			gChangeableOptionsPos[i] = std::to_string(gSettingsFileContent[i]);
 		}
 		if (gTmpVal != gSettingsFileContent[4]) {
 			gTmpVal = gSettingsFileContent[4];
-			for (int i = 0; i <= gPlayerQuantity; i++) {
+			for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 				gPlayer[i].changeSpeed(gSettingsFileContent[4]);
 			}
 		}
@@ -401,7 +344,7 @@ int main() {
 					tilePosY += gLTMenuBackground.getHeight();
 				}
 			}
-			for (int i = 0; i < gFruitsQuantity; i++) {
+			for (int i = 0; i < gSettingsFileContent[2]; i++) {
 				x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 				y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
 			}
@@ -489,7 +432,7 @@ int main() {
 				tileSet[i]->render(gCamera, gWindow, gLTLevelTexture);
 			}
 //			SETTING STARTING POS OF FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			for (int i = 0; i < gFruitsQuantity; i++) {
+			for (int i = 0; i < gSettingsFileContent[2]; i++) {
 				if (gSpriteNum[i] < 25) {
 					gFruit[i].renderDot(gLTFruit, gWindow, x[i], y[i], &gCamera, &gFruitSpriteClips[gSpriteNum[i]]);
 				} else {
@@ -501,7 +444,7 @@ int main() {
 //			COLLISIONS WITH FRUITS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			fruitCollisions();
 //			COLLISIONS WITH LEVEL EDGES >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-			for (int i = 1; i < gPlayerQuantity; i++) {
+			for (int i = 1; i < gSettingsFileContent[1]; i++) {
 				if (gPlayer[i].getHeadBox().x < 1 || gPlayer[i].getHeadBox().y < 1 || (gPlayer[i].getHeadBox().w + gPlayer[i].getHeadBox().x) >= (gLvlWidth) || (gPlayer[i].getHeadBox().h + gPlayer[i].getHeadBox().y) >= (gLvlHeight)) {
 					gAngle[i] = 360 * ((double) rand() / RAND_MAX);
 				}
@@ -521,18 +464,18 @@ int main() {
 //			MOVEMENT AND POSITION CALC >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			gFrameTimer = frameTimer.getSeconds<double>();
 			gPlayer[0].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
-			for (int i = 1; i <= gPlayerQuantity; i++) {
+			for (int i = 1; i <= gSettingsFileContent[1]; i++) {
 				gPlayer[i].setAngle(gAngle[i]);
 				gPlayer[i].move(gLevelBorders, gLTSnakeTail, &gFrameTimer);
 			}
 			frameTimer.start();
 //			POWEUPS MANAGEMENT >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 			powerupCheck(gPlayer[0], true);
-			for (int i = 1; i <= gPlayerQuantity; i++) {
+			for (int i = 1; i <= gSettingsFileContent[1]; i++) {
 				powerupCheck(gPlayer[i]);
 			}
 //			RENDERING <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-			for (int i = 1; i <= gPlayerQuantity; i++) {
+			for (int i = 1; i <= gSettingsFileContent[1]; i++) {
 				gPlayer[i].render(gWindow, gLTEnemyHead, gLTEnemyTail, gCamera, &gSpriteClips[gPlayerSprite[i]]);
 			}
 
@@ -715,8 +658,8 @@ void handleEvents() {
 				if (gSettingsFileContent[0] < 0) {
 					gSettingsFileContent[0] = 0;
 				}
-				if ((unsigned) gSettingsFileContent[0] > gLangList.size() - 1) {
-					gSettingsFileContent[0] = gLangList.size() - 1;
+				if ((unsigned) gSettingsFileContent[0] > game_settings.availableTranslations().size() - 1) {
+					gSettingsFileContent[0] = game_settings.availableTranslations().size() - 1;
 				}
 				if (gSettingsFileContent[1] <= 0) {
 					gSettingsFileContent[1] = 0;
@@ -730,6 +673,7 @@ void handleEvents() {
 				if (gSettingsFileContent[4] <= 1) {
 					gSettingsFileContent[4] = 1;
 				}
+				
 				gSettingsFile.open("../assets/settings.txt", std::ios::out);
 				for (int i = 0; i < 5; i++) {
 					gSettingsFile << gSettingsFileContent[i] << "\t" << fSettingsInstructions[i] << "\n";
@@ -741,8 +685,8 @@ void handleEvents() {
 				gLangFile.open(gPathToLangFile.str().c_str(), std::ios::in);
 				if (gLangFile.is_open()) {
 					unsigned int i = 0;
-					while (i < sizeof(gAllTexts) / sizeof(std::string)) {
-						getline(gLangFile, gAllTexts[i]);
+					while (i < sizeof(game_settings.Translation()) / sizeof(std::string)) {
+						getline(gLangFile, game_settings.Translation()[i]);
 						i++;
 					}
 					gSettingsFile.close();
@@ -755,13 +699,13 @@ void handleEvents() {
 				}
 				gLangFile.close();
 				for (int i = 0; i < TOTAL_NUMBER_OF_BUTTONS; i++) {
-					gMenuItems[i] = gAllTexts[i];
+					gMenuItems[i] = game_settings.Translation()[i];
 				}
 				for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
-					gOptionsItems[i] = gAllTexts[i + TOTAL_NUMBER_OF_BUTTONS];
+					gOptionsItems[i] = game_settings.Translation()[i + TOTAL_NUMBER_OF_BUTTONS];
 				}
 				for (int i = 0; i < 5; i++) {
-					gScreenInfos[i] = gAllTexts[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
+					gScreenInfos[i] = game_settings.Translation()[TOTAL_NUMBER_OF_BUTTONS + POSITIONS_IN_OPTIONS_MENU + i];
 				}
 				gLTExitQuestion.free();
 				gLTPause.free();
@@ -795,37 +739,34 @@ void handleEvents() {
 				for (int i = 0; i < POSITIONS_IN_OPTIONS_MENU; i++) {
 					gOptionButtons[i].setButtonText(gOptionsItems[i], gWindow, gFont, TEXT_SIZE);
 				}
-				gPowerUpsQuantity = gSettingsFileContent[3];
-				for (int i = 0; i < gFruitsQuantity; i++) {
+				for (int i = 0; i < gSettingsFileContent[2]; i++) {
 					x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 					y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
-					if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
+					if (i % (gSettingsFileContent[2] / gSettingsFileContent[3]) == 0) {
 						gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
 					} else {
 						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 					}
 				}
-				gFruitsQuantity = gSettingsFileContent[2];
 				gSpriteNum.push_back(0);
 				x.clear();
 				y.clear();
 				gFruit.clear();
-				for (int i = 0; i < gFruitsQuantity; i++) {
+				for (int i = 0; i < gSettingsFileContent[2]; i++) {
 					gSpriteNum.push_back(0);
 					x.push_back(0);
 					y.push_back(0);
 					gFruit.push_back(Dot());
 				}
-				for (int i = 0; i < gFruitsQuantity; i++) {
+				for (int i = 0; i < gSettingsFileContent[2]; i++) {
 					x[i] = (gLvlWidth - 20) * ((float) rand() / RAND_MAX);
 					y[i] = (gLvlHeight - 20) * ((float) rand() / RAND_MAX);
-					if (i % (gFruitsQuantity / gPowerUpsQuantity) == 0) {
+					if (i % (gSettingsFileContent[2] / gSettingsFileContent[3]) == 0) {
 						gSpriteNum[i] = (int) (30 - (5 * ((float) rand() / RAND_MAX)));
 					} else {
 						gSpriteNum[i] = (int) ((TOTAL_FRUIT_SPRITES - 5) * ((float) rand() / RAND_MAX));
 					}
 				}
-				gPlayerQuantity = gSettingsFileContent[1];
 				gAngle.clear();
 				gCurrentTime.clear();
 				gTimeElapsed.clear();
@@ -834,7 +775,7 @@ void handleEvents() {
 				gPlayer.clear();
 				gPlayerToTargetDistance[0].clear();
 				gPlayerToTargetDistance[1].clear();
-				for (int i = 0; i < gPlayerQuantity; i++) {
+				for (int i = 0; i < gSettingsFileContent[1]; i++) {
 					gAngle.push_back(0.0);
 					gCurrentTime.push_back(0);
 					gTimeElapsed.push_back(0);
@@ -868,8 +809,8 @@ void handleEvents() {
 					gLangFile.open(gPathToLangFile.str().c_str(), std::ios::in);
 					if (gLangFile.is_open()) {
 						unsigned int i = 0;
-						while (i < sizeof(gAllTexts) / sizeof(std::string)) {
-							getline(gLangFile, gAllTexts[i]);
+						while (i < game_settings.Translation().size()) {
+							getline(gLangFile, game_settings.Translation()[i]);
 							i++;
 						}
 						gSettingsFile.close();
@@ -939,19 +880,19 @@ void fTextToShow(int &i, int xpos, int ypos, std::string &vText) {
 // COLLISIONS WITH FRUITS +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 void fruitCollisions() {
     //Reset of distances to fruits
-	for (int i = 0; i <= gPlayerQuantity; i++) {
+	for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 		gPlayerToTargetDistance[0][i] = gLvlWidth * gLvlHeight;
 		gPlayerToTargetDistance[1][i] = -1;
 	}
 	//After eating a fruit copy the new fruit coordinates from snake to coord std::vectors
-	for (int i = 0; i < gFruitsQuantity; i++) {
-		for (int e = 0; e <= gPlayerQuantity; e++) {
+	for (int i = 0; i < gSettingsFileContent[2]; i++) {
+		for (int e = 0; e <= gSettingsFileContent[1]; e++) {
 			if (gPlayer[e].collectFruit(gFruit[i])) {
 				x[i] = gPlayer[e].mNewFruitPos.x;
 				y[i] = gPlayer[e].mNewFruitPos.y;
 			}
 		}
-		for (int j = 0; j <= gPlayerQuantity; j++) {
+		for (int j = 0; j <= gSettingsFileContent[1]; j++) {
 			gCollision = checkCollision(gFruit[i].getRect(), gPlayer[j].getHeadBox());
 			if (gPlayer[j].hasActivePowerup[0] && (gPlayer[0].hasActivePowerup[0] || gPlayer[0].hasActivePowerup[1] || gPlayer[0].hasActivePowerup[3])) {
 				gPlayer[j].hasActivePowerup[0] = false;
@@ -959,13 +900,13 @@ void fruitCollisions() {
 			if (gPlayer[j].hasActivePowerup[0] && j != 0) {
 				gPlayerToTargetDistance[0][j] = gPlayer[j].getSnakeFruitDistance(gPlayer[0].mHeadBox);
 				gPlayerToTargetDistance[1][j] = -1;
-				for (int e = 0; e <= gPlayerQuantity; e++) {
+				for (int e = 0; e <= gSettingsFileContent[1]; e++) {
 					if ((gPlayerToTargetDistance[0][j] > gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
 						gPlayerToTargetDistance[1][j] = e;
 					}
 				}
-				if (gPlayerQuantity > 0) {
-					for (int e = 1; e <= gPlayerQuantity; e++) {
+				if (gSettingsFileContent[1] > 0) {
+					for (int e = 1; e <= gSettingsFileContent[1]; e++) {
 						if ((gPlayerToTargetDistance[0][j] < gPlayer[j].getSnakeFruitDistance(gPlayer[e].mHeadBox)) && j != e) {
 							gAngle[j] = gPlayer[j].getHeadToFruitAngle(gPlayer[0].mHeadBox);
 						} else {
@@ -1122,11 +1063,11 @@ void powerupCheck(Snake &vSnake, bool render) {
 void gameReset(bool &reset) {
 	if (reset) {
 		for (int p = 0; p < TOTAL_POWERUPS; p++) {
-			for (int i = 0; i <= gPlayerQuantity; i++) {
+			for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 				gPlayer[i].hasActivePowerup[p] = false;
 			}
 		}
-		for (int i = 0; i <= gPlayerQuantity; i++) {
+		for (int i = 0; i <= gSettingsFileContent[1]; i++) {
 			gPlayer[i].setStartPos(gPlayerStartPos[i].x, gPlayerStartPos[i].y);
 			gPlayer[i].resetLength();
 			for (int p = 0; p < TOTAL_POWERUPS; p++) {
@@ -1139,8 +1080,8 @@ void gameReset(bool &reset) {
 }
 // COLLISIONS BETWEEN PLAYERS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 void betweenPlayersCollisions() {
-	for (int i = 0; i <= gPlayerQuantity; i++) {
-		for (int j = 0; j <= gPlayerQuantity; j++) {
+	for (int i = 0; i <= gSettingsFileContent[1]; i++) {
+		for (int j = 0; j <= gSettingsFileContent[1]; j++) {
 			if (i != j) {
 
 				if (gPlayer[i].hasActivePowerup[1] || gPlayer[j].hasActivePowerup[1]) {

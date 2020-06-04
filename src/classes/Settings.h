@@ -8,9 +8,15 @@
 
 class Settings{
 public:
+    Settings();
     bool loadSettings(const std::string& path);
+    bool saveSettings();
     bool loadLanguageList(const std::string& path);
     void selectLanguage(const int& language);
+    void setBotsCount(const int& count);
+    void setFruitsCount(const int& count);
+    void setPowerupsCount(const int& count);
+    void setSpeed(const int& speed);
     std::vector<std::string> availableTranslations();
     std::string Language();
     std::vector<std::string> Translation();
@@ -19,6 +25,7 @@ public:
     bool loadTanslation();
     std::vector<int> settingsFromFile();
 private:
+    std::vector<std::string> fSettingsInstructions;
     std::fstream _settings_file;
     std::fstream _language_list_file;
     std::fstream _language_file;
