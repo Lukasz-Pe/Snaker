@@ -1,5 +1,5 @@
 /*
- * T39-Dot.h
+ * T39-Fruit.h
  *
  *  Created on: 25 cze 2018
  *      Author: Łukasz Pękalski
@@ -10,12 +10,13 @@
 #include "src/main.h"
 #include "Tile.h"
 #include "Win.h"
-//#include "Snake.h"
+//TODO Derive Powerup class from Fruit
 bool touchesWall(SDL_Rect vBox, Tile *vTiles[]);
-class Dot {
+class Fruit {
 	public:
-		Dot();
+		Fruit();
 		void eventHandler(SDL_Event &event);
+		//TODO Write code for fruit repositioning
 		void move(Win &vWin);
 //		void moveToSnake(Snake &vSnake);
 		void moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[]=NULL, double timeStep=1.0);

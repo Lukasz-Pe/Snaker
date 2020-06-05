@@ -1,13 +1,13 @@
 /*
- * T39-Dot.cpp
+ * T39-Fruit.cpp
  *
  *  Created on: 25 cze 2018
  *      Author: Łukasz Pękalski
  */
 
-#include "Dot.h"
+#include "Fruit.h"
 
-Dot::Dot() {
+Fruit::Fruit() {
 	mPosX = 0;
 	mPosY = 0;
 	mVelX = 0;
@@ -20,7 +20,7 @@ Dot::Dot() {
 	y = 0;
 }
 
-void Dot::eventHandler(SDL_Event &event) {
+void Fruit::eventHandler(SDL_Event &event) {
 	if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 		switch (event.key.keysym.sym) {
 			case SDLK_UP:
@@ -55,7 +55,7 @@ void Dot::eventHandler(SDL_Event &event) {
 	}
 }
 
-//void Dot::moveToSnake(Snake &vSnake) {
+//void Fruit::moveToSnake(Snake &vSnake) {
 //	double dist = sqrt(pow((vSnake.getHeadBox().x - mPosX), 2) + pow((vSnake.getHeadBox().y - mPosY), 2));
 //	if (dist <= mRad) {
 //		x = (vSnake.getHeadBox().x+10) - (mPosX+10);
@@ -74,7 +74,7 @@ void Dot::eventHandler(SDL_Event &event) {
 //	}
 //}
 
-void Dot::move(Win &vWin) {
+void Fruit::move(Win &vWin) {
 	mPosX += mVelX;
 	mPosY += mVelY;
 	if ((mPosX < 0) || ((mPosX + mDotRadius) > vWin.getWidth())) {
@@ -85,7 +85,7 @@ void Dot::move(Win &vWin) {
 	}
 }
 
-void Dot::moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[], double timeStep) {
+void Fruit::moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[], double timeStep) {
 	mBox.x += mVelX*timeStep;
 	mBox.y += mVelY*timeStep;
 	if ((mBox.x < 0) || ((mBox.x + mDotRadius) > LevelWidht)
@@ -98,7 +98,7 @@ void Dot::moveBox(const int &LevelWidht, const int &LevelHeight, Tile *vTiles[],
 	}
 }
 
-void Dot::moveFramerateIndependent(Win &vWin, float &timeStep) {
+void Fruit::moveFramerateIndependent(Win &vWin, float &timeStep) {
 	mPosX += mVelX * timeStep;
 	mPosY += mVelY * timeStep;
 	if ((mPosX < 0)) {
@@ -114,11 +114,11 @@ void Dot::moveFramerateIndependent(Win &vWin, float &timeStep) {
 
 }
 
-void Dot::renderBox(LTexture &vDotTexture, Win &vWin, SDL_Rect *vCamera) {
+void Fruit::renderBox(LTexture &vDotTexture, Win &vWin, SDL_Rect *vCamera) {
 	vDotTexture.render(mBox.x - vCamera->x, mBox.y - vCamera->y, vWin);
 }
 
-void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vCamera, SDL_Rect *vClip, const double *scaleFactor) {
+void Fruit::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vCamera, SDL_Rect *vClip, const double *scaleFactor) {
 	int tmpPosX = 0, tmpPosY = 0;
 	if (vCamera != NULL) {
 		tmpPosX = vCamera->x;
@@ -150,7 +150,7 @@ void Dot::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vC
 //	SDL_RenderDrawRect(vWin.getRenderer(), &mBox);
 }
 
-void Dot::setCamera(Win &vWin, SDL_Rect &vCamera, const int &LevelWidht, const int &LevelHeight) {
+void Fruit::setCamera(Win &vWin, SDL_Rect &vCamera, const int &LevelWidht, const int &LevelHeight) {
 	vCamera.x = (mBox.x + mDotRadius / 2) - vWin.getWidth() / 2;
 	vCamera.y = (mBox.y + mDotRadius / 2) - vWin.getHeight() / 2;
 	if (vCamera.x < 0) {
@@ -167,14 +167,14 @@ void Dot::setCamera(Win &vWin, SDL_Rect &vCamera, const int &LevelWidht, const i
 	}
 }
 
-int Dot::getPosX() {
+int Fruit::getPosX() {
 	return mPosX;
 }
-int Dot::getPosY() {
+int Fruit::getPosY() {
 	return mPosY;
 }
 
-void Dot::setCollisionBox(LTexture &vTexture, SDL_Rect *vClip) {
+void Fruit::setCollisionBox(LTexture &vTexture, SDL_Rect *vClip) {
 	if (vClip == NULL) {
 		mBox= {(int)mPosX,(int)mPosY,vTexture.getWidth(), vTexture.getHeight()};
 	} else {
@@ -182,7 +182,7 @@ void Dot::setCollisionBox(LTexture &vTexture, SDL_Rect *vClip) {
 	}
 }
 
-SDL_Rect Dot::getRect() {
+SDL_Rect Fruit::getRect() {
 	return mBox;
 }
 

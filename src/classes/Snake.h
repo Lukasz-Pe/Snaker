@@ -10,8 +10,8 @@
 #include "src/main.h"
 #include "Win.h"
 #include "LTexture.h"
-#include "Dot.h"
-
+#include "Fruit.h"
+//TODO Make Snake super class for Player and Bots.
 class Snake {
 public:
 	Snake();
@@ -21,7 +21,7 @@ public:
 	void move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double *timeStep=NULL);
 	void render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL);
 	void setCamera(const int &vLWidth, const int &vLHeight, SDL_Rect &vCam);
-	bool collectFruit(Dot &vFruit);
+	bool collectFruit(Fruit &vFruit);
 	double getAngle();
 	SDL_Rect getHeadBox();
 	SDL_Rect getTailBox(int &num);

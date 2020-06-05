@@ -9,6 +9,7 @@
 #define SRC_T49_LTEXTURE_H_
 #include "src/main.h"
 #include "Win.h"
+//TODO move texture clipping functionality to this class.
 class LTexture {
 public:
 	LTexture();

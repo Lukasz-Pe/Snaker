@@ -53,7 +53,7 @@ int Snake::getSnakeFruitDistance(SDL_Rect &vFruit) {
 	return (sqrt(pow((mHeadX - vFruit.x), 2) + pow((mHeadY - vFruit.y), 2)));
 }
 
-bool Snake::collectFruit(Dot &vFruit) {
+bool Snake::collectFruit(Fruit &vFruit) {
 	if (sqrt(pow((mHeadX - vFruit.getPosX()), 2) + pow((mHeadY - vFruit.getPosY()), 2)) < mCollectDistanceMultiplier * mHeadBox.w) {
 //		CALCULATING HEAD TO FRUIT ANGLE >>>>>>>>>>>>>>>>>>>>>>>>>>>>
 		xHeadToFruit = (vFruit.getPosX() + 10) - (mHeadX + 10);
