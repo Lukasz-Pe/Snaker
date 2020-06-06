@@ -19,8 +19,9 @@ public:
     void setSpeed(const int& speed);
     std::vector<std::string> availableTranslations();
     std::string Language();
-    std::vector<std::string> Translation();
+    std::map<std::string,std::string> Translation();
     int numberOfAvailableLanguages();
+    void setMappingFilePath(const std::string& path);
     void setTranslationDirectory(const std::string& path);
     bool loadTanslation();
     std::vector<int> settingsFromFile();
@@ -29,10 +30,12 @@ private:
     std::fstream _settings_file;
     std::fstream _language_list_file;
     std::fstream _language_file;
+    std::fstream _mapping_file;
     std::string _settings_file_path;
     std::string _language_files_directory;
+    std::string _btn_and_text_mapping_file_path;
     std::vector<int> _settings_values;
-    std::vector<std::string> _translation;
+    std::map<std::string,std::string> _translation;
     std::vector<std::string> _language;
     int _selected_language;
     

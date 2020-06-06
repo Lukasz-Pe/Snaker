@@ -7,7 +7,7 @@
 
 #include "Button.h"
 #include "LTexture.h"
-
+int Button::mButtonNum{0};
 Button::Button() {
 	mButtonNum++;
 	mButtonID = mButtonNum;

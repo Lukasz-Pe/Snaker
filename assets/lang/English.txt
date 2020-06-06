@@ -1,3 +1,4 @@
+Continue game (c)
 Start :D (s)
 Reset game (r)
 Options (o)
@@ -11,6 +12,10 @@ Powerups quantity
 Snake speed
 Save changes
 Back to main menu (no saving)
+++
+--
+->>
+<<-
 End of game?
 Game paused
 Game over :(

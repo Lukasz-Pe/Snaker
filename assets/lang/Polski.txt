@@ -1,3 +1,4 @@
+Kontynuuj grę (c)
 Start :D (s)
 Restartuj grę (r)
 Opcje (o)
@@ -7,10 +8,14 @@ Może jednak nie :) (n/ESC)
 Zmień język
 Ilość botów
 Ilość owoców
-Ilość dopalaczy
+Stężenie dopalaczy
 Prędkość węża
 Zapisz zmiany
 Powrót do menu głównego (bez zapisu)
+++
+--
+->>
+<<-
 Koniec gry?
 Przerwa na kawę :)
 Zwaliłeś/aś

@@ -114,14 +114,13 @@ bool LTexture::loadFromFileAndChange(std::string path, Win &vWin) {
 bool LTexture::loadFromText(std::string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin) {
 	free();
 	SDL_Surface *textSurface = TTF_RenderUTF8_Blended(mUsedFont, textureText.c_str(), textColor);
-	//TTF_RenderText_Solid(mUsedFont, textureText.c_str(), textColor);
 	if (textSurface == NULL) {
-		std::cout << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << "\n";
+		std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << "\n";
 		return false;
 	}
 	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), textSurface);
 	if (mTexture == NULL) {
-		std::cout << "Unable to process fonts surface to texture! SDL Error: " << SDL_GetError() << "\n";
+		std::cerr << "Unable to process fonts surface to texture! SDL Error: " << SDL_GetError() << "\n";
 		return false;
 	}
 	mTextureHeight = textSurface->w;
@@ -202,10 +201,6 @@ Uint32 LTexture::getPixel32(unsigned int x, unsigned int y) {
 	Uint32 *pixels = (Uint32*) mPixels;
 	return pixels[(y * (mPitch / 4)) + x];
 }
-
-//LTexture::~LTexture() {
-//	free();
-//}
 
 bool LTexture::createBlank(int width, int height, Win &vWin, SDL_TextureAccess access) {
 	mTexture = SDL_CreateTexture(vWin.getRenderer(), SDL_PIXELFORMAT_RGBA8888, access, width, height);

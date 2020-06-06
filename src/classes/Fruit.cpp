@@ -147,7 +147,6 @@ void Fruit::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *
 			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
 		}
 	}
-//	SDL_RenderDrawRect(vWin.getRenderer(), &mBox);
 }
 
 void Fruit::setCamera(Win &vWin, SDL_Rect &vCamera, const int &LevelWidht, const int &LevelHeight) {

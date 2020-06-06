@@ -16,9 +16,11 @@
 #include <time.h>
 #include <math.h>
 #include <vector>
+#include <map>
 #include <stdio.h>
 #include <sstream>
 #include <fstream>
+#include <memory>
 //--------------------------------SDL include
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>

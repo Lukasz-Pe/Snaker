@@ -1,3 +1,4 @@
+Spiel fortsetzen (c)
 Starten :D (s)
 Das Spiel neu starten (r)
 Optionen (o)
@@ -11,6 +12,10 @@ Powerups Quantität
 Schlange Geschwindigkeit
 Änderungen speichern
 Zurück zum Hauptmenü (keine Einsparung)
+++
+--
+->>
+<<-
 Ende des Spiels?
 Spiel pausiert
 Spiel über:(

@@ -16,7 +16,7 @@ bool Settings::loadSettings(const std::string &path){
         _settings_file.close();
         return true;
     }
-    std::cout << "Unable to load settings file from: "<<path<<"\n";
+    std::cerr << "Unable to load settings file from: "<<path<<"\n";
     return false;
 }
 
@@ -30,7 +30,7 @@ bool Settings::loadLanguageList(const std::string &path){
         _language_list_file.close();
         return true;
     }
-    std::cout << "Unable to load language list file from: "<<path<<"\n";
+    std::cerr << "Unable to load language list file from: "<<path<<"\n";
     return false;
 }
 
@@ -55,15 +55,17 @@ bool Settings::loadTanslation(){
     std::string path;
     path=_language_files_directory+_language[_selected_language]+".txt";
     _language_file.open(path);
-    if(_language_file.is_open()){
-        std::string line;
-        while(std::getline(_language_file,line)){
-            _translation.emplace_back(line);
+    _mapping_file.open(_btn_and_text_mapping_file_path);
+    if(_language_file.is_open()&&_mapping_file.is_open()){
+        std::string lang_line;
+        std::string mapping_line;
+        while(std::getline(_language_file,lang_line)&&std::getline(_mapping_file,mapping_line)){
+            _translation.emplace(std::pair<std::string,std::string>(mapping_line, lang_line));
         }
         _language_file.close();
         return true;
     }
-    std::cout << "Unable to load translation file from: "<<path<<"\n";
+    std::cerr << "Unable to load translation file from: "<<path<<"\n";
     return false;
 }
 
@@ -75,7 +77,7 @@ int Settings::numberOfAvailableLanguages(){
     return _language.size();
 }
 
-std::vector<std::string> Settings::Translation(){
+std::map<std::string,std::string> Settings::Translation(){
     return _translation;
 }
 
@@ -96,7 +98,7 @@ bool Settings::saveSettings(){
         _settings_file.close();
         return true;
     }
-    std::cout << "Unable to save settings file to: "<<_settings_file_path<<"\n";
+    std::cerr << "Unable to save settings file to: "<<_settings_file_path<<"\n";
     return false;
 }
 
@@ -118,4 +120,8 @@ void Settings::setPowerupsCount(const int &count){
 
 void Settings::setSpeed(const int &speed){
     _settings_values[4]=speed;
+}
+
+void Settings::setMappingFilePath(const std::string& path){
+    _btn_and_text_mapping_file_path=path;
 }
