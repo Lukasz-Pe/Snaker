@@ -68,3 +68,17 @@ void Button::render(int x, int y, Win &vWin){
         mButtonTexture.render(x, y, vWin);
     }
 }
+
+Button::Button(std::string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE){
+    mButtonNum++;
+    mButtonID = mButtonNum;
+    mBoxButton= {0,0,0,0};
+    mButtonSelected = false;
+    mButtonColor= {0,255,0};
+    mSelectedButtonColor= {255,0,0};
+    setButtonText(std::move(text),vWin,vFont,TEXT_SIZE);
+}
+
+std::string Button::getButtonText(){
+    return mButtonText;
+}

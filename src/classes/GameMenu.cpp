@@ -21,9 +21,16 @@ void GameMenu::renderMainMenu(){
     renderBackground();
     //Main menu options are at positions 0-4
     for(int i=0;i<5;i++){
-        auto it=_translation.find(_mapping[i]);
-        if(it!=_translation.end()){
-            renderButton(it->second,_game_window->getWidth() / 2, _game_window->getHeight() / 3 + i**_text_size,false);
+        if(_played&&i!=1){
+            auto it=_translation.find(_mapping[i]);
+            if(it!=_translation.end()){
+                renderButton(it->second, _game_window->getWidth()/2, _game_window->getHeight()/3+i**_text_size, false);
+            }
+        }else if(!_played&&i!=0){
+            auto it=_translation.find(_mapping[i]);
+            if(it!=_translation.end()){
+                renderButton(it->second, _game_window->getWidth()/2, _game_window->getHeight()/3+i**_text_size, false);
+            }
         }
     }
 }
@@ -41,8 +48,9 @@ void GameMenu::renderExitDialogue(){
 }
 
 void GameMenu::eventHandler(SDL_Event &event){
-    while(SDL_PollEvent(&event)){
-    
+    if(event.type==SDL_MOUSEMOTION){
+        _button_event=&event;
+        SDL_GetMouseState(&_mouse_rect.x,&_mouse_rect.y);
     }
 }
 
@@ -51,9 +59,12 @@ void GameMenu::renderText(std::string &text, const int &posX, const int &posY){
 }
 
 void GameMenu::renderButton(std::string &text, const int &posX, const int &posY, const bool &activated){
-    Button menu_button;
     //TODO add collision checking
+    Button menu_button;
     menu_button.setButtonText(text,*_game_window,_text_font,*_text_size);
+    while(SDL_PollEvent(_button_event)){
+        menu_button.eventHandler(*_button_event);
+    }
     menu_button.render(posX-menu_button.getButtonDims().w/2, posY, *_game_window);
 }
 

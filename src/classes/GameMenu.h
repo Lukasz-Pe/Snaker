@@ -25,12 +25,13 @@ public:
     void setBackgroundTexture(LTexture background_texture);
 private:
     void renderText(std::string& text, const int& posX, const int& posY);
-    void renderButton(std::string& text, const int& posX, const int& posY, const bool& activated);
+    void renderButton(std::string &text, const int &posX, const int &posY, const bool &activated);
     void renderBackground();
     std::string _path_to_mapping_file;
     std::fstream _mapping_file;
     std::vector<std::string> _mapping;
     std::map<std::string,std::string> _translation;
+    std::vector<std::unique_ptr<Button>> _buttons;
     bool _played;
     Win* _game_window;
     TTF_Font *_text_font, *_title_font;
@@ -38,6 +39,7 @@ private:
     LTexture _menu_background_texture;
     std::vector<std::unique_ptr<Tile>> _menu_background;
     SDL_Rect _menu_camera, _mouse_rect{0,0,1,1};
+    SDL_Event* _button_event;
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
 };
 

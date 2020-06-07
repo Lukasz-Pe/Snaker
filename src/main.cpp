@@ -88,10 +88,11 @@ int main() {
     game_menu.setBackgroundTexture(std::move(menu_background));
     SDL_Event event;
 	while(gContinue){
+        game_window.prepareRenderer(0,0,0);
         while(SDL_PollEvent(&event)){
             game_window.eventHandler(event);
+            game_menu.eventHandler(event);
         }
-	    game_window.prepareRenderer(0,0,0);
         game_menu.renderMainMenu();
         game_window.render();
 	}
