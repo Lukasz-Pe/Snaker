@@ -81,9 +81,10 @@ void Win::eventHandler(SDL_Event &event) {
 				mMouseFocus = false;
 				break;
 			case SDL_WINDOWEVENT_SIZE_CHANGED:
+			case SDL_WINDOWEVENT_RESIZED:
 				mWidth=event.window.data1;
 				mHeight=event.window.data2;
-				SDL_RenderPresent(mRenderer);
+				//SDL_RenderPresent(mRenderer);
 				break;
 		}
 	}

@@ -7,7 +7,7 @@
 
 #include "../main.h"
 #include "Button.h"
-
+#include "Tile.h"
 class GameMenu{
 public:
     GameMenu(Win& window, TTF_Font* text, TTF_Font* title,
@@ -22,6 +22,7 @@ public:
     void renderPauseDialogue();
     void renderExitDialogue();
     void eventHandler(SDL_Event &event);
+    void setBackgroundTexture(LTexture background_texture);
 private:
     void renderText(std::string& text, const int& posX, const int& posY);
     void renderButton(std::string& text, const int& posX, const int& posY, const bool& activated);
@@ -34,7 +35,10 @@ private:
     Win* _game_window;
     TTF_Font *_text_font, *_title_font;
     const int *_text_size, *_title_size;
-    const LTexture* _menu_backgroud;
+    LTexture _menu_background_texture;
+    std::vector<std::unique_ptr<Tile>> _menu_background;
+    SDL_Rect _menu_camera, _mouse_rect{0,0,1,1};
+    friend bool checkCollision(SDL_Rect a, SDL_Rect b);
 };
 
 

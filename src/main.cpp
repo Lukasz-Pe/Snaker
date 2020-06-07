@@ -16,6 +16,7 @@
 #include "classes/Settings.h"
 #include "classes/GameMenu.h"
 #include "functions/initsdl.h"
+#include "functions/eventHandler.h"
 //#include "functions/collisions.h"
 //TODO think about memory management
 //TODO think about concurrency
@@ -84,7 +85,12 @@ int main() {
 	game_window.setTitle("Snaker");
     GameMenu game_menu(game_window,text_font.get(),title_font.get(),game_settings.Translation(),&TEXT_SIZE,&TITLE_SIZE);
     game_menu.loadMappingFile(MAPPING_FILE_PATH);
+    game_menu.setBackgroundTexture(std::move(menu_background));
+    SDL_Event event;
 	while(gContinue){
+        while(SDL_PollEvent(&event)){
+            game_window.eventHandler(event);
+        }
 	    game_window.prepareRenderer(0,0,0);
         game_menu.renderMainMenu();
         game_window.render();
