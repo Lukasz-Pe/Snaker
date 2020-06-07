@@ -14,6 +14,7 @@
 #include "classes/Button.h"
 #include "classes/Timer.h"
 #include "classes/Settings.h"
+#include "classes/GameMenu.h"
 #include "functions/initsdl.h"
 //#include "functions/collisions.h"
 //TODO think about memory management
@@ -32,13 +33,7 @@ int main() {
     Win game_window;
     game_window.setWidth(1366);
     game_window.setHeight(720);
-    struct SDLTTFDestroyer
-    {
-        void operator()(TTF_Font* font) const
-        {
-            TTF_CloseFont(font);
-        }
-    };
+    
 //Load language list, setting, translation and assets
     gContinue=game_settings.loadLanguageList(PATH_TO_TRANSLATION_LIST);
     gContinue=game_settings.loadSettings(PATH_TO_SETTINGS);
@@ -87,12 +82,12 @@ int main() {
 	//TODO Build class for powerups - derived from Fruits
     //TODO build class for menu generation
 	game_window.setTitle("Snaker");
-    int c{0};
+    GameMenu game_menu(game_window,text_font.get(),title_font.get(),game_settings.Translation(),&TEXT_SIZE,&TITLE_SIZE);
+    game_menu.loadMappingFile(MAPPING_FILE_PATH);
 	while(gContinue){
-        if(c>=100000){
-            gContinue=false;
-        }
-        c++;
+	    game_window.prepareRenderer(0,0,0);
+        game_menu.renderMainMenu();
+        game_window.render();
 	}
 	return 0;
 }

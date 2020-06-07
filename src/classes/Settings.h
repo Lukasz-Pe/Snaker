@@ -8,7 +8,7 @@
 
 class Settings{
 public:
-    Settings();
+    Settings():_settingsInstructions({"/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" }){};
     bool loadSettings(const std::string& path);
     bool saveSettings();
     bool loadLanguageList(const std::string& path);
@@ -26,7 +26,7 @@ public:
     bool loadTanslation();
     std::vector<int> settingsFromFile();
 private:
-    std::vector<std::string> fSettingsInstructions;
+    std::vector<std::string> _settingsInstructions;
     std::fstream _settings_file;
     std::fstream _language_list_file;
     std::fstream _language_file;

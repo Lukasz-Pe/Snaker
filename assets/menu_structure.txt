@@ -5,11 +5,11 @@ btn_options
 btn_quit
 btn_quit_yes
 btn_quit_no
-btn_change_language
-btn_bots_quantity
-btn_frutis_quantity
-btn_powerups_concetration
-btn_snake_speed
+text_change_language
+text_bots_quantity
+text_frutis_quantity
+text_powerups_concetration
+text_snake_speed
 btn_save_and_exit
 btn_exit_without_saving
 btn_increment
@@ -21,3 +21,4 @@ text_game_paused
 text_game_over
 text_press_to_restart
 text_options
+text_main_menu

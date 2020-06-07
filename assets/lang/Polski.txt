@@ -21,3 +21,4 @@ Przerwa na kawę :)
 Zwaliłeś/aś
 Naciśnij R by zresetować lub Q/ESC by wyjść
 Opcje
+Menu główne

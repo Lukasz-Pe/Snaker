@@ -26,11 +26,27 @@
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_ttf.h>
 //#include <SDL2/SDL_thread.h>
-//--------------------------------namespace
+//--------------------------------other functions
 #include "functions/collisions.h"
 double distanceCalc(SDL_Point &a, SDL_Point &b);
 
 //void betweenBotsCollisions();
 //void playerAndBotsCollisions();
 void gameReset(bool &reset);
+//-------------------------------------needed structs
+//Struct for unique_ptr destructor
+struct SDLTTFDestroyer
+{
+    void operator()(TTF_Font* font) const
+    {
+        TTF_CloseFont(font);
+    }
+};
+struct SDLWindowDestroyer
+{
+    void operator()(SDL_Window* w) const
+    {
+        SDL_DestroyWindow(w);
+    }
+};
 #endif /* MAIN_H_ */

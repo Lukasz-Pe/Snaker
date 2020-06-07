@@ -21,3 +21,4 @@ Game paused
 Game over :(
 Press R to restart or Q/ESC to exit
 Options
+Main menu

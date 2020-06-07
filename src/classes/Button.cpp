@@ -38,7 +38,7 @@ SDL_Rect Button::getButtonDims() {
 }
 
 void Button::setButtonText(std::string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen) {
-	mButtonTexture.loadFromText(text.c_str(), mButtonColor, vFont, vWin);
+    mButtonTexture.loadFromText(text.c_str(), mButtonColor, vFont, vWin);
 	if (widen) {
 		mButtonTexture.setWidth(4 * mButtonTexture.getWidth());
 	}

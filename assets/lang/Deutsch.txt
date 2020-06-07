@@ -21,3 +21,4 @@ Spiel pausiert
 Spiel über:(
 Drücken Sie R zum Neustart oder Q/ESC um Spiel zu beenden
 Optionen
+Hauptmenü
