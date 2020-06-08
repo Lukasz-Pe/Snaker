@@ -121,7 +121,6 @@ GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title,
     _title_font(title), _translation(translation),
     _text_size(text_size), _title_size(title_size){
     for(auto btn:_translation){
-        std::cerr<<"btn.first: "<<btn.first<<"\n";
         _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
     }
 }
