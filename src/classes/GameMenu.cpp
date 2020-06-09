@@ -23,8 +23,12 @@ void GameMenu::renderMainMenu(){
         _menu_level=_mapping[23];
     }
     renderBackground();
+    _game_title.render((_game_window->getWidth() - _game_title.getWidth()) / 2, 0, *_game_window);
+    
     //Main menu options are at positions 0-4
     std::map<std::string,Button>::iterator it=_buttons.end();
+    //renderButton(it->second, _game_window->getWidth()/2, _game_window->getHeight()/6+*_text_size);
+    _menu_text.find(_mapping[23])->second.render(_game_window->getWidth()/2-_menu_text.find(_mapping[23])->second.getWidth()/2, _game_window->getHeight()/6+*_text_size,*_game_window);
     for(int i=0;i<4;i++){
         if(_played){
             if(i>1){
@@ -130,8 +134,20 @@ GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title,
     _played(true), _game_window(&window), _text_font(text),
     _title_font(title), _translation(translation),
     _text_size(text_size), _title_size(title_size){
+    _game_title.loadFromText("Snaker", SDL_Color{255,0,0},_title_font,*_game_window);
+    _game_title.setWidth(3*_game_title.getWidth());
+    _game_title.setHeight(*_title_size);
     for(auto btn:_translation){
-        _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
+        if(btn.first.substr(0,4)=="btn_"){
+            _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
+        }
+        if(btn.first.substr(0,5)=="text_"){
+            LTexture text_texture;
+            text_texture.loadFromText(btn.second,SDL_Color{255,0,0},_text_font,*_game_window);
+            text_texture.setWidth(3*text_texture.getWidth());
+            text_texture.setHeight(*_text_size);
+            _menu_text.emplace(btn.first,std::move(text_texture));
+        }
     }
 }
 

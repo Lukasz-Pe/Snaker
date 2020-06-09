@@ -98,7 +98,7 @@ int main() {
             game_menu.renderMainMenu();
         }
         if(state==game_menu.getMapping()[4]){
-        
+            gContinue=false;
         }
         game_window.render();
         state=game_menu.getGameState();

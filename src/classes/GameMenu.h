@@ -35,12 +35,13 @@ private:
     Win* _game_window;
     TTF_Font *_text_font, *_title_font;
     const int *_text_size, *_title_size;
-    LTexture _menu_background_texture;
+    LTexture _menu_background_texture,_game_title;
     std::vector<std::unique_ptr<Tile>> _menu_background;
     SDL_Rect _menu_camera, _mouse_rect{0,0,1,1};
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
     std::string _menu_level;
     std::string _game_state;
+    std::map<std::string, LTexture> _menu_text;
 };
 
 

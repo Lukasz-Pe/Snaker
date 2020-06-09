@@ -111,7 +111,7 @@ bool LTexture::loadFromFileAndChange(std::string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromText(std::string textureText, SDL_Color textColor, TTF_Font *mUsedFont, Win &vWin) {
+bool LTexture::loadFromText(std::string textureText, const SDL_Color &textColor, TTF_Font *mUsedFont, Win &vWin) {
 	free();
 	SDL_Surface *textSurface = TTF_RenderUTF8_Blended(mUsedFont, textureText.c_str(), textColor);
 	if (textSurface == NULL) {
