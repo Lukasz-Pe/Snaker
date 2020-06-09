@@ -36,7 +36,6 @@ private:
     LTexture _menu_background_texture;
     std::vector<std::unique_ptr<Tile>> _menu_background;
     SDL_Rect _menu_camera, _mouse_rect{0,0,1,1};
-    SDL_Event* _button_event;
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
     std::string _menu_level;
 };
