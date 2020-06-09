@@ -26,7 +26,7 @@ void GameMenu::renderMainMenu(){
     std::map<std::string,Button>::iterator it;
     for(int i=0;i<4;i++){
         if(_played){
-            if(i>=1){
+            if(i>1){
                 i++;
                 it=_buttons.find(_mapping[i]);
                 i--;
@@ -34,9 +34,11 @@ void GameMenu::renderMainMenu(){
                 it=_buttons.find(_mapping[i]);
             }
         }else{
-            i++;
-            it=_buttons.find(_mapping[i]);
-            i--;
+            if(i>1){
+                i++;
+                it=_buttons.find(_mapping[i]);
+                i--;
+            }
         }
         if(it!=_buttons.end()){
             renderButton(it->second, _game_window->getWidth()/2, _game_window->getHeight()/3+i**_text_size);
@@ -60,7 +62,7 @@ void GameMenu::eventHandler(SDL_Event &event){
     std::map<std::string,Button>::iterator it;
     for(int i=0;i<4;i++){
         if(_played){
-            if(i>=1){
+            if(i>1){
                 i++;
                 it=_buttons.find(_mapping[i]);
                 i--;
@@ -68,9 +70,11 @@ void GameMenu::eventHandler(SDL_Event &event){
                 it=_buttons.find(_mapping[i]);
             }
         }else{
-            i++;
-            it=_buttons.find(_mapping[i]);
-            i--;
+            if(i>1){
+                i++;
+                it=_buttons.find(_mapping[i]);
+                i--;
+            }
         }
     if(event.type==SDL_MOUSEMOTION){
         _button_event=&event;

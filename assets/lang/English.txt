@@ -1,6 +1,6 @@
 Continue game (c)
-Start :D (s)
 Reset game (r)
+Start :D (s)
 Options (o)
 Quit :( (q/ESC)
 I have to :( (y)

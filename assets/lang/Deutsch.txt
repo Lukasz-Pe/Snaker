@@ -1,6 +1,6 @@
 Spiel fortsetzen (c)
-Starten :D (s)
 Das Spiel neu starten (r)
+Starten :D (s)
 Optionen (o)
 Das Spiel beenden :( (q/ESC)
 Ich muss... :( (t)

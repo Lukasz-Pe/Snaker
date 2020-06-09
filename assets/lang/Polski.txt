@@ -1,6 +1,6 @@
 Kontynuuj grę (c)
-Start :D (s)
 Restartuj grę (r)
+Start :D (s)
 Opcje (o)
 Zakończ grę :( (q/ESC)
 Muszę... :( (t)

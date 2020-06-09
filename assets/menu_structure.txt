@@ -1,6 +1,6 @@
 btn_continue_game
-btn_start
 btn_reset
+btn_start
 btn_options
 btn_quit
 btn_quit_yes
