@@ -23,7 +23,7 @@ void GameMenu::renderMainMenu(){
     }
     renderBackground();
     //Main menu options are at positions 0-4
-    std::map<std::string,Button>::iterator it;
+    std::map<std::string,Button>::iterator it=_buttons.end();
     for(int i=0;i<4;i++){
         if(_played){
             if(i>1){
@@ -59,7 +59,7 @@ void GameMenu::renderExitDialogue(){
 }
 
 void GameMenu::eventHandler(SDL_Event &event){
-    std::map<std::string,Button>::iterator it;
+    std::map<std::string,Button>::iterator it=_buttons.end();
     for(int i=0;i<4;i++){
         if(_played){
             if(i>1){
