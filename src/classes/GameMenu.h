@@ -20,6 +20,8 @@ public:
     void renderExitDialogue();
     void eventHandler(SDL_Event &event);
     void setBackgroundTexture(LTexture background_texture);
+    std::string getGameState();
+    std::vector<std::string> getMapping();
 private:
     void renderText(std::string& text, const int& posX, const int& posY);
     void renderButton(Button &btn, const int &posX, const int &posY);
@@ -38,6 +40,7 @@ private:
     SDL_Rect _menu_camera, _mouse_rect{0,0,1,1};
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
     std::string _menu_level;
+    std::string _game_state;
 };
 
 

@@ -12,6 +12,7 @@ bool GameMenu::loadMappingFile(const std::string &path){
         while(std::getline(_mapping_file, line)){
             _mapping.emplace_back(line);
         }
+        _game_state=_mapping[23];
         return true;
     }
     return false;
@@ -34,7 +35,7 @@ void GameMenu::renderMainMenu(){
                 it=_buttons.find(_mapping[i]);
             }
         }else{
-            if(i>1){
+            if(i>0){
                 i++;
                 it=_buttons.find(_mapping[i]);
                 i--;
@@ -70,14 +71,13 @@ void GameMenu::eventHandler(SDL_Event &event){
                 it=_buttons.find(_mapping[i]);
             }
         }else{
-            if(i>1){
+            if(i>0){
                 i++;
                 it=_buttons.find(_mapping[i]);
                 i--;
             }
         }
     if(event.type==SDL_MOUSEMOTION){
-        _button_event=&event;
         SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
             if(it!=_buttons.end()){
                 it->second.eventHandler(event);
@@ -85,9 +85,15 @@ void GameMenu::eventHandler(SDL_Event &event){
         }
         if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
         if(event.type==SDL_MOUSEBUTTONUP){
-            std::cerr<<"it->second.getButtonTextID(): "<<it->second.getButtonTextID()<<"\n";
+            _game_state=it->second.getButtonTextID();
         }
         }
+    }
+    if(_game_state==_mapping[2]){
+        _played=true;
+    }
+    if(_game_state==_mapping[1]){
+        _played=false;
     }
 }
 void GameMenu::renderText(std::string &text, const int &posX, const int &posY){
@@ -121,10 +127,18 @@ void GameMenu::setBackgroundTexture(LTexture background_texture){
 GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title,
     const std::map<std::string, std::string> &translation,
     const int *text_size, const int *title_size):
-    _played(false), _game_window(&window), _text_font(text),
+    _played(true), _game_window(&window), _text_font(text),
     _title_font(title), _translation(translation),
     _text_size(text_size), _title_size(title_size){
     for(auto btn:_translation){
         _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
     }
+}
+
+std::string GameMenu::getGameState(){
+    return _game_state;
+}
+
+std::vector<std::string> GameMenu::getMapping(){
+    return _mapping;
 }

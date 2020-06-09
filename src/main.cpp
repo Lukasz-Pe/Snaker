@@ -87,14 +87,21 @@ int main() {
     game_menu.loadMappingFile(MAPPING_FILE_PATH);
     game_menu.setBackgroundTexture(std::move(menu_background));
     SDL_Event event;
+    std::string state{game_menu.getGameState()};
 	while(gContinue){
         game_window.prepareRenderer(0,0,0);
         while(SDL_PollEvent(&event)){
             game_window.eventHandler(event);
             game_menu.eventHandler(event);
         }
-        game_menu.renderMainMenu();
+        if(state==game_menu.getMapping()[23]){
+            game_menu.renderMainMenu();
+        }
+        if(state==game_menu.getMapping()[4]){
+        
+        }
         game_window.render();
+        state=game_menu.getGameState();
 	}
 	return 0;
 }
