@@ -94,10 +94,13 @@ int main() {
             game_window.eventHandler(event);
             game_menu.eventHandler(event);
         }
-        if(state==game_menu.getMapping()[23]){
+        if(state==game_menu.getMapping()[23]||state==game_menu.getMapping()[1]||state==game_menu.getMapping()[2]||state==game_menu.getMapping()[6]){
             game_menu.renderMainMenu();
         }
         if(state==game_menu.getMapping()[4]){
+            game_menu.renderExitDialogue();
+        }
+        if(state==game_menu.getMapping()[5]){
             gContinue=false;
         }
         game_window.render();

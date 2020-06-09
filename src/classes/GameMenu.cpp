@@ -19,16 +19,13 @@ bool GameMenu::loadMappingFile(const std::string &path){
 }
 
 void GameMenu::renderMainMenu(){
-    if(_menu_level!=_mapping[23]){
-        _menu_level=_mapping[23];
-    }
+    int position_to_draw=23;
     renderBackground();
-    _game_title.render((_game_window->getWidth() - _game_title.getWidth()) / 2, 0, *_game_window);
-    
+    renderGameTitle();
     //Main menu options are at positions 0-4
     std::map<std::string,Button>::iterator it=_buttons.end();
     //renderButton(it->second, _game_window->getWidth()/2, _game_window->getHeight()/6+*_text_size);
-    _menu_text.find(_mapping[23])->second.render(_game_window->getWidth()/2-_menu_text.find(_mapping[23])->second.getWidth()/2, _game_window->getHeight()/6+*_text_size,*_game_window);
+    _menu_text.find(_mapping[position_to_draw])->second.render(_game_window->getWidth()/2-_menu_text.find(_mapping[position_to_draw])->second.getWidth()/2, _game_window->getHeight()/6+*_text_size,*_game_window);
     for(int i=0;i<4;i++){
         if(_played){
             if(i>1){
@@ -60,37 +57,36 @@ void GameMenu::renderPauseDialogue(){
 }
 
 void GameMenu::renderExitDialogue(){
-
+    renderBackground();
+    renderGameTitle();
+    int position_to_draw=18;
+    auto it=_menu_text.find(_mapping[position_to_draw]);
+    auto btn_it=_buttons.find(_mapping[5]);
+    _dialog_box.w=1.25*_game_title.getWidth();//it->second.getWidth();
+    _dialog_box.x=(_game_window->getWidth()-_dialog_box.w)/2;
+    _dialog_box.y=(_game_window->getHeight()-it->second.getHeight())/2;
+    _dialog_box.h=1.25*it->second.getHeight()+*_text_size;
+    SDL_RenderFillRect(_game_window->getRenderer(),&_dialog_box);
+    it->second.render(_game_window->getWidth()/2-_menu_text.find(_mapping[position_to_draw])->second.getWidth()/2, (_game_window->getHeight()-*_text_size)/2,*_game_window);
+    btn_it->second.render(_dialog_box.x,_dialog_box.y+1.25**_text_size,*_game_window);
+    btn_it=_buttons.find(_mapping[6]);
+    btn_it->second.render(_dialog_box.x+_dialog_box.w-btn_it->second.getButtonDims().w,_dialog_box.y+1.25**_text_size,*_game_window);
 }
 
 void GameMenu::eventHandler(SDL_Event &event){
     std::map<std::string,Button>::iterator it=_buttons.end();
-    for(int i=0;i<4;i++){
-        if(_played){
-            if(i>1){
-                i++;
-                it=_buttons.find(_mapping[i]);
-                i--;
-            }else{
-                it=_buttons.find(_mapping[i]);
-            }
-        }else{
-            if(i>0){
-                i++;
-                it=_buttons.find(_mapping[i]);
-                i--;
-            }
-        }
-    if(event.type==SDL_MOUSEMOTION){
-        SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
-            if(it!=_buttons.end()){
+    for(int i=0;i<_mapping.size();i++){
+        it=_buttons.find(_mapping[i]);
+        if(it!=_buttons.end()){
+            if(event.type==SDL_MOUSEMOTION){
+                SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
                 it->second.eventHandler(event);
             }
-        }
-        if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
-        if(event.type==SDL_MOUSEBUTTONUP){
-            _game_state=it->second.getButtonTextID();
-        }
+            if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
+                if(event.type==SDL_MOUSEBUTTONUP){
+                    _game_state=it->second.getButtonTextID();
+                }
+            }
         }
     }
     if(_game_state==_mapping[2]){
@@ -131,7 +127,7 @@ void GameMenu::setBackgroundTexture(LTexture background_texture){
 GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title,
     const std::map<std::string, std::string> &translation,
     const int *text_size, const int *title_size):
-    _played(true), _game_window(&window), _text_font(text),
+    _played(false), _game_window(&window), _text_font(text),
     _title_font(title), _translation(translation),
     _text_size(text_size), _title_size(title_size){
     _game_title.loadFromText("Snaker", SDL_Color{255,0,0},_title_font,*_game_window);
@@ -157,4 +153,8 @@ std::string GameMenu::getGameState(){
 
 std::vector<std::string> GameMenu::getMapping(){
     return _mapping;
+}
+
+void GameMenu::renderGameTitle(){
+    _game_title.render((_game_window->getWidth() - _game_title.getWidth()) / 2, 0, *_game_window);
 }

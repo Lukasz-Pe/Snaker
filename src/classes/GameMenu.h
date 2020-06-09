@@ -26,6 +26,7 @@ private:
     void renderText(std::string& text, const int& posX, const int& posY);
     void renderButton(Button &btn, const int &posX, const int &posY);
     void renderBackground();
+    void renderGameTitle();
     std::string _path_to_mapping_file;
     std::fstream _mapping_file;
     std::vector<std::string> _mapping;
@@ -37,9 +38,8 @@ private:
     const int *_text_size, *_title_size;
     LTexture _menu_background_texture,_game_title;
     std::vector<std::unique_ptr<Tile>> _menu_background;
-    SDL_Rect _menu_camera, _mouse_rect{0,0,1,1};
+    SDL_Rect _menu_camera, _mouse_rect{0,0,1,1}, _dialog_box{0,0,0,0};
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
-    std::string _menu_level;
     std::string _game_state;
     std::map<std::string, LTexture> _menu_text;
 };
