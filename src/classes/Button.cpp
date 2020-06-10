@@ -69,7 +69,7 @@ void Button::render(int x, int y, Win &vWin){
     }
 }
 
-Button::Button(const std::string& txtID, std::string& text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE):
+Button::Button(const std::string& txtID, std::string& text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, const bool& wide):
 mButtonTxtID(txtID){
     mButtonNum++;
     mButtonID = mButtonNum;
@@ -77,7 +77,7 @@ mButtonTxtID(txtID){
     mButtonSelected = false;
     mButtonColor= {0,255,0};
     mSelectedButtonColor= {255,0,0};
-    setButtonText(text,vWin,vFont,TEXT_SIZE);
+    setButtonText(text,vWin,vFont,TEXT_SIZE,wide);
 }
 
 std::string Button::getButtonTextID(){

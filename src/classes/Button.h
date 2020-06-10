@@ -14,7 +14,7 @@
 class Button {
 public:
 	Button();
-	Button(const std::string& txtID, std::string& text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE);
+	Button(const std::string& txtID, std::string& text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, const bool& wide=true);
 	int getID();
 	void eventHandler(SDL_Event &event);
 	SDL_Rect getButtonDims();

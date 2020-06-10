@@ -13,6 +13,24 @@ bool GameMenu::loadMappingFile(const std::string &path){
             _mapping.emplace_back(line);
         }
         _game_state=_mapping[23];
+        for(auto btn:_translation){
+            if(btn.first.substr(0, 4)=="btn_"&&
+               (btn.first=="btn_increment"||btn.first=="btn_decrement"||btn.first=="btn_next"||btn.first=="btn_prev")){
+                if(btn.first=="btn_next"||btn.first=="btn_prev"){
+                    _btn_value_change_mapping.emplace_back(btn.first);
+                _btn_value_change.emplace(btn.first,
+                                          Button(btn.first, btn.second, *_game_window, _text_font, *_text_size, false));
+                }
+                if(btn.first=="btn_decrement"||btn.first=="btn_increment"){
+                    for(int i=0; i<4; i++){
+                        _btn_value_change_mapping.emplace_back(btn.first+"_"+_mapping[i+8]);
+                        _btn_value_change.emplace(btn.first+"_"+_mapping[i+8],
+                                                  Button(btn.first+"_"+_mapping[i+8], btn.second, *_game_window, _text_font,
+                                                         *_text_size, false));
+                    }
+                }
+            }
+        }
         return true;
     }
     return false;
@@ -49,7 +67,35 @@ void GameMenu::renderMainMenu(){
 }
 
 void GameMenu::renderOptionsScreen(){
-
+    int position_to_draw=22;
+    renderBackground();
+    renderGameTitle();
+    _menu_text.find(_mapping[position_to_draw])->second.render(_game_window->getWidth()/2-_menu_text.find(_mapping[position_to_draw])->second.getWidth()/2, _game_window->getHeight()/6+*_text_size,*_game_window);
+    auto text_it=_menu_text.end();
+    auto btn_it=_buttons.end();
+    for(int i=7;i<12;i++){
+        text_it=_menu_text.find(_mapping[i]);
+        text_it->second.render(_game_window->getWidth()/3, _game_window->getHeight()/3+(i-7)**_text_size, *_game_window);
+        LTexture option_text;
+        if(i==7){
+            option_text.loadFromText(_game_settings->availableTranslations()[_game_settings->settingsFromFile()[i-7]], SDL_Color{255, 0, 0},
+                                     _text_font, *_game_window);
+        }else{
+            option_text.loadFromText(std::to_string(_game_settings->settingsFromFile()[i-7]), SDL_Color{255, 0, 0},
+                                     _text_font, *_game_window);
+        }
+        option_text.setWidth(2*option_text.getWidth());
+        option_text.setHeight(*_text_size);
+        option_text.render((_game_window->getWidth()/6)*3,(_game_window->getHeight()/3)+(i-7)**_text_size,*_game_window);
+        if(i==7){
+            renderButton(_btn_value_change[_btn_value_change_mapping[9]],option_text.getPosX()-_btn_value_change[_btn_value_change_mapping[9]].getButtonDims().w,option_text.getPosY());
+            renderButton(_btn_value_change[_btn_value_change_mapping[8]],option_text.getPosX()+1.25*option_text.getWidth(),option_text.getPosY());
+        }
+        if(i!=7){
+            renderButton(_btn_value_change[_btn_value_change_mapping[i-8]],option_text.getPosX()-_btn_value_change[_btn_value_change_mapping[i-8]].getButtonDims().w,option_text.getPosY());
+            renderButton(_btn_value_change[_btn_value_change_mapping[i-4]],option_text.getPosX()+1.25*option_text.getWidth(),option_text.getPosY());
+        }
+    }
 }
 
 void GameMenu::renderPauseDialogue(){
@@ -62,7 +108,7 @@ void GameMenu::renderExitDialogue(){
     int position_to_draw=18;
     auto it=_menu_text.find(_mapping[position_to_draw]);
     auto btn_it=_buttons.find(_mapping[5]);
-    _dialog_box.w=1.25*_game_title.getWidth();//it->second.getWidth();
+    _dialog_box.w=1.25*_game_title.getWidth();
     _dialog_box.x=(_game_window->getWidth()-_dialog_box.w)/2;
     _dialog_box.y=(_game_window->getHeight()-it->second.getHeight())/2;
     _dialog_box.h=1.25*it->second.getHeight()+*_text_size;
@@ -75,8 +121,20 @@ void GameMenu::renderExitDialogue(){
 
 void GameMenu::eventHandler(SDL_Event &event){
     std::map<std::string,Button>::iterator it=_buttons.end();
-    for(int i=0;i<_mapping.size();i++){
+    int begin=0, end=0;
+    if(_game_state==_mapping[23]||_game_state==_mapping[1]||_game_state==_mapping[2]||_game_state==_mapping[6]){
+        if(_played){
+            begin=0;
+        }else{
+            begin=2;
+        }
+        end=4;
+    }
+    for(int i=begin;i<end;i++){
         it=_buttons.find(_mapping[i]);
+        if(_played&&_mapping[i]==_mapping[2]){
+            it=_buttons.end();
+        }
         if(it!=_buttons.end()){
             if(event.type==SDL_MOUSEMOTION){
                 SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
@@ -89,15 +147,47 @@ void GameMenu::eventHandler(SDL_Event &event){
             }
         }
     }
+    if(_game_state==_mapping[3]){
+        it=_btn_value_change.end();
+        for(int i=0; i<_btn_value_change_mapping.size(); i++){
+            it=_btn_value_change.find(_btn_value_change_mapping[i]);
+            if(it!=_btn_value_change.end()){
+                if(event.type==SDL_MOUSEMOTION){
+                    SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
+                    it->second.eventHandler(event);
+                }
+                if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
+                    if(event.type==SDL_MOUSEBUTTONUP){
+                        std::cerr<<it->second.getButtonTextID()<<"\n";
+//                    _game_state=it->second.getButtonTextID();
+                    }
+                }
+            }
+        }
+    }
+    it=_btn_value_change.end();
+    for(int i=14;i<16;i++){
+        for(int j=8;j<12;j++){
+            it=_btn_value_change.find(_mapping[i]+"_"+_mapping[j]);
+            if(it!=_btn_value_change.end()){
+                if(event.type==SDL_MOUSEMOTION){
+                    SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
+                    it->second.eventHandler(event);
+                }
+                if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
+                    if(event.type==SDL_MOUSEBUTTONUP){
+//                    _game_state=it->second.getButtonTextID();
+                    }
+                }
+            }
+        }
+    }
     if(_game_state==_mapping[2]){
         _played=true;
     }
     if(_game_state==_mapping[1]){
         _played=false;
     }
-}
-void GameMenu::renderText(std::string &text, const int &posX, const int &posY){
-
 }
 
 void GameMenu::renderButton(Button &btn, const int &posX, const int &posY){
@@ -126,15 +216,16 @@ void GameMenu::setBackgroundTexture(LTexture background_texture){
 
 GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title,
     const std::map<std::string, std::string> &translation,
-    const int *text_size, const int *title_size):
+    const int *text_size, const int *title_size, Settings *game_settings):
     _played(false), _game_window(&window), _text_font(text),
     _title_font(title), _translation(translation),
-    _text_size(text_size), _title_size(title_size){
+    _text_size(text_size), _title_size(title_size), _game_settings(game_settings){
+    _settings_values=game_settings->settingsFromFile();
     _game_title.loadFromText("Snaker", SDL_Color{255,0,0},_title_font,*_game_window);
     _game_title.setWidth(3*_game_title.getWidth());
     _game_title.setHeight(*_title_size);
     for(auto btn:_translation){
-        if(btn.first.substr(0,4)=="btn_"){
+        if(btn.first.substr(0,4)=="btn_"&&btn.first!="btn_increment"&&btn.first!="btn_decrement"&&btn.first!="btn_next"&&btn.first!="btn_prev"){
             _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
         }
         if(btn.first.substr(0,5)=="text_"){
