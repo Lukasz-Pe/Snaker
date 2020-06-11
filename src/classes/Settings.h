@@ -8,7 +8,7 @@
 
 class Settings{
 public:
-    Settings():_settingsInstructions({"/Languages, as they are present in the list", "/Enemies count - original 20", "/Fruits count - original 200", "/Powerups count, cannot be 0 - original 25", "/Snake speed - original 300" }){};
+    Settings():_settingsInstructions({"/Languages, as they are present in the list\n", "/Enemies count - original 20\n", "/Fruits count - original 200\n", "/Powerups count, cannot be 0 - original 25\n", "/Snake speed - original 300" }){};
     bool loadSettings(const std::string& path);
     bool saveSettings();
     bool loadLanguageList(const std::string& path);

@@ -75,7 +75,6 @@ void GameMenu::renderMainMenu(){
 }
 
 void GameMenu::renderOptionsScreen(){
-    if(_game_state==_mapping[3])
     if(_game_state==_btn_value_change_mapping[8]){
         _settings_values[0]++;
         if(_settings_values[0]>=_game_settings->numberOfAvailableLanguages()){
@@ -114,6 +113,9 @@ void GameMenu::renderOptionsScreen(){
     }
     if(_game_state==_btn_value_change_mapping[6]){
         _settings_values[3]++;
+        if(_settings_values[3]>100){
+            _settings_values[3]=100;
+        }
         _game_state=_mapping[3];
     }
     if(_game_state==_btn_value_change_mapping[2]){
@@ -147,8 +149,13 @@ void GameMenu::renderOptionsScreen(){
             option_text.loadFromText(_game_settings->availableTranslations()[_settings_values[i-7]], SDL_Color{255, 0, 0},
                                      _text_font, *_game_window);
         }else{
-            option_text.loadFromText(std::to_string(_settings_values[i-7]), SDL_Color{255, 0, 0},
-                                     _text_font, *_game_window);
+            if((i-7)==3){
+                option_text.loadFromText(std::to_string(_settings_values[i-7])+"%", SDL_Color{255, 0, 0},
+                                         _text_font, *_game_window);
+            }else{
+                option_text.loadFromText(std::to_string(_settings_values[i-7]), SDL_Color{255, 0, 0},
+                                         _text_font, *_game_window);
+            }
         }
         option_text.setWidth(2*option_text.getWidth());
         option_text.setHeight(*_text_size);
@@ -282,7 +289,7 @@ void GameMenu::eventHandler(SDL_Event &event){
                             it->second.eventHandler(event);
                         }
                         if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
-                            if(event.type==SDL_MOUSEBUTTONUP){
+                            if(event.type==SDL_MOUSEBUTTONUP||event.type==SDL_MOUSEWHEEL){
                                 _game_state=it->second.getButtonTextID();
                             }
                         }

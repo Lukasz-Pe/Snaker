@@ -86,7 +86,7 @@ bool Settings::saveSettings(){
     _settings_file.open(_settings_file_path);
     if(_settings_file.is_open()){
         for(int i=0;i<_settings_values.size();i++){
-            _settings_file<<_settings_values[i]<<"\t"<<_settingsInstructions[i]<<"\n";
+            _settings_file<<_settings_values[i]<<"\t"<<_settingsInstructions[i];//<<"\n";
         }
         _settings_file.close();
         return true;
