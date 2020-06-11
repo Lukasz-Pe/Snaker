@@ -42,7 +42,7 @@ private:
     std::vector<std::unique_ptr<Tile>> _menu_background;
     SDL_Rect _menu_camera, _mouse_rect{0,0,1,1}, _dialog_box{0,0,0,0};
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
-    std::string _game_state;
+    std::string _game_state, _tmp_state;
     std::map<std::string, LTexture> _menu_text;
     Settings *_game_settings;
     std::vector<int> _settings_values;

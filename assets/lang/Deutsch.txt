@@ -24,3 +24,4 @@ Optionen
 Hauptmenü
 Das Spiel muss neugestartet werden um die Änderungen zu übernehmen
 Verstaden
+ESC/q Drücken für Hauptmenü

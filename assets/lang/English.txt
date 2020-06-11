@@ -24,3 +24,4 @@ Options
 Main menu
 The changes will take effect after game restart
 Ok
+Press ESC/q to enter main menu

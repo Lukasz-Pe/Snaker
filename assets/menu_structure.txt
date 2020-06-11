@@ -24,3 +24,4 @@ text_options
 text_main_menu
 text_reboot_info
 btn_ok
+text_pause_info

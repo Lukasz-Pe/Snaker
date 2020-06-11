@@ -24,3 +24,4 @@ Opcje
 Menu główne
 Zmiany będą wprowadzone po restarcie gry
 Zrozumiano
+Naciśnij ESC/q by przejść do menu głównego

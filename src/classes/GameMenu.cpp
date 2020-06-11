@@ -33,6 +33,12 @@ bool GameMenu::loadMappingFile(const std::string &path){
         }
         auto text_it=_menu_text.find(_mapping[24]);
         text_it->second.setWidth(4*text_it->second.getWidth());
+        _menu_text[_mapping[19]].loadFromText(_translation[_mapping[19]],SDL_Color{255,255,0},_title_font,*_game_window);
+        _menu_text[_mapping[19]].setHeight(*_title_size);
+        _menu_text[_mapping[19]].setWidth(3*_menu_text[_mapping[19]].getWidth());
+        _menu_text[_mapping[26]].loadFromText(_translation[_mapping[26]],SDL_Color{255,255,0},_text_font,*_game_window);
+        _menu_text[_mapping[26]].setWidth(12*_menu_text[_mapping[26]].getWidth());
+        _menu_text[_mapping[26]].setHeight(*_text_size);
         return true;
     }
     return false;
@@ -161,7 +167,19 @@ void GameMenu::renderOptionsScreen(){
 }
 
 void GameMenu::renderPauseDialogue(){
-
+    renderBackground();
+    renderGameTitle();
+    _dialog_box.w=1.5*_menu_text[_mapping[19]].getWidth();
+    _dialog_box.h=1.5*_menu_text[_mapping[19]].getHeight();
+    _dialog_box.x=_game_window->getWidth()/2-_dialog_box.w/2;
+    _dialog_box.y=_game_window->getHeight()/2-_dialog_box.h/2;
+    SDL_RenderFillRect(_game_window->getRenderer(),&_dialog_box);
+    _menu_text[_mapping[19]].render(_game_window->getWidth()/2-_menu_text[_mapping[19]].getWidth()/2,
+                                    _game_window->getHeight()/2-*_title_size/2,
+                                    *_game_window);
+    _menu_text[_mapping[26]].render(_game_window->getWidth()/2-_menu_text[_mapping[26]].getWidth()/2,
+                                    _game_window->getHeight()/2+*_text_size,
+                                    *_game_window);
 }
 
 void GameMenu::renderExitDialogue(){
@@ -186,78 +204,62 @@ void GameMenu::eventHandler(SDL_Event &event){
     int begin=0, end=0;
     bool options=false;
     //Buttons to check for main menu
-    
-    if(_game_state==_mapping[23]||_game_state==_mapping[1]||_game_state==_mapping[2]||_game_state==_mapping[6]){
-        if(_played){
-            begin=0;
-        }else{
-            begin=2;
-        }
-        end=5;
-    }
-    //Buttons for quit dialogue
-    if(_game_state==_mapping[4]){
-        begin=5;
-        end=7;
-    }
-    //Save and exit and exit buttons in options menu
-    if(_game_state==_mapping[3]){
-        begin=12;
-        end=14;
-        options=true;
-    }
-    //Reboot info
-    if(_game_state==_mapping[24]){
-        begin=25;
-        end=26;
-    }
-    //Logic
-    for(int i=begin;i<end;i++){
-        it=_buttons.find(_mapping[i]);
-        if(_played&&_mapping[i]==_mapping[2]){
-            it=_buttons.end();
-        }
-        if(it!=_buttons.end()){
-            if(event.type==SDL_MOUSEMOTION){
-                SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
-                it->second.eventHandler(event);
+    if(_game_state!=_mapping[0]||_game_state!=_mapping[2]){
+        if(_game_state==_mapping[23]||_game_state==_mapping[1]||_game_state==_mapping[2]||_game_state==_mapping[6]){
+            if(_played){
+                begin=0;
+            }else{
+                begin=2;
             }
-            if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
-                if(event.type==SDL_MOUSEBUTTONUP){
-                    if(!options){
-                        _game_state=it->second.getButtonTextID();
-                    }else{
-                        if(it->second.getButtonTextID()==_mapping[12]){
-                            saveSettings();
-                        }
-                        if(it->second.getButtonTextID()==_mapping[13]){
-                            _game_state=_mapping[23];
-                        }
-                    }
-                }
-            }
+            end=5;
         }
-    }
-    if(_game_state==_mapping[3]){
-        it=_btn_value_change.end();
-        for(int i=0; i<_btn_value_change_mapping.size(); i++){
-            it=_btn_value_change.find(_btn_value_change_mapping[i]);
-            if(it!=_btn_value_change.end()){
+        //Buttons for quit dialogue
+        if(_game_state==_mapping[4]){
+            begin=5;
+            end=7;
+        }
+        //Save and exit and exit buttons in options menu
+        if(_game_state==_mapping[3]){
+            begin=12;
+            end=14;
+            options=true;
+        }
+        //Reboot info
+        if(_game_state==_mapping[24]){
+            begin=25;
+            end=26;
+        }
+        //Logic
+        for(int i=begin; i<end; i++){
+            it=_buttons.find(_mapping[i]);
+            if(_played&&_mapping[i]==_mapping[2]){
+                it=_buttons.end();
+            }
+            if(it!=_buttons.end()){
                 if(event.type==SDL_MOUSEMOTION){
                     SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
                     it->second.eventHandler(event);
                 }
                 if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
                     if(event.type==SDL_MOUSEBUTTONUP){
-                        _game_state=it->second.getButtonTextID();
+                        if(!options){
+                            _game_state=it->second.getButtonTextID();
+                        }else{
+                            if(it->second.getButtonTextID()==_mapping[12]){
+                                saveSettings();
+                            }
+                            if(it->second.getButtonTextID()==_mapping[13]){
+                                _game_state=_mapping[23];
+                            }
+                        }
                     }
                 }
             }
         }
-        it=_btn_value_change.end();
-        for(int i=14; i<16; i++){
-            for(int j=8; j<12; j++){
-                it=_btn_value_change.find(_mapping[i]+"_"+_mapping[j]);
+        if(_game_state==_mapping[3]){
+            it=_btn_value_change.end();
+            for(int i=0; i<_btn_value_change_mapping.size(); i++){
+                it=_btn_value_change.find(_btn_value_change_mapping[i]);
                 if(it!=_btn_value_change.end()){
                     if(event.type==SDL_MOUSEMOTION){
                         SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
@@ -266,6 +268,23 @@ void GameMenu::eventHandler(SDL_Event &event){
                     if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
                         if(event.type==SDL_MOUSEBUTTONUP){
                             _game_state=it->second.getButtonTextID();
+                        }
+                    }
+                }
+            }
+            it=_btn_value_change.end();
+            for(int i=14; i<16; i++){
+                for(int j=8; j<12; j++){
+                    it=_btn_value_change.find(_mapping[i]+"_"+_mapping[j]);
+                    if(it!=_btn_value_change.end()){
+                        if(event.type==SDL_MOUSEMOTION){
+                            SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
+                            it->second.eventHandler(event);
+                        }
+                        if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
+                            if(event.type==SDL_MOUSEBUTTONUP){
+                                _game_state=it->second.getButtonTextID();
+                            }
                         }
                     }
                 }
@@ -280,6 +299,65 @@ void GameMenu::eventHandler(SDL_Event &event){
     }
     if(_game_state==_mapping[25]){
         _game_state=_mapping[23];
+    }
+    if(event.type==SDL_KEYDOWN&&event.key.repeat == 0){
+        switch(event.key.keysym.sym){
+            case SDLK_p:
+            case SDLK_PAUSE:{
+                if(_game_state!=_mapping[19]){
+                    _tmp_state=_game_state;
+                    _game_state=_mapping[19];
+                }else{
+                    _game_state=_tmp_state;
+                }
+                break;
+            }
+            case SDLK_q:
+            case SDLK_ESCAPE:{
+                if(_game_state==_mapping[0]||_game_state==_mapping[2]||_game_state==_mapping[19]){
+                    _game_state=_mapping[23];
+                }else{
+                    _game_state=_mapping[4];
+                }
+                break;
+            }
+            case SDLK_o:{
+                if(_game_state!=_mapping[0]||_game_state!=_mapping[2]){
+                    _game_state=_mapping[3];
+                }
+                break;
+            }
+            case SDLK_c:{
+                if(_played){
+                    _game_state=_mapping[0];
+                }
+                break;
+            }
+            case SDLK_r:{
+                if(_played){
+                    _game_state=_mapping[2];
+                }
+                break;
+            }
+            case SDLK_s:{
+                if(!_played){
+                    _game_state=_mapping[2];
+                }
+                break;
+            }
+            case SDLK_y:{
+                if(_game_state==_mapping[4]){
+                    _game_state=_mapping[5];
+                }
+                break;
+            }
+            case SDLK_n:{
+                if(_game_state==_mapping[4]){
+                    _game_state=_mapping[6];
+                }
+                break;
+            }
+        }
     }
 }
 

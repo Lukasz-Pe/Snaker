@@ -87,7 +87,7 @@ int main() {
     game_menu.loadMappingFile(MAPPING_FILE_PATH);
     game_menu.setBackgroundTexture(std::move(menu_background));
     SDL_Event event;
-    std::string state{game_menu.getGameState()};
+    std::string state{game_menu.getGameState()}, tmp_state{};
 	while(gContinue){
         game_window.prepareRenderer(0,0,0);
         while(SDL_PollEvent(&event)){
@@ -108,6 +108,9 @@ int main() {
         }
         if(state==game_menu.getMapping()[24]){
             game_menu.renderInfo();
+        }
+        if(state==game_menu.getMapping()[19]){
+            game_menu.renderPauseDialogue();
         }
         game_window.render();
         state=game_menu.getGameState();
