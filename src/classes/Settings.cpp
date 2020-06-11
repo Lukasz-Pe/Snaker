@@ -35,16 +35,8 @@ bool Settings::loadLanguageList(const std::string &path){
 }
 
 void Settings::selectLanguage(const int &language){
-    if(language<_language.size()||language>=0){
-        _selected_language=language;
-    }else{
-        if(language>_language.size()-1){
-            _selected_language=0;
-        }
-        if(language<0){
-            _selected_language=_language.size()-1;
-        }
-    }
+    _selected_language=language;
+    _settings_values[0]=_selected_language;
 }
 
 std::string Settings::Language(){
@@ -63,6 +55,7 @@ bool Settings::loadTanslation(){
             _translation.emplace(std::pair<std::string,std::string>(mapping_line, lang_line));
         }
         _language_file.close();
+        _mapping_file.close();
         return true;
     }
     std::cerr << "Unable to load translation file from: "<<path<<"\n";
@@ -93,7 +86,7 @@ bool Settings::saveSettings(){
     _settings_file.open(_settings_file_path);
     if(_settings_file.is_open()){
         for(int i=0;i<_settings_values.size();i++){
-            _settings_file<<_settings_values[i]<<_settingsInstructions[i]<<"\n";
+            _settings_file<<_settings_values[i]<<"\t"<<_settingsInstructions[i]<<"\n";
         }
         _settings_file.close();
         return true;

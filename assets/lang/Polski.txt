@@ -22,3 +22,5 @@ Zwaliłeś/aś
 Naciśnij R by zresetować lub Q/ESC by wyjść
 Opcje
 Menu główne
+Zmiany będą wprowadzone po restarcie gry
+Zrozumiano

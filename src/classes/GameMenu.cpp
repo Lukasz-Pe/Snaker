@@ -31,6 +31,8 @@ bool GameMenu::loadMappingFile(const std::string &path){
                 }
             }
         }
+        auto text_it=_menu_text.find(_mapping[24]);
+        text_it->second.setWidth(4*text_it->second.getWidth());
         return true;
     }
     return false;
@@ -67,21 +69,79 @@ void GameMenu::renderMainMenu(){
 }
 
 void GameMenu::renderOptionsScreen(){
+    if(_game_state==_mapping[3])
+    if(_game_state==_btn_value_change_mapping[8]){
+        _settings_values[0]++;
+        if(_settings_values[0]>=_game_settings->numberOfAvailableLanguages()){
+            _settings_values[0]=0;
+        }
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[9]){
+        _settings_values[0]--;
+        if(_settings_values[0]<0){
+            _settings_values[0]=_game_settings->numberOfAvailableLanguages()-1;
+        }
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[4]){
+        _settings_values[1]++;
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[0]){
+        _settings_values[1]--;
+        if(_settings_values[1]<0){
+            _settings_values[1]=0;
+        }
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[5]){
+        _settings_values[2]++;
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[1]){
+        _settings_values[2]--;
+        if(_settings_values[2]<0){
+            _settings_values[2]=0;
+        }
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[6]){
+        _settings_values[3]++;
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[2]){
+        _settings_values[3]--;
+        if(_settings_values[3]<0){
+            _settings_values[3]=0;
+        }
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[7]){
+        _settings_values[4]++;
+        _game_state=_mapping[3];
+    }
+    if(_game_state==_btn_value_change_mapping[3]){
+        _settings_values[4]--;
+        if(_settings_values[4]<0){
+            _settings_values[4]=0;
+        }
+        _game_state=_mapping[3];
+    }
     int position_to_draw=22;
     renderBackground();
     renderGameTitle();
     _menu_text.find(_mapping[position_to_draw])->second.render(_game_window->getWidth()/2-_menu_text.find(_mapping[position_to_draw])->second.getWidth()/2, _game_window->getHeight()/6+*_text_size,*_game_window);
     auto text_it=_menu_text.end();
-    auto btn_it=_buttons.end();
     for(int i=7;i<12;i++){
         text_it=_menu_text.find(_mapping[i]);
         text_it->second.render(_game_window->getWidth()/3, _game_window->getHeight()/3+(i-7)**_text_size, *_game_window);
         LTexture option_text;
         if(i==7){
-            option_text.loadFromText(_game_settings->availableTranslations()[_game_settings->settingsFromFile()[i-7]], SDL_Color{255, 0, 0},
+            option_text.loadFromText(_game_settings->availableTranslations()[_settings_values[i-7]], SDL_Color{255, 0, 0},
                                      _text_font, *_game_window);
         }else{
-            option_text.loadFromText(std::to_string(_game_settings->settingsFromFile()[i-7]), SDL_Color{255, 0, 0},
+            option_text.loadFromText(std::to_string(_settings_values[i-7]), SDL_Color{255, 0, 0},
                                      _text_font, *_game_window);
         }
         option_text.setWidth(2*option_text.getWidth());
@@ -96,6 +156,8 @@ void GameMenu::renderOptionsScreen(){
             renderButton(_btn_value_change[_btn_value_change_mapping[i-4]],option_text.getPosX()+1.25*option_text.getWidth(),option_text.getPosY());
         }
     }
+    renderButton(_buttons[_mapping[12]],text_it->second.getPosX()+text_it->second.getWidth()/2,text_it->second.getPosY()+*_text_size);
+    renderButton(_buttons[_mapping[13]],_buttons[_mapping[12]].getButtonDims().x+2*_buttons[_mapping[12]].getButtonDims().w,text_it->second.getPosY()+*_text_size);
 }
 
 void GameMenu::renderPauseDialogue(){
@@ -122,14 +184,34 @@ void GameMenu::renderExitDialogue(){
 void GameMenu::eventHandler(SDL_Event &event){
     std::map<std::string,Button>::iterator it=_buttons.end();
     int begin=0, end=0;
+    bool options=false;
+    //Buttons to check for main menu
+    
     if(_game_state==_mapping[23]||_game_state==_mapping[1]||_game_state==_mapping[2]||_game_state==_mapping[6]){
         if(_played){
             begin=0;
         }else{
             begin=2;
         }
-        end=4;
+        end=5;
     }
+    //Buttons for quit dialogue
+    if(_game_state==_mapping[4]){
+        begin=5;
+        end=7;
+    }
+    //Save and exit and exit buttons in options menu
+    if(_game_state==_mapping[3]){
+        begin=12;
+        end=14;
+        options=true;
+    }
+    //Reboot info
+    if(_game_state==_mapping[24]){
+        begin=25;
+        end=26;
+    }
+    //Logic
     for(int i=begin;i<end;i++){
         it=_buttons.find(_mapping[i]);
         if(_played&&_mapping[i]==_mapping[2]){
@@ -142,7 +224,16 @@ void GameMenu::eventHandler(SDL_Event &event){
             }
             if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
                 if(event.type==SDL_MOUSEBUTTONUP){
-                    _game_state=it->second.getButtonTextID();
+                    if(!options){
+                        _game_state=it->second.getButtonTextID();
+                    }else{
+                        if(it->second.getButtonTextID()==_mapping[12]){
+                            saveSettings();
+                        }
+                        if(it->second.getButtonTextID()==_mapping[13]){
+                            _game_state=_mapping[23];
+                        }
+                    }
                 }
             }
         }
@@ -158,25 +249,24 @@ void GameMenu::eventHandler(SDL_Event &event){
                 }
                 if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
                     if(event.type==SDL_MOUSEBUTTONUP){
-                        std::cerr<<it->second.getButtonTextID()<<"\n";
-//                    _game_state=it->second.getButtonTextID();
+                        _game_state=it->second.getButtonTextID();
                     }
                 }
             }
         }
-    }
-    it=_btn_value_change.end();
-    for(int i=14;i<16;i++){
-        for(int j=8;j<12;j++){
-            it=_btn_value_change.find(_mapping[i]+"_"+_mapping[j]);
-            if(it!=_btn_value_change.end()){
-                if(event.type==SDL_MOUSEMOTION){
-                    SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
-                    it->second.eventHandler(event);
-                }
-                if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
-                    if(event.type==SDL_MOUSEBUTTONUP){
-//                    _game_state=it->second.getButtonTextID();
+        it=_btn_value_change.end();
+        for(int i=14; i<16; i++){
+            for(int j=8; j<12; j++){
+                it=_btn_value_change.find(_mapping[i]+"_"+_mapping[j]);
+                if(it!=_btn_value_change.end()){
+                    if(event.type==SDL_MOUSEMOTION){
+                        SDL_GetMouseState(&_mouse_rect.x, &_mouse_rect.y);
+                        it->second.eventHandler(event);
+                    }
+                    if(checkCollision(it->second.getButtonDims(), _mouse_rect)){
+                        if(event.type==SDL_MOUSEBUTTONUP){
+                            _game_state=it->second.getButtonTextID();
+                        }
                     }
                 }
             }
@@ -187,6 +277,9 @@ void GameMenu::eventHandler(SDL_Event &event){
     }
     if(_game_state==_mapping[1]){
         _played=false;
+    }
+    if(_game_state==_mapping[25]){
+        _game_state=_mapping[23];
     }
 }
 
@@ -248,4 +341,29 @@ std::vector<std::string> GameMenu::getMapping(){
 
 void GameMenu::renderGameTitle(){
     _game_title.render((_game_window->getWidth() - _game_title.getWidth()) / 2, 0, *_game_window);
+}
+
+void GameMenu::saveSettings(){
+    _game_settings->selectLanguage(_settings_values[0]);
+    _game_settings->setBotsCount(_settings_values[1]);
+    _game_settings->setFruitsCount(_settings_values[2]);
+    _game_settings->setPowerupsCount(_settings_values[3]);
+    _game_settings->setSpeed(_settings_values[4]);
+    _game_settings->saveSettings();
+    _game_state=_mapping[24];
+}
+
+void GameMenu::renderInfo(){
+    renderBackground();
+    renderGameTitle();
+    _dialog_box.w=_game_window->getWidth()/3*2;
+    _dialog_box.x=_game_window->getWidth()/2-_dialog_box.w/2;
+    _dialog_box.y=_game_window->getHeight()/3;
+    _dialog_box.h=_game_window->getHeight()/3;
+    SDL_RenderFillRect(_game_window->getRenderer(),&_dialog_box);
+    auto text_it=_menu_text.find(_mapping[24]);
+    auto btn_it=_buttons.find(_mapping[25]);
+    text_it->second.render(_dialog_box.x+_dialog_box.w/2-text_it->second.getWidth()/2,
+        _dialog_box.y+*_text_size,*_game_window);
+    renderButton(btn_it->second,_dialog_box.x+_dialog_box.w/2,_dialog_box.y+_dialog_box.h-*_text_size);
 }

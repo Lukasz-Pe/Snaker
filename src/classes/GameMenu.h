@@ -21,12 +21,14 @@ public:
     void renderExitDialogue();
     void eventHandler(SDL_Event &event);
     void setBackgroundTexture(LTexture background_texture);
+    void renderInfo();
     std::string getGameState();
     std::vector<std::string> getMapping();
 private:
     void renderButton(Button &btn, const int &posX, const int &posY);
     void renderBackground();
     void renderGameTitle();
+    void saveSettings();
     std::string _path_to_mapping_file;
     std::fstream _mapping_file;
     std::vector<std::string> _mapping, _btn_value_change_mapping;

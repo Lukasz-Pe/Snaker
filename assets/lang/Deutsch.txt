@@ -22,3 +22,5 @@ Spiel über:(
 Drücken Sie R zum Neustart oder Q/ESC um Spiel zu beenden
 Optionen
 Hauptmenü
+Das Spiel muss neugestartet werden um die Änderungen zu übernehmen
+Verstaden

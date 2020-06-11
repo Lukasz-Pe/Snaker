@@ -106,6 +106,9 @@ int main() {
         if(state==game_menu.getMapping()[3]){
             game_menu.renderOptionsScreen();
         }
+        if(state==game_menu.getMapping()[24]){
+            game_menu.renderInfo();
+        }
         game_window.render();
         state=game_menu.getGameState();
 	}
