@@ -6,18 +6,7 @@
 
 bool Settings::loadSettings(const std::string &path){
     _settings_file_path=path;
-    _settings_file.open(_settings_file_path);
-    if(_settings_file.is_open()){
-        std::string value;
-        while(std::getline(_settings_file,value,'/')){
-            _settings_file.ignore(1024, '\n');
-            _settings_values.emplace_back(std::stoi(value));
-        }
-        _settings_file.close();
-        return true;
-    }
-    std::cerr << "Unable to load settings file from: "<<path<<"\n";
-    return false;
+    return reloadSettings();
 }
 
 bool Settings::loadLanguageList(const std::string &path){
@@ -36,7 +25,7 @@ bool Settings::loadLanguageList(const std::string &path){
 
 void Settings::selectLanguage(const int &language){
     _selected_language=language;
-    _settings_values[0]=_selected_language;
+    _settings_values[0]=language;
 }
 
 std::string Settings::Language(){
@@ -44,6 +33,9 @@ std::string Settings::Language(){
 }
 
 bool Settings::loadTanslation(){
+    if(!_translation.empty()){
+        _translation.clear();
+    }
     std::string path;
     path=_language_files_directory+_language[_selected_language]+".txt";
     _language_file.open(path);
@@ -113,4 +105,22 @@ void Settings::setSpeed(const int &speed){
 
 void Settings::setMappingFilePath(const std::string& path){
     _btn_and_text_mapping_file_path=path;
+}
+
+bool Settings::reloadSettings(){
+    if(!_settings_values.empty()){
+        _settings_values.clear();
+    }
+    _settings_file.open(_settings_file_path);
+    if(_settings_file.is_open()){
+        std::string value;
+        while(std::getline(_settings_file,value,'/')){
+            _settings_file.ignore(10240, '\n');
+            _settings_values.emplace_back(std::stoi(value));
+        }
+        _settings_file.close();
+        return true;
+    }
+    std::cerr << "Unable to load settings file from: "<<_settings_file_path<<"\n";
+    return false;
 }

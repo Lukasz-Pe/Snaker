@@ -22,6 +22,6 @@ Game over :(
 Press R to restart or Q/ESC to exit
 Options
 Main menu
-The changes will take effect after game restart
+Error on saving
 Ok
 Press ESC/q to enter main menu

@@ -25,6 +25,7 @@ public:
     void setTranslationDirectory(const std::string& path);
     bool loadTanslation();
     std::vector<int> settingsFromFile();
+    bool reloadSettings();
 private:
     std::vector<std::string> _settingsInstructions;
     std::fstream _settings_file;

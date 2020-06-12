@@ -83,7 +83,7 @@ int main() {
 	//TODO Build class for powerups - derived from Fruits
     //TODO build class for menu generation
 	game_window.setTitle("Snaker");
-    GameMenu game_menu(game_window,text_font.get(),title_font.get(),game_settings.Translation(),&TEXT_SIZE,&TITLE_SIZE,&game_settings);
+    GameMenu game_menu(game_window, text_font.get(), title_font.get(), &TEXT_SIZE, &TITLE_SIZE, &game_settings);
     game_menu.loadMappingFile(MAPPING_FILE_PATH);
     game_menu.setBackgroundTexture(std::move(menu_background));
     SDL_Event event;

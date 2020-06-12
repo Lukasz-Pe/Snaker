@@ -13,32 +13,7 @@ bool GameMenu::loadMappingFile(const std::string &path){
             _mapping.emplace_back(line);
         }
         _game_state=_mapping[23];
-        for(auto btn:_translation){
-            if(btn.first.substr(0, 4)=="btn_"&&
-               (btn.first=="btn_increment"||btn.first=="btn_decrement"||btn.first=="btn_next"||btn.first=="btn_prev")){
-                if(btn.first=="btn_next"||btn.first=="btn_prev"){
-                    _btn_value_change_mapping.emplace_back(btn.first);
-                _btn_value_change.emplace(btn.first,
-                                          Button(btn.first, btn.second, *_game_window, _text_font, *_text_size, false));
-                }
-                if(btn.first=="btn_decrement"||btn.first=="btn_increment"){
-                    for(int i=0; i<4; i++){
-                        _btn_value_change_mapping.emplace_back(btn.first+"_"+_mapping[i+8]);
-                        _btn_value_change.emplace(btn.first+"_"+_mapping[i+8],
-                                                  Button(btn.first+"_"+_mapping[i+8], btn.second, *_game_window, _text_font,
-                                                         *_text_size, false));
-                    }
-                }
-            }
-        }
-        auto text_it=_menu_text.find(_mapping[24]);
-        text_it->second.setWidth(4*text_it->second.getWidth());
-        _menu_text[_mapping[19]].loadFromText(_translation[_mapping[19]],SDL_Color{255,255,0},_title_font,*_game_window);
-        _menu_text[_mapping[19]].setHeight(*_title_size);
-        _menu_text[_mapping[19]].setWidth(3*_menu_text[_mapping[19]].getWidth());
-        _menu_text[_mapping[26]].loadFromText(_translation[_mapping[26]],SDL_Color{255,255,0},_text_font,*_game_window);
-        _menu_text[_mapping[26]].setWidth(12*_menu_text[_mapping[26]].getWidth());
-        _menu_text[_mapping[26]].setHeight(*_text_size);
+        createMenuItems();
         return true;
     }
     return false;
@@ -146,7 +121,8 @@ void GameMenu::renderOptionsScreen(){
         text_it->second.render(_game_window->getWidth()/3, _game_window->getHeight()/3+(i-7)**_text_size, *_game_window);
         LTexture option_text;
         if(i==7){
-            option_text.loadFromText(_game_settings->availableTranslations()[_settings_values[i-7]], SDL_Color{255, 0, 0},
+            _game_settings->selectLanguage(_settings_values[i-7]);
+            option_text.loadFromText(_game_settings->Language(), SDL_Color{255, 0, 0},
                                      _text_font, *_game_window);
         }else{
             if((i-7)==3){
@@ -211,7 +187,7 @@ void GameMenu::eventHandler(SDL_Event &event){
     int begin=0, end=0;
     bool options=false;
     //Buttons to check for main menu
-    if(_game_state!=_mapping[0]||_game_state!=_mapping[2]){
+//    if(_game_state!=_mapping[0]||_game_state!=_mapping[2]){
         if(_game_state==_mapping[23]||_game_state==_mapping[1]||_game_state==_mapping[2]||_game_state==_mapping[6]){
             if(_played){
                 begin=0;
@@ -257,13 +233,15 @@ void GameMenu::eventHandler(SDL_Event &event){
                             }
                             if(it->second.getButtonTextID()==_mapping[13]){
                                 _game_state=_mapping[23];
+                                _game_settings->reloadSettings();
+                                _settings_values=_game_settings->settingsFromFile();
                             }
                         }
                     }
                 }
             }
         }
-        if(_game_state==_mapping[3]){
+        if(_game_state==_mapping[3]&&options){
             it=_btn_value_change.end();
             for(int i=0; i<_btn_value_change_mapping.size(); i++){
                 it=_btn_value_change.find(_btn_value_change_mapping[i]);
@@ -297,7 +275,7 @@ void GameMenu::eventHandler(SDL_Event &event){
                 }
             }
         }
-    }
+//    }
     if(_game_state==_mapping[2]){
         _played=true;
     }
@@ -392,28 +370,14 @@ void GameMenu::setBackgroundTexture(LTexture background_texture){
     }
 }
 
-GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title,
-    const std::map<std::string, std::string> &translation,
-    const int *text_size, const int *title_size, Settings *game_settings):
+GameMenu::GameMenu(Win &window, TTF_Font *text, TTF_Font *title, const int *text_size, const int *title_size,
+                   Settings *game_settings):
     _played(false), _game_window(&window), _text_font(text),
-    _title_font(title), _translation(translation),
-    _text_size(text_size), _title_size(title_size), _game_settings(game_settings){
+    _title_font(title), _text_size(text_size), _title_size(title_size), _game_settings(game_settings){
     _settings_values=game_settings->settingsFromFile();
     _game_title.loadFromText("Snaker", SDL_Color{255,0,0},_title_font,*_game_window);
     _game_title.setWidth(3*_game_title.getWidth());
     _game_title.setHeight(*_title_size);
-    for(auto btn:_translation){
-        if(btn.first.substr(0,4)=="btn_"&&btn.first!="btn_increment"&&btn.first!="btn_decrement"&&btn.first!="btn_next"&&btn.first!="btn_prev"){
-            _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
-        }
-        if(btn.first.substr(0,5)=="text_"){
-            LTexture text_texture;
-            text_texture.loadFromText(btn.second,SDL_Color{255,0,0},_text_font,*_game_window);
-            text_texture.setWidth(3*text_texture.getWidth());
-            text_texture.setHeight(*_text_size);
-            _menu_text.emplace(btn.first,std::move(text_texture));
-        }
-    }
 }
 
 std::string GameMenu::getGameState(){
@@ -434,8 +398,14 @@ void GameMenu::saveSettings(){
     _game_settings->setFruitsCount(_settings_values[2]);
     _game_settings->setPowerupsCount(_settings_values[3]);
     _game_settings->setSpeed(_settings_values[4]);
-    _game_settings->saveSettings();
-    _game_state=_mapping[24];
+    if(_game_settings->saveSettings()){
+        _game_state=_mapping[23];
+        _game_settings->reloadSettings();
+        _game_settings->loadTanslation();
+        createMenuItems();
+    }else{
+        _game_state=_mapping[24];
+    }
 }
 
 void GameMenu::renderInfo(){
@@ -451,4 +421,53 @@ void GameMenu::renderInfo(){
     text_it->second.render(_dialog_box.x+_dialog_box.w/2-text_it->second.getWidth()/2,
         _dialog_box.y+*_text_size,*_game_window);
     renderButton(btn_it->second,_dialog_box.x+_dialog_box.w/2,_dialog_box.y+_dialog_box.h-*_text_size);
+}
+
+void GameMenu::createMenuItems(){
+    if(!_buttons.empty()){
+        _buttons.clear();
+    }
+    if(!_menu_text.empty()){
+        _menu_text.clear();
+    }
+    if(!_btn_value_change.empty()){
+        _btn_value_change.clear();
+    }
+    
+    for(auto btn:_game_settings->Translation()){
+        if(btn.first.substr(0,4)=="btn_"&&btn.first!="btn_increment"&&btn.first!="btn_decrement"&&btn.first!="btn_next"&&btn.first!="btn_prev"){
+            _buttons.emplace(btn.first,Button(btn.first,btn.second,*_game_window,_text_font,*_text_size));
+        }
+        if(btn.first.substr(0,5)=="text_"){
+            LTexture text_texture;
+            text_texture.loadFromText(btn.second,SDL_Color{255,0,0},_text_font,*_game_window);
+            text_texture.setWidth(3*text_texture.getWidth());
+            text_texture.setHeight(*_text_size);
+            _menu_text.emplace(btn.first,std::move(text_texture));
+        }
+        if(btn.first.substr(0, 4)=="btn_"&&
+           (btn.first=="btn_increment"||btn.first=="btn_decrement"||btn.first=="btn_next"||btn.first=="btn_prev")){
+            if(btn.first=="btn_next"||btn.first=="btn_prev"){
+                _btn_value_change_mapping.emplace_back(btn.first);
+                _btn_value_change.emplace(btn.first,
+                                          Button(btn.first, btn.second, *_game_window, _text_font, *_text_size, false));
+            }
+            if(btn.first=="btn_decrement"||btn.first=="btn_increment"){
+                for(int i=0; i<4; i++){
+                    _btn_value_change_mapping.emplace_back(btn.first+"_"+_mapping[i+8]);
+                    _btn_value_change.emplace(btn.first+"_"+_mapping[i+8],
+                                              Button(btn.first+"_"+_mapping[i+8], btn.second, *_game_window, _text_font,
+                                                     *_text_size, false));
+                }
+            }
+        }
+    }
+    auto text_it=_menu_text.find(_mapping[24]);
+    text_it->second.setWidth(4*text_it->second.getWidth());
+    _menu_text[_mapping[19]].loadFromText(_game_settings->Translation()[_mapping[19]],SDL_Color{255,255,0},_title_font,*_game_window);
+    _menu_text[_mapping[19]].setHeight(*_title_size);
+    _menu_text[_mapping[19]].setWidth(3*_menu_text[_mapping[19]].getWidth());
+    _menu_text[_mapping[26]].loadFromText(_game_settings->Translation()[_mapping[26]],SDL_Color{255,255,0},_text_font,*_game_window);
+    _menu_text[_mapping[26]].setWidth(12*_menu_text[_mapping[26]].getWidth());
+    _menu_text[_mapping[26]].setHeight(*_text_size);
 }

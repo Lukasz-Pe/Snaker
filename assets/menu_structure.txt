@@ -22,6 +22,6 @@ text_game_over
 text_press_to_restart
 text_options
 text_main_menu
-text_reboot_info
+text_error_info
 btn_ok
 text_pause_info

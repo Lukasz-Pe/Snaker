@@ -11,9 +11,8 @@
 #include "Settings.h"
 class GameMenu{
 public:
-    GameMenu(Win& window, TTF_Font* text, TTF_Font* title,
-        const std::map<std::string,std::string>& translation,
-        const int* text_size, const int* title_size, Settings *game_settings);
+    GameMenu(Win &window, TTF_Font *text, TTF_Font *title, const int *text_size, const int *title_size,
+             Settings *game_settings);
     bool loadMappingFile(const std::string& path);
     void renderMainMenu();
     void renderOptionsScreen();
@@ -24,6 +23,7 @@ public:
     void renderInfo();
     std::string getGameState();
     std::vector<std::string> getMapping();
+    void createMenuItems();
 private:
     void renderButton(Button &btn, const int &posX, const int &posY);
     void renderBackground();

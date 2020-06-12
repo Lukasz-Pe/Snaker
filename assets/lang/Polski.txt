@@ -22,6 +22,6 @@ Zwaliłeś/aś
 Naciśnij R by zresetować lub Q/ESC by wyjść
 Opcje
 Menu główne
-Zmiany będą wprowadzone po restarcie gry
+Błąd podczas zapisywania ustawień
 Zrozumiano
 Naciśnij ESC/q by przejść do menu głównego
