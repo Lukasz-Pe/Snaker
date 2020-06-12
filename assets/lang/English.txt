@@ -1,5 +1,5 @@
-Continue game (c)
-Reset game (r)
+Continue Game (c)
+Reset Game (r)
 Start :D (s)
 Options (o)
 Quit :( (q/ESC)
@@ -16,7 +16,7 @@ Back to main menu (no saving)
 --
 ->>
 <<-
-End of game?
+End of Game?
 Game paused
 Game over :(
 Press R to restart or Q/ESC to exit

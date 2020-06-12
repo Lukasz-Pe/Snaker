@@ -8,33 +8,27 @@
 #include "main.h"
 #include "classes/Win.h"
 #include "classes/LTexture.h"
-#include "classes/Snake.h"
-#include "classes/Fruit.h"
-#include "classes/Tile.h"
-#include "classes/Button.h"
 #include "classes/Timer.h"
 #include "classes/Settings.h"
 #include "classes/GameMenu.h"
 #include "functions/initsdl.h"
-#include "functions/eventHandler.h"
 //#include "functions/collisions.h"
 //TODO think about memory management
 //TODO think about concurrency
 //TODO no global variables!
 //----------------------------------------------------------------Declarations of variables
-const std::string PATH_TO_TRANSLATION_LIST{"../assets/lang/_LangList.txt"},
-PATH_TO_SETTINGS{"../assets/settings.txt"},
-PATH_TO_TRANSLATIONS{"../assets/lang/"},
-PATH_TO_FONT_FILE{"../assets/fonts/Horta.ttf"},
-MAPPING_FILE_PATH{"../assets/menu_structure.txt"};
-const int TEXT_SIZE=50, TITLE_SIZE=150;
 int main() {
+    const int TEXT_SIZE=50, TITLE_SIZE=150;
+    const std::string PATH_TO_TRANSLATION_LIST{"../assets/lang/_LangList.txt"},
+        PATH_TO_SETTINGS{"../assets/settings.txt"},
+        PATH_TO_TRANSLATIONS{"../assets/lang/"},
+        PATH_TO_FONT_FILE{"../assets/fonts/Horta.ttf"},
+        MAPPING_FILE_PATH{"../assets/menu_structure.txt"};
     bool gContinue = false;
     Settings game_settings;
     Win game_window;
     game_window.setWidth(1366);
     game_window.setHeight(720);
-    
 //Load language list, setting, translation and assets
     gContinue=game_settings.loadLanguageList(PATH_TO_TRANSLATION_LIST);
     gContinue=game_settings.loadSettings(PATH_TO_SETTINGS);
@@ -47,7 +41,8 @@ int main() {
     if (gContinue) {
         gContinue = initSDL(&game_window, game_window.getWidth(), game_window.getHeight());
     }
-    LTexture fruits_and_powerups_textures, player_head_textures, player_tail_textures, level_background, menu_background, snake_head_textures, snake_tail_textures, icons_of_active_powerups;
+    LTexture fruits_and_powerups_textures, player_head_textures, player_tail_textures,
+             level_background, menu_background, snake_head_textures, snake_tail_textures, icons_of_active_powerups;
     if (gContinue) {
         gContinue = fruits_and_powerups_textures.loadFromFile("../assets/images/fruits.png", game_window);
     }
@@ -83,7 +78,8 @@ int main() {
 	//TODO Build class for powerups - derived from Fruits
     //TODO build class for menu generation
 	game_window.setTitle("Snaker");
-    GameMenu game_menu(game_window, text_font.get(), title_font.get(), &TEXT_SIZE, &TITLE_SIZE, &game_settings);
+    GameMenu game_menu(game_window, text_font.get(), title_font.get(),
+        &TEXT_SIZE, &TITLE_SIZE, &game_settings);
     game_menu.loadMappingFile(MAPPING_FILE_PATH);
     game_menu.setBackgroundTexture(std::move(menu_background));
     SDL_Event event;
@@ -94,7 +90,8 @@ int main() {
             game_window.eventHandler(event);
             game_menu.eventHandler(event);
         }
-        if(state==game_menu.getMapping()[23]||state==game_menu.getMapping()[1]||state==game_menu.getMapping()[2]||state==game_menu.getMapping()[6]){
+        if(state==game_menu.getMapping()[23]||state==game_menu.getMapping()[1]||
+           state==game_menu.getMapping()[2]||state==game_menu.getMapping()[6]){
             game_menu.renderMainMenu();
         }
         if(state==game_menu.getMapping()[4]){
