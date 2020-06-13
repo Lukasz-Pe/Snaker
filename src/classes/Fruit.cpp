@@ -55,25 +55,6 @@ void Fruit::eventHandler(SDL_Event &event) {
 	}
 }
 
-//void Fruit::moveToSnake(Snake &vSnake) {
-//	double dist = sqrt(pow((vSnake.getHeadBox().x - mPosX), 2) + pow((vSnake.getHeadBox().y - mPosY), 2));
-//	if (dist <= mRad) {
-//		x = (vSnake.getHeadBox().x+10) - (mPosX+10);
-//		y = (vSnake.getHeadBox().y+10) - (mPosY+10);
-//		if (x > 0 && y >= 0) {
-//			mAngle = (180 / M_PI) * atan(x / y);
-//		} else if (x > 0 && y < 0) {
-//			mAngle = 180 + (180 / M_PI) * atan(x / y);
-//		} else if (x < 0 && y >= 0) {
-//			mAngle = (180 / M_PI) * atan(x / y);
-//		} else if (x < 0 && y < 0) {
-//			mAngle = 180 + (180 / M_PI) * atan(x / y);
-//		}
-//		mPosX = mPosX + mCollectDist * sin(mAngle * (M_PI / 180.0));
-//		mPosY = mPosY + mCollectDist * cos(mAngle * (M_PI / 180.0));
-//	}
-//}
-
 void Fruit::move(Win &vWin) {
 	mPosX += mVelX;
 	mPosY += mVelY;
