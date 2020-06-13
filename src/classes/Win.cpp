@@ -96,10 +96,10 @@ int Win::getWidth() {
 int Win::getHeight() {
 	return mHeight;
 }
-void Win::setHeight(int height) {
+void Win::setHeight(const int& height) {
 	mHeight = height;
 }
-void Win::setWidth(int width) {
+void Win::setWidth(const int& width) {
 	mWidth = width;
 }
 

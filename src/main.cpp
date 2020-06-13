@@ -31,7 +31,9 @@ int main() {
     game_window.setHeight(720);
 //Load language list, setting, translation and assets
     gContinue=game_settings.loadLanguageList(PATH_TO_TRANSLATION_LIST);
-    gContinue=game_settings.loadSettings(PATH_TO_SETTINGS);
+    if(gContinue){
+        gContinue=game_settings.loadSettings(PATH_TO_SETTINGS);
+    }
     if(gContinue){
         game_settings.setTranslationDirectory(PATH_TO_TRANSLATIONS);
         game_settings.setMappingFilePath(MAPPING_FILE_PATH);

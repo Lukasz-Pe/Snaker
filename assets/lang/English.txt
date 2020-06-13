@@ -8,7 +8,7 @@ Maybe not :) (n/ESC)
 Change language
 Bots quantity
 Fruits quantity
-Powerups quantity
+Powerups concentration
 Snake speed
 Save changes
 Back to main menu (no saving)
