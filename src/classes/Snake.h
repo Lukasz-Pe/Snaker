@@ -14,12 +14,12 @@
 //TODO Make Snake super class for Player and Bots.
 class Snake {
 public:
-	Snake();
+	Snake(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL, double *timeStep);
 	void addLength();
-	void eventHandler(SDL_Event event, Win *vWin=NULL, SDL_Rect *vCam=NULL);
+	void eventHandler(SDL_Event event);
 	void setStartPos(int sPosX, int sPosY);
-	void move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double *timeStep=NULL);
-	void render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL);
+	void move();
+	void render();
 	void setCamera(const int &vLWidth, const int &vLHeight, SDL_Rect &vCam);
 	bool collectFruit(Fruit &vFruit);
 	double getAngle();
@@ -48,6 +48,7 @@ private:
 	std::vector<double> mTailAngle;
 	bool hasMouseFocus;
 	std::vector<SDL_Rect> mBox;
+	Win* vWin;
 
 
 

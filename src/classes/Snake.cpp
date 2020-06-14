@@ -7,7 +7,7 @@
 
 #include "Snake.h"
 
-Snake::Snake() {
+Snake::Snake(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL, double *timeStep) {
 	mTailLength = 0;
 	mHeadX = 0;
 	mHeadY = 0;
@@ -128,7 +128,7 @@ void Snake::addLength() {
 	mTailLength++;
 }
 
-void Snake::eventHandler(SDL_Event event, Win *vWin, SDL_Rect *vCam) {
+void Snake::eventHandler(SDL_Event event) {
 	if (event.type == SDL_KEYDOWN && event.key.repeat == 0) {
 		switch (event.key.keysym.sym) {
 			case SDLK_LSHIFT:
@@ -198,7 +198,7 @@ void Snake::eventHandler(SDL_Event event, Win *vWin, SDL_Rect *vCam) {
 	}
 }
 
-void Snake::move(SDL_Rect &gLevelBorders, LTexture &vTexTail, double *timeStep) {
+void Snake::move() {
 	if(timeStep==NULL){
 		*timeStep=1.0;
 	}
@@ -246,11 +246,9 @@ void Snake::updateTail(LTexture &vTex) {
 	mBox[mTailLength-1]= {(int)mPrevHeadX, (int)mPrevHeadY, mHeadBox.w, mHeadBox.h};
 }
 
-void Snake::render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip) {
+void Snake::render() {
 	for (unsigned int i = 0; i < mTailLength; i++) {
 		vTexTail.render(mTailX[i] - gCam.x, mTailY[i] - gCam.y, vWin, vClip, NULL, mTailAngle[i]);
-//		SDL_Rect tbox={mBox[i].x - gCam.x,mBox[i].y - gCam.y,mBox[i].w,mBox[i].h};
-//		SDL_RenderDrawRect(vWin.getRenderer(), &tbox);
 	}
 	vTexHead.render(mHeadX - gCam.x, mHeadY - gCam.y, vWin, vClip, NULL, mHeadAngle);
 	if (vClip == NULL) {
@@ -258,7 +256,6 @@ void Snake::render(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &
 	} else {
 		mHeadBox= {(int)mHeadX ,(int)mHeadY, vClip->w,vClip->h};
 	}
-//	SDL_RenderDrawRect(vWin.getRenderer(), &mHeadBox);
 }
 
 double Snake::getAngle() {
