@@ -9,7 +9,7 @@
 #include "classes/Win.h"
 #include "classes/LTexture.h"
 #include "classes/Timer.h"
-#include "classes/Settings.h"
+#include "classes/PowerUp.h"
 #include "classes/GameMenu.h"
 #include "functions/initsdl.h"
 //#include "functions/collisions.h"
@@ -75,10 +75,6 @@ int main() {
         std::cerr<<"Failed to load font! SDL_ttf Error: "<<TTF_GetError()<<"\n";
         gContinue = false;
     }
-//	gLTOptionsText.setWidth(5 * gLTOptionsText.getWidth());
-    //ToDo: Write object creation and sprite assignment code
-	//TODO Build class for powerups - derived from Fruits
-    //TODO build class for menu generation
 	game_window.setTitle("Snaker");
     GameMenu game_menu(game_window, text_font.get(), title_font.get(),
         &TEXT_SIZE, &TITLE_SIZE, &game_settings);
@@ -86,6 +82,7 @@ int main() {
     game_menu.setBackgroundTexture(std::move(menu_background));
     SDL_Event event;
     std::string state{game_menu.getGameState()}, tmp_state{};
+    Timer frame_timer;
 	while(gContinue){
         game_window.prepareRenderer(0,0,0);
         while(SDL_PollEvent(&event)){

@@ -14,7 +14,7 @@
 bool touchesWall(SDL_Rect vBox, Tile *vTiles[]);
 class Fruit {
 	public:
-		Fruit(Win *window);
+		Fruit(Win *window, const int& level_width, const int& level_height);
 		void eventHandler(SDL_Event &event);
 		//TODO Write code for fruit repositioning
 		void move();
@@ -32,7 +32,7 @@ class Fruit {
 		void setCollisionBox(LTexture &vTexture, SDL_Rect *vClip=NULL);
 	private:
 		double mPosX, mPosY, mVelX, mVelY, mAngle, mCollectDist,x,y;
-		int mRad;
+		int mRad, mLevelWidth, mLevelHeight;
 		const static int mDotRadius=20, mDotSpeed=10;
         Win* mWindow;
 		//friend bool touchesWall();

@@ -7,7 +7,8 @@
 
 #include "Fruit.h"
 
-Fruit::Fruit() {
+Fruit::Fruit(Win *window, const int& level_width, const int& level_height)
+            :mWindow(window), mLevelWidth(level_width), mLevelHeight(level_height) {
 	mPosX = 0;
 	mPosY = 0;
 	mVelX = 0;
@@ -55,13 +56,13 @@ void Fruit::eventHandler(SDL_Event &event) {
 	}
 }
 
-void Fruit::move(Win &vWin) {
+void Fruit::move() {
 	mPosX += mVelX;
 	mPosY += mVelY;
-	if ((mPosX < 0) || ((mPosX + mDotRadius) > vWin.getWidth())) {
+	if ((mPosX < 0) || ((mPosX + mDotRadius) > mWindow->getWidth())) {
 		mPosX -= mVelX;
 	}
-	if ((mPosY < 0) || ((mPosY + mDotRadius) > vWin.getHeight())) {
+	if ((mPosY < 0) || ((mPosY + mDotRadius) > mWindow->getHeight())) {
 		mPosY -= mVelY;
 	}
 }
@@ -164,5 +165,11 @@ void Fruit::setCollisionBox(LTexture &vTexture, SDL_Rect *vClip) {
 
 SDL_Rect Fruit::getRect() {
 	return mBox;
+}
+
+void Fruit::reposition(){
+    srand(time(NULL));
+    mPosX=rand()%static_cast<int>(0.9*mLevelWidth);
+    mPosY=rand()%static_cast<int>(0.9*mLevelHeight);
 }
 
