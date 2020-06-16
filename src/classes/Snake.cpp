@@ -7,7 +7,7 @@
 
 #include "Snake.h"
 
-Snake::Snake(Win &vWin, LTexture &vTexHead, LTexture &vTexTail, SDL_Rect &gCam, SDL_Rect *vClip=NULL, double *timeStep) {
+Snake::Snake(Win *vWin, LTexture *mHeadTexture, LTexture *vTexTail, SDL_Rect *mCamera, SDL_Rect *mClip, double *timeStep) {
 	mTailLength = 0;
 	mHeadX = 0;
 	mHeadY = 0;
@@ -179,9 +179,9 @@ void Snake::eventHandler(SDL_Event event) {
 	}
 	if (event.type == SDL_MOUSEMOTION && hasMouseFocus) {
 		int x, y, camWinDiffX = 0, camWinDiffY = 0;
-		if (vCam != NULL) {
-			camWinDiffX = vCam->x;
-			camWinDiffY = vCam->y;
+		if (mCamera != NULL) {
+			camWinDiffX = mCamera->x;
+			camWinDiffY = mCamera->y;
 		}
 		SDL_GetMouseState(&x, &y);
 		mTargetX = (double) ((x + camWinDiffX) - mHeadX);
@@ -199,30 +199,30 @@ void Snake::eventHandler(SDL_Event event) {
 }
 
 void Snake::move() {
-	if(timeStep==NULL){
-		*timeStep=1.0;
+	if(mTimeStep==NULL){
+		*mTimeStep=1.0;
 	}
 	mPrevHeadX = mHeadX;
 	mPrevHeadY = mHeadY;
 	mPrevHeadAngle = mHeadAngle;
-	mHeadY -= mSpeed * cos(mHeadAngle * (M_PI / 180.0)) * *timeStep;
-	mHeadX += mSpeed * sin(mHeadAngle * (M_PI / 180.0)) * *timeStep;
+	mHeadY -= mSpeed * cos(mHeadAngle * (M_PI / 180.0)) * *mTimeStep;
+	mHeadX += mSpeed * sin(mHeadAngle * (M_PI / 180.0)) * *mTimeStep;
 	if (mTailLength > 0) {
-		updateTail(vTexTail);
+		updateTail(*mTailTexture);
 	}
-	if (((int) mHeadY + mHeadBox.h) > gLevelBorders.h) {
+	if (((int) mHeadY + mHeadBox.h) > mLevelSize->h) {
 		//mHeadY = 0;
-		mHeadY = gLevelBorders.h - mHeadBox.h;
+		mHeadY = mLevelSize->h - mHeadBox.h;
 	} else if ((int) mHeadY < 0) {
-		//mHeadY = gLevelBorders.h;
+		//mHeadY = mLevelSize->h;
 		mHeadY = 0;
 	}
-	if (((int) mHeadX + mHeadBox.w) > gLevelBorders.w) {
+	if (((int) mHeadX + mHeadBox.w) > mLevelSize->w) {
 		//mHeadX = 0;
-		mHeadX = gLevelBorders.w - mHeadBox.w;
+		mHeadX = mLevelSize->w - mHeadBox.w;
 	}
 	if ((int) mHeadX < 0) {
-		//mHeadX = gLevelBorders.w;
+		//mHeadX = mLevelSize->w;
 		mHeadX = 0;
 	}
 }
@@ -248,13 +248,13 @@ void Snake::updateTail(LTexture &vTex) {
 
 void Snake::render() {
 	for (unsigned int i = 0; i < mTailLength; i++) {
-		vTexTail.render(mTailX[i] - gCam.x, mTailY[i] - gCam.y, vWin, vClip, NULL, mTailAngle[i]);
+		mTailTexture->render(mTailX[i] - mCamera->x, mTailY[i] - mCamera->y, *vWin, mClip, NULL, mTailAngle[i]);
 	}
-	vTexHead.render(mHeadX - gCam.x, mHeadY - gCam.y, vWin, vClip, NULL, mHeadAngle);
-	if (vClip == NULL) {
-		mHeadBox= {(int)mHeadX,(int)mHeadY, vTexHead.getWidth(),vTexHead.getHeight()};
+	mHeadTexture->render(mHeadX - mCamera->x, mHeadY - mCamera->y, *vWin, mClip, NULL, mHeadAngle);
+	if (mClip == NULL) {
+		mHeadBox= {(int)mHeadX,(int)mHeadY, mHeadTexture->getWidth(),mHeadTexture->getHeight()};
 	} else {
-		mHeadBox= {(int)mHeadX ,(int)mHeadY, vClip->w,vClip->h};
+		mHeadBox= {(int)mHeadX ,(int)mHeadY, mClip->w,mClip->h};
 	}
 }
 
