@@ -12,50 +12,41 @@
 #include "LTexture.h"
 #include "Fruit.h"
 //TODO Make Snake super class for Player and Bots.
+namespace SnakeBody{
+    struct Coordinates{
+        SDL_Point _position;
+        double _angle;
+    };
+}
 class Snake {
 public:
-	Snake(Win *vWin, LTexture *vTexHead, LTexture *vTexTail, SDL_Rect *gCam, SDL_Rect *vClip=nullptr, double *timeStep=nullptr);
-	void addLength();
-	void eventHandler(SDL_Event event);
-	void setStartPos(int sPosX, int sPosY);
-	void move();
-	void render();
-	void setCamera(const int &vLWidth, const int &vLHeight, SDL_Rect &vCam);
-	bool collectFruit(Fruit &vFruit);
-	double getAngle();
-	SDL_Rect getHeadBox();
-	SDL_Rect getTailBox(int &num);
-	void collectDistanceMultiplier(int dist);
-	void printParams();
-	void resetLength();
-	void setAngle(double newAngle);
-	int getLength();
-	int getSnakeFruitDistance(SDL_Rect &vFruit);
-	double getHeadToFruitAngle(SDL_Rect &vFruit);
-	void updateTail(LTexture &vTex);
-	void changeSpeed(int &speed);
-	void setCollectAngle(int angle);
+    Snake();
+    void StartPosition(SDL_Point &position);
+    void changeSpeed();
+    void updateSnake();
+    void resetLength();
+    int Length();
+    virtual void render()=0;
+    void ActivatePowerUpVision();
+    void ActivatePowerUpSnakeEater();
+    void ActivatePowerUpGhostMode();
+    void ActivatePowerUpEatingDistance();
+    void ActivatePowerUpGodMode();
+    std::vector<bool> ActivePowerUps();
+    std::vector<int> PowerUpsActivationTimeStamp();
+    
 private:
-    SDL_Point mNewFruitPos;
-    SDL_Rect mHeadBox;
-    std::vector<bool> hasActivePowerup{false,false,false,false,false};
-    std::vector<int> powerupActivationTimestamp{0,0,0,0,0};
-	unsigned int mTailLength, mSpeed, mTemp, mVeryFast;
-	double mHeadAngle, mPrevHeadAngle, mHeadX, mHeadY, mPrevHeadX, mPrevHeadY, mTargetX, mTargetY, mCollectDist,
-	    mCollectAngle,xHeadToFruit,yHeadToFruit, mAngleHeadToFruit, mMinCollectAngle,mMaxCollectAngle, xFruitToHead,
-	    yFruitToHead, mAngleFruitToHead, mCollectDistanceMultiplier;
-	const double mAngleDelta=5.0;
-	std::vector<double> mTailX;
-	std::vector<double> mTailY;
-	std::vector<double> mTailAngle;
-	bool hasMouseFocus;
-	std::vector<SDL_Rect> mBox;
-	Win *vWin;
-	LTexture *mHeadTexture, *mTailTexture;
-    SDL_Rect *mCamera, *mClip, *mLevelSize;
-    double *mTimeStep;
-
-
+    std::vector<bool> _active_powerup;
+    std::vector<unsigned int> _powerup_activation_timestamp;
+    SDL_Point _position;
+    int _speed;
+    bool _faster;
+    double _angle, _max_collection_angle, _min_collection_angle, _max_collection_distance, _min_collection_distance;
+    std::vector<SnakeBody::Coordinates> _body;
+    Win *_window;
+    LTexture *_head, *_tail;
+    SDL_Rect *_camera, *_level_size;
+    double *_time_step;
 };
 
 #endif /* SNAKE_H_ */
