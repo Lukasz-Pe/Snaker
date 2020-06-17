@@ -4,7 +4,9 @@
 
 #include "PowerUp.h"
 
-PowerUp::PowerUp(Win *window, const int& level_width, const int& level_height):Fruit(window, level_width, level_height),is_powerup(true), lifespan(20){
+#include <utility>
+
+PowerUp::PowerUp(std::shared_ptr<Win> window, const int& level_width, const int& level_height):Fruit(std::move(window), level_width, level_height),is_powerup(true), lifespan(20){
 }
 
 bool PowerUp::Is_PowerUp(){

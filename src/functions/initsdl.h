@@ -7,6 +7,6 @@
 #include "../main.h"
 #include "../classes/Win.h"
 
-bool initSDL(Win *window = NULL, const int& gScreenWidth=800, const int& gScreenHeight=600);
+bool initSDL(std::shared_ptr<Win> window, const int& gScreenWidth=800, const int& gScreenHeight=600);
 
 #endif //SNAKER_INITSDL_H

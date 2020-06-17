@@ -11,8 +11,8 @@
 #include "Settings.h"
 class GameMenu{
 public:
-    GameMenu(Win &window, TTF_Font *text, TTF_Font *title, const int *text_size, const int *title_size,
-             Settings *game_settings);
+    GameMenu(std::shared_ptr<Win> window, TTF_Font *text, TTF_Font *title, const int *text_size, const int *title_size,
+             const std::shared_ptr<Settings> &game_settings);
     bool loadMappingFile(const std::string& path);
     void renderMainMenu();
     void renderOptionsScreen();
@@ -35,7 +35,7 @@ private:
     std::map<std::string,std::string> _translation;
     std::map<std::string,Button> _buttons, _btn_value_change;
     bool _played;
-    Win* _game_window;
+    std::shared_ptr<Win> _game_window;
     TTF_Font *_text_font, *_title_font;
     const int *_text_size, *_title_size;
     LTexture _menu_background_texture,_game_title;
@@ -44,7 +44,7 @@ private:
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
     std::string _game_state, _tmp_state;
     std::map<std::string, LTexture> _menu_text;
-    Settings *_game_settings;
+    std::shared_ptr<Settings> _game_settings;
     std::vector<int> _settings_values;
 };
 

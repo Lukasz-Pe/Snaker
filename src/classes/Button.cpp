@@ -37,14 +37,14 @@ SDL_Rect Button::getButtonDims() {
 	return mBoxButton;
 }
 
-void Button::setButtonText(std::string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen) {
-    mButtonTexture.loadFromText(text.c_str(), mButtonColor, vFont, vWin);
+void Button::setButtonText(const std::string& text, TTF_Font *vFont, const int &TEXT_SIZE, bool widen) {
+    mButtonTexture.loadFromText(text, mButtonColor, vFont, _window);
 	if (widen) {
 		mButtonTexture.setWidth(4 * mButtonTexture.getWidth());
 	}
 	mButtonTexture.setHeight(TEXT_SIZE);
 	TTF_SetFontStyle(vFont, TTF_STYLE_UNDERLINE);
-	mSelectedButtonTexture.loadFromText(text, mSelectedButtonColor, vFont, vWin);
+	mSelectedButtonTexture.loadFromText(text, mSelectedButtonColor, vFont, _window);
 	if (widen) {
 		mSelectedButtonTexture.setWidth(4 * mSelectedButtonTexture.getWidth());
 	}
@@ -59,25 +59,25 @@ void Button::setPosition(int x, int y) {
 	mBoxButton.y = y;
 }
 
-void Button::render(int x, int y, Win &vWin){
+void Button::render(int x, int y){
     mBoxButton.x=x;
     mBoxButton.y=y;
     if(mButtonSelected){
-        mSelectedButtonTexture.render(x, y, vWin);
+        mSelectedButtonTexture.render(x, y, _window);
     }else{
-        mButtonTexture.render(x, y, vWin);
+        mButtonTexture.render(x, y, _window);
     }
 }
 
-Button::Button(const std::string& txtID, std::string& text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, const bool& wide):
-mButtonTxtID(txtID){
+Button::Button(const std::string& txtID, std::string& text, std::shared_ptr<Win> window, TTF_Font *vFont, const int &TEXT_SIZE, const bool& wide):
+mButtonTxtID(txtID),_window(std::move(window)){
     mButtonNum++;
     mButtonID = mButtonNum;
     mBoxButton= {0,0,0,0};
     mButtonSelected = false;
     mButtonColor= {0,255,0};
     mSelectedButtonColor= {255,0,0};
-    setButtonText(text,vWin,vFont,TEXT_SIZE,wide);
+    setButtonText(text,vFont,TEXT_SIZE,wide);
 }
 
 std::string Button::getButtonTextID(){

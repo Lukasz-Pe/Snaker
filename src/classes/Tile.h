@@ -14,7 +14,7 @@
 class Tile {
 public:
 	Tile(int x, int y, int gTileDimX, int gTileDimY, int tileType=-1);
-	void render(SDL_Rect &gCamera, Win &vWin, LTexture &vTexture, SDL_Rect *vClip=NULL);
+	void render(SDL_Rect &gCamera, std::shared_ptr<Win> window, LTexture &vTexture, SDL_Rect *vClip=NULL);
 	int getType();
 	void setWindowCoords(int x, int y);
 	void setNewPos(int &x, int &y);

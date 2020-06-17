@@ -24,7 +24,7 @@ public:
 	SDL_Renderer* getRenderer();
 	SDL_Window *getWindow();
 	//--------------------------------------setters
-	void setWidth(const int& width);
+	void setWidth(const int &width);
 	void setHeight(const int& height);
 	void setTitle(std::string caption);
 	//--------------------------------------checkers

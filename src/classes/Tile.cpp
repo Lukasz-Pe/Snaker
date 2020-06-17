@@ -20,13 +20,13 @@ void Tile::setNewPos(int &x, int &y) {
 	mBox.y = y;
 }
 
-void Tile::render(SDL_Rect &gCamera, Win &vWin, LTexture &vTexture, SDL_Rect *vClip) {
+void Tile::render(SDL_Rect &gCamera, std::shared_ptr<Win> window, LTexture &vTexture, SDL_Rect *vClip) {
 	if (vClip != NULL) {
 		if (checkCollision(gCamera, mBox)) {
-			vTexture.render(mBox.x - gCamera.x, mBox.y - gCamera.y, vWin, &vClip[mType]);
+			vTexture.render(mBox.x - gCamera.x, mBox.y - gCamera.y, window, &vClip[mType]);
 		}
 	} else {
-		vTexture.render(mBox.x - gCamera.x, mBox.y - gCamera.y, vWin);
+		vTexture.render(mBox.x - gCamera.x, mBox.y - gCamera.y, window);
 	}
 }
 

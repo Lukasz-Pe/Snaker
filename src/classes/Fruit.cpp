@@ -7,8 +7,10 @@
 
 #include "Fruit.h"
 
-Fruit::Fruit(Win *window, const int& level_width, const int& level_height)
-            :mWindow(window), mLevelWidth(level_width), mLevelHeight(level_height) {
+#include <utility>
+
+Fruit::Fruit(std::shared_ptr<Win> window, const int& level_width, const int& level_height)
+            :mWindow(std::move(window)), mLevelWidth(level_width), mLevelHeight(level_height) {
 	mPosX = 0;
 	mPosY = 0;
 	mVelX = 0;
@@ -96,11 +98,11 @@ void Fruit::moveFramerateIndependent(Win &vWin, float &timeStep) {
 
 }
 
-void Fruit::renderBox(LTexture &vDotTexture, Win &vWin, SDL_Rect *vCamera) {
-	vDotTexture.render(mBox.x - vCamera->x, mBox.y - vCamera->y, vWin);
+void Fruit::renderBox(LTexture &vDotTexture, SDL_Rect *vCamera) {
+	vDotTexture.render(mBox.x - vCamera->x, mBox.y - vCamera->y, mWindow);
 }
 
-void Fruit::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *vCamera, SDL_Rect *vClip, const double *scaleFactor) {
+void Fruit::renderDot(LTexture &vDotTexture, int x, int y, SDL_Rect *vCamera, SDL_Rect *vClip, const double *scaleFactor) {
 	int tmpPosX = 0, tmpPosY = 0;
 	if (vCamera != NULL) {
 		tmpPosX = vCamera->x;
@@ -118,22 +120,22 @@ void Fruit::renderDot(LTexture &vDotTexture, Win &vWin, int x, int y, SDL_Rect *
 	if (vClip != NULL) {
 		if (scaleFactor != NULL) {
 			setCollisionBox(vDotTexture, vClip);
-			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip, scaleFactor);
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, mWindow, vClip, scaleFactor);
 		} else {
-			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, mWindow, vClip);
 		}
 	} else {
 		if (scaleFactor != NULL) {
-			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip, scaleFactor);
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, mWindow, vClip, scaleFactor);
 		} else {
-			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, vWin, vClip);
+			vDotTexture.render((int) mPosX - tmpPosX, (int) mPosY - tmpPosY, mWindow, vClip);
 		}
 	}
 }
 
-void Fruit::setCamera(Win &vWin, SDL_Rect &vCamera, const int &LevelWidht, const int &LevelHeight) {
-	vCamera.x = (mBox.x + mDotRadius / 2) - vWin.getWidth() / 2;
-	vCamera.y = (mBox.y + mDotRadius / 2) - vWin.getHeight() / 2;
+void Fruit::setCamera(SDL_Rect &vCamera, const int &LevelWidht, const int &LevelHeight){
+	vCamera.x = (mBox.x + mDotRadius / 2) - mWindow->getWidth() / 2;
+	vCamera.y = (mBox.y + mDotRadius / 2) - mWindow->getHeight() / 2;
 	if (vCamera.x < 0) {
 		vCamera.x = 0;
 	}

@@ -14,15 +14,16 @@
 class Button {
 public:
 	Button();
-	Button(const std::string& txtID, std::string& text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, const bool& wide=true);
+	Button(const std::string& txtID, std::string& text, std::shared_ptr<Win> window, TTF_Font *vFont, const int &TEXT_SIZE, const bool& wide=true);
 	int getID();
 	void eventHandler(SDL_Event &event);
 	SDL_Rect getButtonDims();
-	void setButtonText(std::string text, Win &vWin, TTF_Font *vFont, const int &TEXT_SIZE, bool widen=1);
+	void setButtonText(const std::string& text, TTF_Font *vFont, const int &TEXT_SIZE, bool widen=1);
 	void setPosition(int x, int y);
-	void render(int x, int y, Win &vWin);
+	void render(int x, int y);
 	std::string getButtonTextID();
 private:
+    std::shared_ptr<Win> _window;
 	static int mButtonNum;
 	int mButtonID;
 	SDL_Rect mBoxButton;

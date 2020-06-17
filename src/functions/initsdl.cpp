@@ -4,8 +4,8 @@
 
 #include "initsdl.h"
 
-bool initSDL(Win *window, const int& gScreenWidth, const int& gScreenHeight) {
-    if (window == NULL) {
+bool initSDL(std::shared_ptr<Win> window, const int& gScreenWidth, const int& gScreenHeight) {
+    if (window ==nullptr) {
         std::cerr << "Window not set!\n";
         return false;
     }

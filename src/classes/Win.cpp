@@ -99,7 +99,7 @@ int Win::getHeight() {
 void Win::setHeight(const int& height) {
 	mHeight = height;
 }
-void Win::setWidth(const int& width) {
+void Win::setWidth(const int &width) {
 	mWidth = width;
 }
 

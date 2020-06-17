@@ -8,7 +8,7 @@
 
 class PowerUp:public Fruit{
 public:
-    PowerUp(Win *window, const int& level_width, const int& level_height);
+    PowerUp (std::shared_ptr<Win> window, const int& level_width, const int& level_height);
     bool Is_PowerUp();
     void Is_PowerUp(const int& value);
     int Lifespan();

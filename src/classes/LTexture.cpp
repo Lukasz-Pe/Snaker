@@ -7,6 +7,8 @@
 
 #include "LTexture.h"
 
+#include <utility>
+
 LTexture::LTexture() {
 	mTexture = NULL;
 	mTextureHeight = 0;
@@ -17,8 +19,9 @@ LTexture::LTexture() {
 	mPosY = 0;
 }
 
-bool LTexture::loadFromFile(std::string path, Win &vWin) {
+bool LTexture::loadFromFile(std::string path, std::shared_ptr<Win> window) {
 	free();
+	_window=std::move(window);
 	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
 
 	if (loadedSurface == NULL) {
@@ -26,7 +29,7 @@ bool LTexture::loadFromFile(std::string path, Win &vWin) {
 		return false;
 	}
 	SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 128, 128, 128));
-	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), loadedSurface);
+	mTexture = SDL_CreateTextureFromSurface(_window->getRenderer(), loadedSurface);
 	if (mTexture == NULL) {
 		std::cout << "Failed to transform " << path.c_str() << " to texture. SDL Error: " << SDL_GetError() << "\n";
 	}
@@ -36,8 +39,9 @@ bool LTexture::loadFromFile(std::string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromFileForString(std::string path, Win &vWin) {
+bool LTexture::loadFromFileForString(std::string path, std::shared_ptr<Win> window) {
 	free();
+    _window=std::move(window);
 	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
 	SDL_Surface *formattedSurface = NULL;
 	SDL_Texture *newTexture = NULL;
@@ -51,7 +55,7 @@ bool LTexture::loadFromFileForString(std::string path, Win &vWin) {
 		printf("Unable to convert loaded surface to display format! SDL Error: %s\n", SDL_GetError());
 		return false;
 	}
-	newTexture = SDL_CreateTexture(vWin.getRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, formattedSurface->w, formattedSurface->h);
+	newTexture = SDL_CreateTexture(_window->getRenderer(), SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, formattedSurface->w, formattedSurface->h);
 	if (newTexture == NULL) {
 		printf("Unable to create blank texture! SDL Error: %s\n", SDL_GetError());
 		return false;
@@ -79,8 +83,9 @@ bool LTexture::loadFromFileForString(std::string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromFileAndChange(std::string path, Win &vWin) {
+bool LTexture::loadFromFileAndChange(std::string path, std::shared_ptr<Win> window) {
 	free();
+    _window=std::move(window);
 	SDL_Surface *loadedSurface = IMG_Load(path.c_str());
 	SDL_Surface *formattedSurface = NULL;
 	SDL_Texture *newTexture = NULL;
@@ -89,12 +94,12 @@ bool LTexture::loadFromFileAndChange(std::string path, Win &vWin) {
 		std::cout << "Failed to load " << path.c_str() << " to sufrace. SDL Error: " << SDL_GetError() << "\n";
 		return false;
 	}
-	formattedSurface = SDL_ConvertSurfaceFormat(loadedSurface, SDL_GetWindowPixelFormat(vWin.getWindow()), 0);
+	formattedSurface = SDL_ConvertSurfaceFormat(loadedSurface, SDL_GetWindowPixelFormat(_window->getWindow()), 0);
 	if (formattedSurface == NULL) {
 		printf("Unable to convert loaded surface to display format! SDL Error: %s\n", SDL_GetError());
 		return false;
 	}
-	newTexture = SDL_CreateTexture(vWin.getRenderer(), SDL_GetWindowPixelFormat(vWin.getWindow()), SDL_TEXTUREACCESS_STREAMING, formattedSurface->w, formattedSurface->h);
+	newTexture = SDL_CreateTexture(_window->getRenderer(), SDL_GetWindowPixelFormat(_window->getWindow()), SDL_TEXTUREACCESS_STREAMING, formattedSurface->w, formattedSurface->h);
 	if (newTexture == NULL) {
 		printf("Unable to create blank texture! SDL Error: %s\n", SDL_GetError());
 		return false;
@@ -111,14 +116,15 @@ bool LTexture::loadFromFileAndChange(std::string path, Win &vWin) {
 	return mTexture != NULL;
 }
 
-bool LTexture::loadFromText(std::string textureText, const SDL_Color &textColor, TTF_Font *mUsedFont, Win &vWin) {
+bool LTexture::loadFromText(std::string textureText, const SDL_Color &textColor, TTF_Font *mUsedFont, std::shared_ptr<Win> window) {
 	free();
+    _window=std::move(window);
 	SDL_Surface *textSurface = TTF_RenderUTF8_Blended(mUsedFont, textureText.c_str(), textColor);
 	if (textSurface == NULL) {
 		std::cerr << "Unable to render text surface! SDL_ttf Error: " << TTF_GetError() << "\n";
 		return false;
 	}
-	mTexture = SDL_CreateTextureFromSurface(vWin.getRenderer(), textSurface);
+	mTexture = SDL_CreateTextureFromSurface(_window->getRenderer(), textSurface);
 	if (mTexture == NULL) {
 		std::cerr << "Unable to process fonts surface to texture! SDL Error: " << SDL_GetError() << "\n";
 		return false;
@@ -138,7 +144,7 @@ void LTexture::free() {
 	}
 }
 
-void LTexture::render(int posX, int posY, Win &vWin, SDL_Rect *clip, const double *scaleFactor, double angle, SDL_Point *center, SDL_RendererFlip flip) {
+void LTexture::render(int posX, int posY, std::shared_ptr<Win> window, SDL_Rect *clip, const double *scaleFactor, double angle, SDL_Point *center, SDL_RendererFlip flip) {
 	SDL_Rect rect = { posX, posY, mTextureWidht, mTextureHeight };
 	mPosX = posX;
 	mPosY = posY;
@@ -152,7 +158,7 @@ void LTexture::render(int posX, int posY, Win &vWin, SDL_Rect *clip, const doubl
 		}
 	}
 
-	SDL_RenderCopyEx(vWin.getRenderer(), mTexture, clip, &rect, angle, center, flip);
+	SDL_RenderCopyEx(_window->getRenderer(), mTexture, clip, &rect, angle, center, flip);
 }
 
 int LTexture::getHeight() {
@@ -202,8 +208,8 @@ Uint32 LTexture::getPixel32(unsigned int x, unsigned int y) {
 	return pixels[(y * (mPitch / 4)) + x];
 }
 
-bool LTexture::createBlank(int width, int height, Win &vWin, SDL_TextureAccess access) {
-	mTexture = SDL_CreateTexture(vWin.getRenderer(), SDL_PIXELFORMAT_RGBA8888, access, width, height);
+bool LTexture::createBlank(int width, int height, std::shared_ptr<Win> window, SDL_TextureAccess access) {
+	mTexture = SDL_CreateTexture(_window->getRenderer(), SDL_PIXELFORMAT_RGBA8888, access, width, height);
 	if (mTexture == NULL) {
 		printf("Unable to create blank texture! SDL Error: %s\n", SDL_GetError());
 		return false;
@@ -227,11 +233,11 @@ void LTexture::setColor(Uint8 red, Uint8 green, Uint8 blue) {
 	SDL_SetTextureColorMod(mTexture, red, green, blue);
 }
 
-void LTexture::setAsRenderTarget(Win &vWin, bool state) {
+void LTexture::setAsRenderTarget(std::shared_ptr<Win> window, bool state) {
 	if (state) {
-		SDL_SetRenderTarget(vWin.getRenderer(), mTexture);
+		SDL_SetRenderTarget(_window->getRenderer(), mTexture);
 	} else {
-		SDL_SetRenderTarget(vWin.getRenderer(), NULL);
+		SDL_SetRenderTarget(_window->getRenderer(), NULL);
 	}
 }
 
