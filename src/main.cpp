@@ -10,6 +10,7 @@
 #include "classes/LTexture.h"
 #include "classes/Timer.h"
 #include "classes/PowerUp.h"
+#include "classes/Game.h"
 #include "classes/GameMenu.h"
 #include "functions/initsdl.h"
 //#include "functions/collisions.h"

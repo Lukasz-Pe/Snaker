@@ -5,8 +5,8 @@
 #ifndef SNAKER_GAME_H
 #define SNAKER_GAME_H
 #include "../main.h"
-#include "Snake.h"
-#include "Fruit.h"
+#include "Player.h"
+#include "PowerUp.h"
 
 
 class Game{

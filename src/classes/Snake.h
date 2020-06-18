@@ -22,8 +22,9 @@ namespace SnakeBody{
 }
 class Snake {
 public:
-    Snake(const SDL_Point& start_position, const std::shared_ptr<Win>& window, const std::shared_ptr<Settings>& settings,
-        const std::shared_ptr<SDL_Rect>& level_size, const std::shared_ptr<Timer>& timer, const std::shared_ptr<double>& time_step);
+    Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
+          const std::shared_ptr<Settings> &settings, const std::shared_ptr<SDL_Rect> &level_size,
+          const std::shared_ptr<Timer> &timer);
     void StartPosition(SDL_Point &position);
     virtual void updateSnake()=0;
     void resetLength();
@@ -35,7 +36,8 @@ public:
     void ActivatePowerUpEatingDistance();
     void ActivatePowerUpShield();
     std::vector<unsigned int> PowerUpsActivationTimeStamp();
-private:
+protected:
+    virtual void move()=0;
     std::vector<unsigned int> _powerup_deactivation_timestamp;
     SDL_Point _position;
     int _speed;
@@ -45,7 +47,6 @@ private:
     std::vector<SnakeBody::Coordinates> _body;
     std::shared_ptr<Win> _window;
     std::shared_ptr<SDL_Rect> _level_size;
-    std::shared_ptr<double> _time_step;
     std::shared_ptr<Timer> _timer;
     std::shared_ptr<Settings> _game_settings;
     static const int _powerup_duration;
