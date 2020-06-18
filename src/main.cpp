@@ -43,31 +43,39 @@ int main() {
     if (gContinue) {
         gContinue = initSDL(game_window, game_window->getWidth(), game_window->getHeight());
     }
-    LTexture fruits_and_powerups_textures, player_head_textures, player_tail_textures,
-             level_background, menu_background, snake_head_textures, snake_tail_textures, icons_of_active_powerups;
+//    LTexture fruits_and_powerups_textures, player_head_textures, player_tail_textures,
+//             level_background, menu_background, snake_head_textures, snake_tail_textures, icons_of_active_powerups;
+    auto fruits_and_powerups_textures = std::make_shared<LTexture>();
+    auto player_head_textures = std::make_shared<LTexture>();
+    auto player_tail_textures = std::make_shared<LTexture>();
+    auto level_background = std::make_shared<LTexture>();
+    auto menu_background = std::make_shared<LTexture>();
+    auto snake_head_textures = std::make_shared<LTexture>();
+    auto snake_tail_textures = std::make_shared<LTexture>();
+    auto icons_of_active_powerups = std::make_shared<LTexture>();
     if (gContinue) {
-        gContinue = fruits_and_powerups_textures.loadFromFile("../assets/images/fruits.png", game_window);
+        gContinue = fruits_and_powerups_textures->loadFromFile("../assets/images/fruits.png", game_window);
     }
     if (gContinue) {
-        gContinue = player_head_textures.loadFromFile("../assets/images/face.png", game_window);
+        gContinue = player_head_textures->loadFromFile("../assets/images/face.png", game_window);
     }
     if (gContinue) {
-        gContinue = player_tail_textures.loadFromFile("../assets/images/dot.png", game_window);
+        gContinue = player_tail_textures->loadFromFile("../assets/images/dot.png", game_window);
     }
     if (gContinue) {
-        gContinue = level_background.loadFromFile("../assets/images/bo_play_pattern.png", game_window);
+        gContinue = level_background->loadFromFile("../assets/images/bo_play_pattern.png", game_window);
     }
     if (gContinue) {
-        gContinue = menu_background.loadFromFile("../assets/images/escheresque.png", game_window);
+        gContinue = menu_background->loadFromFile("../assets/images/escheresque.png", game_window);
     }
     if (gContinue) {
-        gContinue = snake_head_textures.loadFromFile("../assets/images/faces.png", game_window);
+        gContinue = snake_head_textures->loadFromFile("../assets/images/faces.png", game_window);
     }
     if (gContinue) {
-        gContinue = snake_tail_textures.loadFromFile("../assets/images/tails.png", game_window);
+        gContinue = snake_tail_textures->loadFromFile("../assets/images/tails.png", game_window);
     }
     if (gContinue) {
-        gContinue = icons_of_active_powerups.loadFromFile("../assets/images/powerups.png", game_window);
+        gContinue = icons_of_active_powerups->loadFromFile("../assets/images/powerups.png", game_window);
     }
     std::unique_ptr<TTF_Font,SDLTTFDestroyer>text_font(TTF_OpenFont(PATH_TO_FONT_FILE.c_str(), TEXT_SIZE));
     std::unique_ptr<TTF_Font,SDLTTFDestroyer>title_font(TTF_OpenFont(PATH_TO_FONT_FILE.c_str(), TITLE_SIZE));
@@ -79,7 +87,7 @@ int main() {
     GameMenu game_menu(game_window, text_font.get(), title_font.get(),
         &TEXT_SIZE, &TITLE_SIZE, game_settings);
     game_menu.loadMappingFile(MAPPING_FILE_PATH);
-    game_menu.setBackgroundTexture(std::move(menu_background));
+    game_menu.setBackgroundTexture(menu_background);
     SDL_Event event;
     std::string state{game_menu.getGameState()}, tmp_state{};
     Timer frame_timer;

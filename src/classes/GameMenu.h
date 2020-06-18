@@ -19,7 +19,7 @@ public:
     void renderPauseDialogue();
     void renderExitDialogue();
     void eventHandler(SDL_Event &event);
-    void setBackgroundTexture(LTexture background_texture);
+    void setBackgroundTexture(std::shared_ptr<LTexture> background_texture);
     void renderInfo();
     std::string getGameState();
     std::vector<std::string> getMapping();
@@ -38,7 +38,8 @@ private:
     std::shared_ptr<Win> _game_window;
     TTF_Font *_text_font, *_title_font;
     const int *_text_size, *_title_size;
-    LTexture _menu_background_texture,_game_title;
+    std::shared_ptr<LTexture> _menu_background_texture;
+    LTexture _game_title;
     std::vector<std::unique_ptr<Tile>> _menu_background;
     SDL_Rect _menu_camera, _mouse_rect{0,0,1,1}, _dialog_box{0,0,0,0};
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);

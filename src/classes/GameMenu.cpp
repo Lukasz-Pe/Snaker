@@ -355,19 +355,19 @@ void GameMenu::renderButton(Button &btn, const int &posX, const int &posY){
 void GameMenu::renderBackground(){
     _menu_camera={0,0,_game_window->getWidth(),_game_window->getHeight()};
     for(int i=0;i<_menu_background.size();i++){
-        _menu_background[i]->render(_menu_camera,_game_window,_menu_background_texture);
+        _menu_background[i]->render(_menu_camera,_game_window,*_menu_background_texture);
     }
 }
 
-void GameMenu::setBackgroundTexture(LTexture background_texture){
+void GameMenu::setBackgroundTexture(std::shared_ptr<LTexture> background_texture){
     _menu_background_texture=std::move(background_texture);
-    int tile_count_x{2*(_game_window->getWidth()/_menu_background_texture.getWidth())},
-        tile_count_y{2*(_game_window->getHeight()/_menu_background_texture.getHeight())};
+    int tile_count_x{2*(_game_window->getWidth()/_menu_background_texture->getWidth())},
+        tile_count_y{2*(_game_window->getHeight()/_menu_background_texture->getHeight())};
     for(int i=0;i<tile_count_y;i++){
         for(int j=0;j<tile_count_x;j++){
-            _menu_background.emplace_back(std::make_unique<Tile>(j*_menu_background_texture.getWidth(),
-                i*_menu_background_texture.getHeight(),_menu_background_texture.getWidth(),
-                _menu_background_texture.getHeight()));
+            _menu_background.emplace_back(std::make_unique<Tile>(j*_menu_background_texture->getWidth(),
+                i*_menu_background_texture->getHeight(),_menu_background_texture->getWidth(),
+                _menu_background_texture->getHeight()));
         }
     }
 }
