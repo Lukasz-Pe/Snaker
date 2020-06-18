@@ -8,6 +8,8 @@
 #ifndef SNAKE_H_
 #define SNAKE_H_
 #include "src/main.h"
+#include "Timer.h"
+#include "Settings.h"
 #include "Win.h"
 #include "LTexture.h"
 #include "Fruit.h"
@@ -20,33 +22,33 @@ namespace SnakeBody{
 }
 class Snake {
 public:
-    Snake();
+    Snake(const SDL_Point& start_position, const std::shared_ptr<Win>& window, const std::shared_ptr<Settings>& settings,
+        const std::shared_ptr<SDL_Rect>& level_size, const std::shared_ptr<Timer>& timer, const std::shared_ptr<double>& time_step);
     void StartPosition(SDL_Point &position);
-    void changeSpeed();
-    void updateSnake();
+    virtual void updateSnake()=0;
     void resetLength();
-    int Length();
+    unsigned long Length();
     virtual void render()=0;
     void ActivatePowerUpVision();
     void ActivatePowerUpSnakeEater();
     void ActivatePowerUpGhostMode();
     void ActivatePowerUpEatingDistance();
-    void ActivatePowerUpGodMode();
-    std::vector<bool> ActivePowerUps();
-    std::vector<int> PowerUpsActivationTimeStamp();
-    
+    void ActivatePowerUpShield();
+    std::vector<unsigned int> PowerUpsActivationTimeStamp();
 private:
-    std::vector<bool> _active_powerup;
-    std::vector<unsigned int> _powerup_activation_timestamp;
+    std::vector<unsigned int> _powerup_deactivation_timestamp;
     SDL_Point _position;
     int _speed;
-    bool _faster;
-    double _angle, _max_collection_angle, _min_collection_angle, _max_collection_distance, _min_collection_distance;
+    double _angle;
+    static const double _max_collection_angle, _min_collection_angle,
+                        _max_collection_distance, _min_collection_distance;
     std::vector<SnakeBody::Coordinates> _body;
-    Win *_window;
-    LTexture *_head, *_tail;
-    SDL_Rect *_camera, *_level_size;
-    double *_time_step;
+    std::shared_ptr<Win> _window;
+    std::shared_ptr<SDL_Rect> _level_size;
+    std::shared_ptr<double> _time_step;
+    std::shared_ptr<Timer> _timer;
+    std::shared_ptr<Settings> _game_settings;
+    static const int _powerup_duration;
 };
 
 #endif /* SNAKE_H_ */
