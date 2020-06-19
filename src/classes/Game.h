@@ -11,25 +11,27 @@
 
 class Game{
 public:
-    Game(std::shared_ptr<Win> window, std::shared_ptr<LTexture> player_head,
-         std::shared_ptr<LTexture> player_tail, std::shared_ptr<LTexture> bot_head,
-         std::shared_ptr<LTexture> bot_tail, std::shared_ptr<LTexture> fruit,
-         std::shared_ptr<LTexture> tile, std::shared_ptr<LTexture> poweup_vision,
-         std::shared_ptr<LTexture> powerup_snake_eater,
-         std::shared_ptr<LTexture> powerup_ghost_mode,
-         std::shared_ptr<LTexture> powerup_eating_distance,
-         std::shared_ptr<LTexture> powerup_shield, std::shared_ptr<Timer> timer);
+    Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &background_texture,
+         const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
+         const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
+         const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
+         const std::shared_ptr<Timer> &timer);
+    bool setLevelSize(const int& width=13660, const int& height=7200);
     void render();
-    void eventHandler();
+    void eventHandler(SDL_Event &event);
 private:
+    void centerCameraOnMouse();
     void renderHUD();
     void renderLevelBackground();
+    void generateBackground();
     std::shared_ptr<Win> _window;
-    std::shared_ptr<LTexture> _player_head, _player_tail,
-        _bot_head, _bot_tail, _fruit, _tile, _poweup_vision,
-        _powerup_snake_eater, _powerup_ghost_mode,
-        _powerup_eating_distance, _powerup_shield;
+    std::shared_ptr<LTexture> _player_head, _player_tail, _background_texture,
+        _bot_head, _bot_tail, _fruit, _powerup_textures;
     std::shared_ptr<Timer> _timer;
+    int _level_width, _level_height;
+    std::vector<std::unique_ptr<Tile>> _background;
+    SDL_Rect _camera;
+    SDL_Point  _mouse;
 };
 
 

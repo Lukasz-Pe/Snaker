@@ -90,15 +90,20 @@ int main() {
     game_menu.setBackgroundTexture(menu_background);
     SDL_Event event;
     std::string state{game_menu.getGameState()}, tmp_state{};
-    Timer frame_timer;
+    auto frame_timer=std::make_shared<Timer>();
+    Game game(game_window, level_background, player_head_textures, player_tail_textures,
+              snake_head_textures, snake_tail_textures, fruits_and_powerups_textures,icons_of_active_powerups,frame_timer);
+    gContinue=game.setLevelSize(6830,3600);
 	while(gContinue){
+        state=game_menu.getGameState();
         game_window->prepareRenderer(0,0,0);
         while(SDL_PollEvent(&event)){
             game_window->eventHandler(event);
             game_menu.eventHandler(event);
+            game.eventHandler(event);
         }
         if(state==game_menu.getMapping()[23]||state==game_menu.getMapping()[1]||
-           state==game_menu.getMapping()[2]||state==game_menu.getMapping()[6]){
+           state==game_menu.getMapping()[6]){
             game_menu.renderMainMenu();
         }
         if(state==game_menu.getMapping()[4]){
@@ -116,8 +121,10 @@ int main() {
         if(state==game_menu.getMapping()[19]){
             game_menu.renderPauseDialogue();
         }
+        if(state==game_menu.getMapping()[2]){
+            game.render();
+        }
         game_window->render();
-        state=game_menu.getGameState();
 	}
 	return 0;
 }
