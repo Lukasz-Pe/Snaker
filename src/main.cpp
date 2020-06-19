@@ -92,8 +92,10 @@ int main() {
     std::string state{game_menu.getGameState()}, tmp_state{};
     auto frame_timer=std::make_shared<Timer>();
     Game game(game_window, level_background, player_head_textures, player_tail_textures,
-              snake_head_textures, snake_tail_textures, fruits_and_powerups_textures,icons_of_active_powerups,frame_timer);
+              snake_head_textures, snake_tail_textures, fruits_and_powerups_textures, icons_of_active_powerups,
+              frame_timer, game_settings);
     gContinue=game.setLevelSize(6830,3600);
+    game.generatePlayer();
 	while(gContinue){
         state=game_menu.getGameState();
         game_window->prepareRenderer(0,0,0);

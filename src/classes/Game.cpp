@@ -8,20 +8,22 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
            const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
            const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
            const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
-           const std::shared_ptr<Timer> &timer):
+           const std::shared_ptr<Timer> &timer, const std::shared_ptr<Settings> &settings):
     _window(window), _background_texture(background_texture), _player_head(player_head),
     _player_tail(player_tail), _bot_head(bot_head), _bot_tail(bot_tail),
-    _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer){
-    generateBackground();
-    _camera={0,0,_window->getWidth(), _window->getHeight()};
+    _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer), _settings(settings){
+    _camera->x=0;
+    _camera->y=0;
+    _camera->w=_window->getWidth();
+    _camera->h=_window->getHeight();
     _mouse={0,0};
 }
 
 void Game::renderLevelBackground(){
-    _camera.x=_mouse.x+_camera.w/2;
-    _camera.y=_mouse.y+_camera.h/2;
+    _camera->x=_mouse.x+_camera->w/2;
+    _camera->y=_mouse.y+_camera->h/2;
     for(int i=0;i<_background.size();i++){
-        _background[i]->render(_camera,_window,*_background_texture);
+        _background[i]->render(*_camera,_window,*_background_texture);
     }
 }
 
@@ -41,6 +43,10 @@ bool Game::setLevelSize(const int &width, const int &height){
     if(width>0&&height>0){
         _level_width=width;
         _level_height=height;
+        _level_size->x=0;
+        _level_size->y=0;
+        _level_size->w=_level_width;
+        _level_size->h=_level_height;
         generateBackground();
         return true;
     }
@@ -51,6 +57,7 @@ bool Game::setLevelSize(const int &width, const int &height){
 
 void Game::render(){
     renderLevelBackground();
+    _player.render();
 }
 
 void Game::eventHandler(SDL_Event &event){
@@ -64,4 +71,9 @@ void Game::renderHUD(){
 }
 
 void Game::centerCameraOnMouse(){
+}
+
+void Game::generatePlayer(){
+    _player=Player(_player_head, _player_tail, SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
+                   _window, _settings, _level_size, _timer, _camera);
 }

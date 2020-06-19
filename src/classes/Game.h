@@ -15,23 +15,26 @@ public:
          const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
          const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
          const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
-         const std::shared_ptr<Timer> &timer);
+         const std::shared_ptr<Timer> &timer, const std::shared_ptr<Settings> &settings);
     bool setLevelSize(const int& width=13660, const int& height=7200);
     void render();
     void eventHandler(SDL_Event &event);
+    void generatePlayer();
 private:
     void centerCameraOnMouse();
     void renderHUD();
     void renderLevelBackground();
     void generateBackground();
     std::shared_ptr<Win> _window;
+    std::shared_ptr<Settings> _settings;
     std::shared_ptr<LTexture> _player_head, _player_tail, _background_texture,
         _bot_head, _bot_tail, _fruit, _powerup_textures;
     std::shared_ptr<Timer> _timer;
     int _level_width, _level_height;
     std::vector<std::unique_ptr<Tile>> _background;
-    SDL_Rect _camera;
+    std::shared_ptr<SDL_Rect> _level_size,_camera;
     SDL_Point  _mouse;
+    Player _player;
 };
 
 

@@ -22,6 +22,7 @@ namespace SnakeBody{
 }
 class Snake {
 public:
+    Snake()= default;;
     Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
           const std::shared_ptr<Settings> &settings, const std::shared_ptr<SDL_Rect> &level_size,
           const std::shared_ptr<Timer> &timer);

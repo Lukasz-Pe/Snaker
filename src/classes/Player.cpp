@@ -4,12 +4,11 @@
 
 #include "Player.h"
 
-Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail,
-               const SDL_Point &start_position, const std::shared_ptr<Win> &window,
-               const std::shared_ptr<Settings> &settings,
-               const std::shared_ptr<SDL_Rect> &level_size,
-               const std::shared_ptr<Timer> &timer):Snake(start_position,window
-                   ,settings,level_size,timer), _head(head), _tail(tail){
+Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
+               const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
+               const std::shared_ptr<SDL_Rect> &level_size, const std::shared_ptr<Timer> &timer,
+               const std::shared_ptr<SDL_Rect> &camera):Snake(start_position, window
+                   , settings, level_size, timer), _head(head), _tail(tail), _camera(camera){
     _speed=_game_settings->settingsFromFile()[4];
 }
 
