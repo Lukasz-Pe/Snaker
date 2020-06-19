@@ -40,10 +40,11 @@ bool Game::setLevelSize(const int &width, const int &height){
     if(width>0&&height>0){
         _level_width=width;
         _level_height=height;
-        _level_size->x=0;
-        _level_size->y=0;
-        _level_size->w=_level_width;
-        _level_size->h=_level_height;
+        _level_size={0,0,_level_width,_level_height};
+//        _level_size->x=0;
+//        _level_size->y=0;
+//        _level_size->w=_level_width;
+//        _level_size->h=_level_height;
         generateBackground();
         return true;
     }

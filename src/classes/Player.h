@@ -11,7 +11,7 @@ public:
     Player()= default;;
     Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
            const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
-           const std::shared_ptr<SDL_Rect> &level_size, const std::shared_ptr<Timer> &timer,
+           const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer,
            const SDL_Rect &camera);
     void render() override;
     void eventHandler(SDL_Event& event);

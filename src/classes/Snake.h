@@ -24,7 +24,7 @@ class Snake {
 public:
     Snake()= default;;
     Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
-          const std::shared_ptr<Settings> &settings, const std::shared_ptr<SDL_Rect> &level_size,
+          const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
           const std::shared_ptr<Timer> &timer);
     void StartPosition(SDL_Point &position);
     virtual void updateSnake()=0;
@@ -47,7 +47,7 @@ protected:
                         _max_collection_distance, _min_collection_distance;
     std::vector<SnakeBody::Coordinates> _body;
     std::shared_ptr<Win> _window;
-    std::shared_ptr<SDL_Rect> _level_size;
+    SDL_Rect _level_size;
     std::shared_ptr<Timer> _timer;
     std::shared_ptr<Settings> _game_settings;
     static const int _powerup_duration;

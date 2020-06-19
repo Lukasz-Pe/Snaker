@@ -14,7 +14,7 @@ const double Snake::_max_collection_distance=30.0;
 const double Snake::_min_collection_distance=15.0;
 
 Snake::Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
-             const std::shared_ptr<Settings> &settings, const std::shared_ptr<SDL_Rect> &level_size,
+             const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
              const std::shared_ptr<Timer> &timer): _position(start_position), _window(window), _game_settings(settings),
              _level_size(level_size), _timer(timer){
     _speed=_game_settings->settingsFromFile()[4];
