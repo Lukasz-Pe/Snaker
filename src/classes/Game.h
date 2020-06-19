@@ -32,7 +32,8 @@ private:
     std::shared_ptr<Timer> _timer;
     int _level_width, _level_height;
     std::vector<std::unique_ptr<Tile>> _background;
-    std::shared_ptr<SDL_Rect> _level_size,_camera;
+    SDL_Rect _camera;
+    std::shared_ptr<SDL_Rect> _level_size;
     SDL_Point  _mouse;
     Player _player;
 };

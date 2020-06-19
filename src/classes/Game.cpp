@@ -12,18 +12,15 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
     _window(window), _background_texture(background_texture), _player_head(player_head),
     _player_tail(player_tail), _bot_head(bot_head), _bot_tail(bot_tail),
     _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer), _settings(settings){
-    _camera->x=0;
-    _camera->y=0;
-    _camera->w=_window->getWidth();
-    _camera->h=_window->getHeight();
+    _camera={0,0,_window->getWidth(), _window->getHeight()};
     _mouse={0,0};
 }
 
 void Game::renderLevelBackground(){
-    _camera->x=_mouse.x+_camera->w/2;
-    _camera->y=_mouse.y+_camera->h/2;
+    _camera.x=_mouse.x+_camera.w/2;
+    _camera.y=_mouse.y+_camera.h/2;
     for(int i=0;i<_background.size();i++){
-        _background[i]->render(*_camera,_window,*_background_texture);
+        _background[i]->render(_camera,_window,*_background_texture);
     }
 }
 
