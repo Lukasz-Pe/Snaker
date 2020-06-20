@@ -55,7 +55,7 @@ bool Game::setLevelSize(const int &width, const int &height){
 
 void Game::render(){
     renderLevelBackground();
-    _player.render();
+    _player->render();
 }
 
 void Game::eventHandler(SDL_Event &event){
@@ -72,6 +72,6 @@ void Game::centerCameraOnMouse(){
 }
 
 void Game::generatePlayer(){
-    _player=Player(_player_head, _player_tail, SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
+    _player=std::make_unique<Player>(_player_head, _player_tail, SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
                    _window, _settings, _level_size, _timer, _camera);
 }

@@ -35,7 +35,8 @@ private:
     SDL_Rect _camera, _level_size;
 //    std::shared_ptr<SDL_Rect> ;
     SDL_Point  _mouse;
-    Player _player;
+    std::unique_ptr<Player> _player;
+    std::vector<std::unique_ptr<Snake>> _bot;
 };
 
 
