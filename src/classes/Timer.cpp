@@ -56,17 +56,6 @@ Uint32 Timer::getTicks() {
 
 	return time;
 }
-/*double Timer::getSeconds() {
-	double time = 0;
-	if (mStarted) {
-		if (mPaused) {
-			time = (mPausedTicks/1000.0);
-		} else {
-			time = ((SDL_GetTicks() - mStartTicks)/1000.0);
-		}
-	}
-	return time;
-}*/
 
 bool Timer::isStarted() {
 	return mStarted;

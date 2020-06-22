@@ -18,18 +18,17 @@ class Timer {
 		void pause();
 		void unpause();
 		Uint32 getTicks();
-//		double getSeconds();
-		template <typename zmienna>
-		zmienna getSeconds();
+		template <typename variable>
+		variable getSeconds();
 		bool isStarted();
 		bool isPaused();
 	private:
 Uint32 mStartTicks, mPausedTicks;
 bool mStarted, mPaused;
 };
-template <typename zmienna>
-zmienna Timer::getSeconds() {
-	zmienna time = 0;
+template <typename variable>
+variable Timer::getSeconds() {
+	variable time = 0;
 	if (mStarted) {
 		if (mPaused) {
 			time = (mPausedTicks/1000.0);

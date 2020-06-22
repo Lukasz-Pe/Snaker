@@ -17,6 +17,7 @@
 namespace SnakeBody{
     struct Coordinates{
         SDL_Point _position;
+        double _x,_y;
         double _angle;
     };
 }
@@ -41,7 +42,7 @@ protected:
     virtual void move()=0;
     std::vector<unsigned int> _powerup_deactivation_timestamp;
     SDL_Point _position;
-    int _speed;
+    int _speed,_old_length;
     double _angle;
     static const double _max_collection_angle, _min_collection_angle,
                         _max_collection_distance, _min_collection_distance;

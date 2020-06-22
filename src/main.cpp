@@ -94,7 +94,8 @@ int main() {
     Game game(game_window, level_background, player_head_textures, player_tail_textures,
               snake_head_textures, snake_tail_textures, fruits_and_powerups_textures, icons_of_active_powerups,
               frame_timer, game_settings);
-    gContinue=game.setLevelSize(6830,3600);
+//    gContinue=game.setLevelSize(6830,3600);
+    gContinue=game.setLevelSize(2732,1440);
     game.generatePlayer();
 	while(gContinue){
         state=game_menu.getGameState();
@@ -106,21 +107,39 @@ int main() {
         }
         if(state==game_menu.getMapping()[23]||state==game_menu.getMapping()[1]||
            state==game_menu.getMapping()[6]){
+            if(frame_timer->isStarted()||frame_timer->isPaused()){
+                frame_timer->stop();
+            }
             game_menu.renderMainMenu();
         }
         if(state==game_menu.getMapping()[4]){
+            if(frame_timer->isStarted()||frame_timer->isPaused()){
+                frame_timer->stop();
+            }
             game_menu.renderExitDialogue();
         }
         if(state==game_menu.getMapping()[5]){
+            if(frame_timer->isStarted()||frame_timer->isPaused()){
+                frame_timer->stop();
+            }
             gContinue=false;
         }
         if(state==game_menu.getMapping()[3]){
+            if(frame_timer->isStarted()||frame_timer->isPaused()){
+                frame_timer->stop();
+            }
             game_menu.renderOptionsScreen();
         }
         if(state==game_menu.getMapping()[24]){
+            if(frame_timer->isStarted()||frame_timer->isPaused()){
+                frame_timer->stop();
+            }
             game_menu.renderInfo();
         }
         if(state==game_menu.getMapping()[19]){
+            if(frame_timer->isStarted()){
+                frame_timer->pause();
+            }
             game_menu.renderPauseDialogue();
         }
         if(state==game_menu.getMapping()[2]){

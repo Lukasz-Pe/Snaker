@@ -17,8 +17,7 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
 }
 
 void Game::renderLevelBackground(){
-    _camera.x=_mouse.x+_camera.w/2;
-    _camera.y=_mouse.y+_camera.h/2;
+    std::cerr<<"game:"<<_camera.x<<"x"<<_camera.y<<"\n";
     for(int i=0;i<_background.size();i++){
         _background[i]->render(_camera,_window,*_background_texture);
     }
@@ -54,14 +53,17 @@ bool Game::setLevelSize(const int &width, const int &height){
 }
 
 void Game::render(){
+    _timer->start();
     renderLevelBackground();
     _player->render();
+    if(_timer->getSeconds<double>()<0.017){
+        std::this_thread::sleep_for(std::chrono::microseconds (15600-static_cast<int>(1000*_timer->getSeconds<double>())));
+    }
+//    std::cerr<<1.0/_timer->getSeconds<double>()<<" FPS\n";
 }
 
 void Game::eventHandler(SDL_Event &event){
-    if(event.type==SDL_MOUSEMOTION&&_window->hasMouseFocus()){
-        SDL_GetMouseState(&_mouse.x,&_mouse.y);
-    }
+    _player->eventHandler(event);
 }
 
 void Game::renderHUD(){
