@@ -175,3 +175,8 @@ void Fruit::reposition(){
     mPosY=rand()%static_cast<int>(0.9*mLevelHeight);
 }
 
+void Fruit::setPosition(const int &posx, const int &posy){
+    mPosX=static_cast<double>(posx);
+    mPosY=static_cast<double>(posx);
+}
+

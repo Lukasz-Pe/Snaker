@@ -21,8 +21,10 @@ public:
     void render();
     void eventHandler(SDL_Event &event);
     void generatePlayer();
+    void generateFruits();
+    void moveFruit(const int& i);
+    void movePowerUp(const int& i);
 private:
-    void centerCameraOnMouse();
     void renderHUD();
     void renderLevelBackground();
     void generateBackground();
@@ -34,14 +36,17 @@ private:
     std::vector<Fruit> _fruits;
     std::vector<PowerUp> _powerups;
     std::shared_ptr<Timer> _timer;
-    int _level_width, _level_height;
+    std::vector<SDL_Point> _fruits_pos,_powerups_pos;
+    int _level_width, _level_height, _powerups_count;
     const int &_text_size;
     std::vector<std::unique_ptr<Tile>> _background;
     SDL_Rect _camera, _level_size;
+    std::vector<SDL_Rect> _clip_fruit,_clip_powerup;
 //    std::shared_ptr<SDL_Rect> _camera;
     std::unique_ptr<Player> _player;
     std::vector<std::unique_ptr<Snake>> _bot;
     TTF_Font *_font;
+    int TOTAL_FRUIT_SPRITES;
 };
 
 

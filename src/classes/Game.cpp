@@ -15,6 +15,8 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
     _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer), _settings(settings),
     _font(font), _text_size(text_size){
     _camera={0,0,_window->getWidth(),_window->getHeight()};
+    _powerups_count=_settings->settingsFromFile()[2]*_settings->settingsFromFile()[3]/100;
+    
 //    _camera->x={0};
 //    _camera->y={0};
 //    _camera->w={_window->getWidth()};
@@ -44,10 +46,28 @@ bool Game::setLevelSize(const int &width, const int &height){
         _level_width=width;
         _level_height=height;
         _level_size={0,0,_level_width,_level_height};
-//        _level_size->x=0;
-//        _level_size->y=0;
-//        _level_size->w=_level_width;
-//        _level_size->h=_level_height;
+        for(int i=0;i<_settings->settingsFromFile()[2]-_powerups_count;i++){
+            int x=rand()%static_cast<int>(0.9*_level_width);
+            int y=rand()%static_cast<int>(0.9*_level_height);
+            _fruits.emplace_back(Fruit(_window,_level_width,_level_height));
+            _fruits[i].setPosition(x,y);
+        }
+        for(int i=0;i<_powerups_count;i++){
+            int x=(_level_width-20)*(rand()/RAND_MAX);
+            int y=(_level_height-20)*(rand()/RAND_MAX);
+            _powerups.emplace_back(PowerUp(_window,_level_width,_level_height));
+            _powerups[i].setPosition(x,y);
+        }
+        TOTAL_FRUIT_SPRITES=5;
+        int SPRITE_DIMS=20;
+        for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
+            for(int j=0;j<TOTAL_FRUIT_SPRITES;j++){
+                _clip_fruit.emplace_back(SDL_Rect{i*SPRITE_DIMS, j*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
+            }
+        }
+        for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
+            _clip_powerup.emplace_back(SDL_Rect{i*SPRITE_DIMS, 5*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
+        }
         generateBackground();
         return true;
     }
@@ -59,6 +79,12 @@ bool Game::setLevelSize(const int &width, const int &height){
 void Game::render(){
     _timer->start();
     renderLevelBackground();
+    for(int i=0;i<_fruits.size();i++){
+        _fruits[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_fruit[i&25]);
+    }
+    for(int i=0;i<_powerups.size();i++){
+        _powerups[i].renderDot(*_powerup_textures,-1,-1,&_camera,&_clip_powerup[i&5]);
+    }
     _player->render();
     renderHUD();
 //    if(_timer->getSeconds<double>()<0.017){
@@ -83,9 +109,6 @@ void Game::renderHUD(){
     _fps.setHeight(_text_size);
     _score.render(0,0,_window);
     _fps.render((_window->getWidth()-_fps.getWidth())/2,0,_window);
-}
-
-void Game::centerCameraOnMouse(){
 }
 
 void Game::generatePlayer(){

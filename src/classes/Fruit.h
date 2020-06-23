@@ -29,6 +29,7 @@ class Fruit {
 		int getPosY();
 		SDL_Rect getRect();
 		SDL_Rect mBox;
+		void setPosition(const int &posx, const int &posy);
 		void setCollisionBox(LTexture &vTexture, SDL_Rect *vClip=NULL);
 	private:
 		double mPosX, mPosY, mVelX, mVelY, mAngle, mCollectDist,x,y;
