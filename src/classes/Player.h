@@ -16,13 +16,14 @@ public:
     void render() override;
     void eventHandler(SDL_Event& event);
     void updateSnake() override;
+    ~Player();
 private:
     void move() override;
     std::shared_ptr<LTexture> _head,_tail;
     SDL_Point _mouse_position;
     SnakeBody::Coordinates _previous_position;
     int _speed;
-    SDL_Rect _camera;
+    std::unique_ptr<SDL_Rect> _camera;
 };
 
 

@@ -8,14 +8,14 @@ Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail,
                const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
                const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer,
                SDL_Rect &camera):Snake(start_position, window
-                   , settings, level_size, timer), _head(head), _tail(tail), _camera(camera){
+                   , settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
     _speed=_game_settings->settingsFromFile()[4];
-    _body.emplace_back(SnakeBody::Coordinates{_camera.w/2,_camera.h/2,0.0});
+    _body.emplace_back(SnakeBody::Coordinates{_camera->w/2,_camera->h/2,0.0});
 }
 
 void Player::move(){
-    double target_x{static_cast<double>((_mouse_position.x+_camera.x)-_body[0]._x)},
-    target_y{static_cast<double>(_body[0]._y-(_mouse_position.y+_camera.y))};
+    double target_x{static_cast<double>((_mouse_position.x+_camera->x)-_body[0]._x)},
+    target_y{static_cast<double>(_body[0]._y-(_mouse_position.y+_camera->y))};
     if (target_x >= 0 && target_y >= 0) {
         _body[0]._angle = (180 / M_PI) * std::atan(target_x/target_y);
     } else if (target_x > 0 && target_y < 0) {
@@ -49,22 +49,22 @@ void Player::move(){
 
 void Player::render(){
     move();
-    _camera.x = _body[0]._x - _camera.w/2;
-    _camera.y = _body[0]._y - _camera.h/2;
-    std::cerr<<"player:"<<_camera.x<<"x"<<_camera.y<<"\n";
-    if (_camera.x < 0) {
-        _camera.x = 0;
+    _camera->x = _body[0]._x - _camera->w/2;
+    _camera->y = _body[0]._y - _camera->h/2;
+//    std::cerr<<"player:"<<_camera->x<<"x"<<_camera->y<<"\n";
+    if (_camera->x < 0) {
+        _camera->x = 0;
     }
-    if (_camera.y < 0) {
-        _camera.y = 0;
+    if (_camera->y < 0) {
+        _camera->y = 0;
     }
-    if (_camera.x > _level_size.w - _camera.w) {
-        _camera.x = _level_size.w - _camera.w;
+    if (_camera->x > _level_size.w - _camera->w) {
+        _camera->x = _level_size.w - _camera->w;
     }
-    if (_camera.y > _level_size.h - _camera.h) {
-        _camera.y = _level_size.h - _camera.h;
+    if (_camera->y > _level_size.h - _camera->h) {
+        _camera->y = _level_size.h - _camera->h;
     }
-    _head->render(static_cast<int>(_body[0]._x) - _camera.x, static_cast<int>(_body[0]._y) - _camera.y, _window, NULL, NULL, _body[0]._angle);
+    _head->render(static_cast<int>(_body[0]._x) - _camera->x, static_cast<int>(_body[0]._y) - _camera->y, _window, NULL, NULL, _body[0]._angle);
 //    mHeadBox= {(int)_body[0]._x,_body[0]._y, _head->getWidth(),_head->getHeight()};
 }
 
@@ -84,5 +84,9 @@ void Player::eventHandler(SDL_Event &event){
 
 void Player::updateSnake(){
 
+}
+
+Player::~Player(){
+    _camera.release();
 }
 

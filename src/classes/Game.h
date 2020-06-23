@@ -33,8 +33,7 @@ private:
     int _level_width, _level_height;
     std::vector<std::unique_ptr<Tile>> _background;
     SDL_Rect _camera, _level_size;
-//    std::shared_ptr<SDL_Rect> ;
-    SDL_Point  _mouse;
+//    std::shared_ptr<SDL_Rect> _camera;
     std::unique_ptr<Player> _player;
     std::vector<std::unique_ptr<Snake>> _bot;
 };
