@@ -8,10 +8,12 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
            const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
            const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
            const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
-           const std::shared_ptr<Timer> &timer, const std::shared_ptr<Settings> &settings):
+           const std::shared_ptr<Timer> &timer, const std::shared_ptr<Settings> &settings, TTF_Font *font,
+           const int &text_size):
     _window(window), _background_texture(background_texture), _player_head(player_head),
     _player_tail(player_tail), _bot_head(bot_head), _bot_tail(bot_tail),
-    _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer), _settings(settings){
+    _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer), _settings(settings),
+    _font(font), _text_size(text_size){
     _camera={0,0,_window->getWidth(),_window->getHeight()};
 //    _camera->x={0};
 //    _camera->y={0};
@@ -58,9 +60,10 @@ void Game::render(){
     _timer->start();
     renderLevelBackground();
     _player->render();
-    if(_timer->getSeconds<double>()<0.017){
-        std::this_thread::sleep_for(std::chrono::microseconds (15600-static_cast<int>(1000*_timer->getSeconds<double>())));
-    }
+    renderHUD();
+//    if(_timer->getSeconds<double>()<0.017){
+//        std::this_thread::sleep_for(std::chrono::microseconds (15600-static_cast<int>(1000*_timer->getSeconds<double>())));
+//    }
 //    std::cerr<<1.0/_timer->getSeconds<double>()<<" FPS\n";
 }
 
@@ -69,7 +72,17 @@ void Game::eventHandler(SDL_Event &event){
 }
 
 void Game::renderHUD(){
-
+    std::stringstream score, fps;
+    score<<"Points: "<<_player->Length();
+    _score.loadFromText(score.str(),SDL_Color{255,0,0},_font,_window);
+    _score.setWidth(3*_score.getWidth());
+    _score.setHeight(_text_size);
+    fps<<1.0/_timer->getSeconds<double>()<<" FPS";
+    _fps.loadFromText(fps.str(),SDL_Color{255,0,0},_font,_window);
+    _fps.setWidth(3*_fps.getWidth());
+    _fps.setHeight(_text_size);
+    _score.render(0,0,_window);
+    _fps.render((_window->getWidth()-_fps.getWidth())/2,0,_window);
 }
 
 void Game::centerCameraOnMouse(){
