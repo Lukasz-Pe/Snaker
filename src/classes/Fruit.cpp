@@ -177,6 +177,6 @@ void Fruit::reposition(){
 
 void Fruit::setPosition(const int &posx, const int &posy){
     mPosX=static_cast<double>(posx);
-    mPosY=static_cast<double>(posx);
+    mPosY=static_cast<double>(posy);
 }
 

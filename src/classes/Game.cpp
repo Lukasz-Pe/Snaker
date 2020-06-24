@@ -53,8 +53,8 @@ bool Game::setLevelSize(const int &width, const int &height){
             _fruits[i].setPosition(x,y);
         }
         for(int i=0;i<_powerups_count;i++){
-            int x=(_level_width-20)*(rand()/RAND_MAX);
-            int y=(_level_height-20)*(rand()/RAND_MAX);
+            int x=rand()%static_cast<int>(0.9*_level_width);
+            int y=rand()%static_cast<int>(0.9*_level_height);
             _powerups.emplace_back(PowerUp(_window,_level_width,_level_height));
             _powerups[i].setPosition(x,y);
         }
@@ -83,7 +83,7 @@ void Game::render(){
         _fruits[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_fruit[i&25]);
     }
     for(int i=0;i<_powerups.size();i++){
-        _powerups[i].renderDot(*_powerup_textures,-1,-1,&_camera,&_clip_powerup[i&5]);
+        _powerups[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_powerup[i&5]);
     }
     _player->render();
     renderHUD();
