@@ -20,10 +20,12 @@ public:
     bool setLevelSize(const int& width=13660, const int& height=7200);
     void render();
     void eventHandler(SDL_Event &event);
-    void generatePlayer();
-    void generateFruits();
+    void generatePlayers();
+    void checkCollisions();
     void moveFruit(const int& i);
     void movePowerUp(const int& i);
+    void repositionFruit(const int& i);
+    void repositionPowerUp(const int& i);
 private:
     void renderHUD();
     void renderLevelBackground();

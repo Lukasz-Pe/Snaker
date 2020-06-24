@@ -8,8 +8,8 @@
 #include "Snake.h"
 
 const int Snake::_powerup_duration=20;
-const double Snake::_max_collection_angle=60.0;
-const double Snake::_min_collection_angle=30.0;
+const double Snake::_max_collection_angle=30.0;
+const double Snake::_min_collection_angle=15.0;
 const double Snake::_max_collection_distance=30.0;
 const double Snake::_min_collection_distance=15.0;
 

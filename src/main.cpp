@@ -95,7 +95,7 @@ int main() {
               snake_head_textures, snake_tail_textures, fruits_and_powerups_textures, icons_of_active_powerups,
               frame_timer, game_settings, text_font.get(), TEXT_SIZE);
     gContinue=game.setLevelSize(6830,3600);
-    game.generatePlayer();
+    game.generatePlayers();
 	while(gContinue){
         state=game_menu.getGameState();
         game_window->prepareRenderer(0,0,0);

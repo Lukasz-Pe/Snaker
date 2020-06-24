@@ -111,7 +111,7 @@ void Game::renderHUD(){
     _fps.render((_window->getWidth()-_fps.getWidth())/2,0,_window);
 }
 
-void Game::generatePlayer(){
+void Game::generatePlayers(){
     _player=std::make_unique<Player>(_player_head, _player_tail,
                 SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
                 _window, _settings, _level_size, _timer, _camera);

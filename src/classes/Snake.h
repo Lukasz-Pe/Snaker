@@ -38,12 +38,13 @@ public:
     void ActivatePowerUpEatingDistance();
     void ActivatePowerUpShield();
     std::vector<unsigned int> PowerUpsActivationTimeStamp();
+    double collectFruit();
 protected:
     virtual void move()=0;
     std::vector<unsigned int> _powerup_deactivation_timestamp;
     SDL_Point _position;
     int _speed,_old_length;
-    double _angle;
+    double _angle,_collection_distance;
     static const double _max_collection_angle, _min_collection_angle,
                         _max_collection_distance, _min_collection_distance;
     std::vector<SnakeBody::Coordinates> _body;
