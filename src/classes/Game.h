@@ -5,6 +5,7 @@
 #ifndef SNAKER_GAME_H
 #define SNAKER_GAME_H
 #include "../main.h"
+#include "../functions/moveFruit.h"
 #include "Player.h"
 #include "PowerUp.h"
 
@@ -21,9 +22,7 @@ public:
     void render();
     void eventHandler(SDL_Event &event);
     void generatePlayers();
-    void checkCollisions();
-    void moveFruit(const int& i);
-    void movePowerUp(const int& i);
+    void moveFruits();
     void repositionFruit(const int& i);
     void repositionPowerUp(const int& i);
 private:
@@ -46,9 +45,10 @@ private:
     std::vector<SDL_Rect> _clip_fruit,_clip_powerup;
 //    std::shared_ptr<SDL_Rect> _camera;
     std::unique_ptr<Player> _player;
-    std::vector<std::unique_ptr<Snake>> _bot;
+    //std::vector<std::unique_ptr<Snake>> _bot;
     TTF_Font *_font;
     int TOTAL_FRUIT_SPRITES;
+    template<typename S,typename F> friend void changeFruitPosition(S &snake, F &fruit);
 };
 
 

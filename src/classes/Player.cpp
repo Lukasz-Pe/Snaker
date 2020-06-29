@@ -10,7 +10,7 @@ Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail,
                SDL_Rect &camera):Snake(start_position, window
                    , settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
     _speed=_game_settings->settingsFromFile()[4];
-    _body.emplace_back(SnakeBody::Coordinates{_camera->w/2,_camera->h/2,0.0});
+    _body.emplace_back(SnakeBody::Coordinates{static_cast<double>(_camera->w/2),static_cast<double>(_camera->h/2),0.0});
 }
 
 void Player::move(){

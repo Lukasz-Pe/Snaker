@@ -13,17 +13,16 @@
 #include "Win.h"
 #include "LTexture.h"
 #include "Fruit.h"
-//TODO Make Snake super class for Player and Bots.
+//TODO Make Snake super class for Bots.
 namespace SnakeBody{
     struct Coordinates{
-        SDL_Point _position;
         double _x,_y;
         double _angle;
     };
 }
 class Snake {
 public:
-    Snake()= default;;
+    Snake()= default;
     Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
           const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
           const std::shared_ptr<Timer> &timer);
@@ -38,13 +37,15 @@ public:
     void ActivatePowerUpEatingDistance();
     void ActivatePowerUpShield();
     std::vector<unsigned int> PowerUpsActivationTimeStamp();
-    double collectFruit();
+    SnakeBody::Coordinates headCoordinates();
+    double collectionDistance();
+    double collectionAngle();
 protected:
     virtual void move()=0;
     std::vector<unsigned int> _powerup_deactivation_timestamp;
     SDL_Point _position;
     int _speed,_old_length;
-    double _angle,_collection_distance;
+    double _angle,_collection_distance,_collection_angle;
     static const double _max_collection_angle, _min_collection_angle,
                         _max_collection_distance, _min_collection_distance;
     std::vector<SnakeBody::Coordinates> _body;

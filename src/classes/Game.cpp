@@ -116,3 +116,9 @@ void Game::generatePlayers(){
                 SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
                 _window, _settings, _level_size, _timer, _camera);
 }
+
+void Game::moveFruits(){
+    for(int i=0;i<_fruits.size();i++){
+        changeFruitPosition(_player,_fruits[i]);
+    }
+}

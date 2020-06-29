@@ -20,6 +20,7 @@ Snake::Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window
     _speed=_game_settings->settingsFromFile()[4];
     _powerup_deactivation_timestamp={0, 0, 0, 0, 0};
     _angle=0.0;
+    _collection_angle=_max_collection_angle;
 }
 
 void Snake::StartPosition(SDL_Point &position){
@@ -56,4 +57,16 @@ void Snake::ActivatePowerUpShield(){
 
 std::vector<unsigned int> Snake::PowerUpsActivationTimeStamp(){
     return _powerup_deactivation_timestamp;
+}
+
+SnakeBody::Coordinates Snake::headCoordinates(){
+    return _body[0];
+}
+
+double Snake::collectionDistance(){
+    return _collection_distance;
+}
+
+double Snake::collectionAngle(){
+    return _collection_angle;
 }
