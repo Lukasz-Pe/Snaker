@@ -122,6 +122,6 @@ void Game::generatePlayers(){
 
 void Game::moveFruits(){
     for(int i=0;i<_fruits.size();i++){
-//        changeFruitPosition(_player,_fruits[i]);
+        changeFruitPosition(_player,_fruits[i]);
     }
 }

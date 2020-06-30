@@ -2,6 +2,7 @@
 // Created by lukasz on 29.06.2020.
 //
 
+
 #include "moveFruit.h"
 
 template<typename S,typename F> double calculateDistance(S &snake, F &fruit){
@@ -24,9 +25,9 @@ template<typename S,typename F> double calculateAngle(S &snake, F &fruit){
     return _angle_head_to_fruit;
 }
 
-template<typename S,typename F> void changeFruitPosition(std::unique_ptr<S> &snake, F &fruit){
-    if(fruitIsInRange(*snake,fruit)&&fruitIsInCollectionAngle(*snake,fruit)){
-        moveFruit(*snake,fruit);
+template<typename S,typename F> void changeFruitPosition(S &snake, F &fruit){
+    if(fruitIsInRange(snake,fruit)&&fruitIsInCollectionAngle(snake,fruit)){
+        moveFruit(snake,fruit);
     }
 }
 

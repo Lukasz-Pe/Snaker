@@ -14,7 +14,8 @@
 #include <sstream>
 #include <stdlib.h>
 #include <time.h>
-#include <math.h>
+#define _USE_MATH_DEFINES
+#include <cmath>
 #include <vector>
 #include <map>
 #include <stdio.h>
