@@ -85,7 +85,7 @@ void Game::render(){
     for(int i=0;i<_powerups.size();i++){
         _powerups[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_powerup[i&5]);
     }
-    _player->render();
+    _player.render();
     renderHUD();
 //    if(_timer->getSeconds<double>()<0.017){
 //        std::this_thread::sleep_for(std::chrono::microseconds (15600-static_cast<int>(1000*_timer->getSeconds<double>())));
@@ -94,12 +94,12 @@ void Game::render(){
 }
 
 void Game::eventHandler(SDL_Event &event){
-    _player->eventHandler(event);
+    _player.eventHandler(event);
 }
 
 void Game::renderHUD(){
     std::stringstream score, fps;
-    score<<"Points: "<<_player->Length();
+    score<<"Points: "<<_player.Length();
     _score.loadFromText(score.str(),SDL_Color{255,0,0},_font,_window);
     _score.setWidth(3*_score.getWidth());
     _score.setHeight(_text_size);
@@ -112,13 +112,16 @@ void Game::renderHUD(){
 }
 
 void Game::generatePlayers(){
-    _player=std::make_unique<Player>(_player_head, _player_tail,
-                SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
-                _window, _settings, _level_size, _timer, _camera);
+//    _player=std::make_unique<Player>(_player_head, _player_tail,
+//                SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
+//                _window, _settings, _level_size, _timer, _camera);
+    _player=Player(_player_head, _player_tail,
+                  SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
+                  _window, _settings, _level_size, _timer, _camera);
 }
 
 void Game::moveFruits(){
     for(int i=0;i<_fruits.size();i++){
-        changeFruitPosition(_player,_fruits[i]);
+//        changeFruitPosition(_player,_fruits[i]);
     }
 }

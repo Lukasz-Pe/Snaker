@@ -4,6 +4,8 @@
 
 #include "Player.h"
 
+#include <memory>
+
 Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
                const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
                const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer,
@@ -88,5 +90,50 @@ void Player::updateSnake(){
 
 Player::~Player(){
     _camera.release();
+}
+
+Player::Player(const Player &source):Snake(source){
+    _head=source._head;
+    _tail=source._tail;
+    _camera=std::make_unique<SDL_Rect>(*source._camera);
+    _speed=source._speed;
+    _body=source._body;
+}
+
+Player &Player::operator=(const Player &source){
+    Snake::operator=(source);
+    if(this==&source){
+        return *this;
+    }
+    _head=source._head;
+    _tail=source._tail;
+    _camera=std::make_unique<SDL_Rect>(*source._camera);
+    _speed=source._speed;
+    _body=source._body;
+    return *this;
+}
+
+Player::Player(Player &&source):Snake(source){
+    _head=source._head;
+    _tail=source._tail;
+    _camera=std::move(source._camera);
+    if(source._camera!=nullptr){
+        source._camera.release();
+    }
+    _speed=source._speed;
+    _body=source._body;
+}
+
+Player &Player::operator=(Player &&source){
+    Snake::operator=(std::move(source));
+    if(this==&source){
+        return *this;
+    }
+    _head=source._head;
+    _tail=source._tail;
+    _camera=std::move(source._camera);
+    _speed=source._speed;
+    _body=source._body;
+    return *this;
 }
 

@@ -16,6 +16,10 @@ public:
     void render() override;
     void eventHandler(SDL_Event& event);
     void updateSnake() override;
+    Player(const Player &source);//copy constructor
+    Player &operator=(const Player &source);//copy assigment operator
+    Player(Player &&source);//move constructor
+    Player &operator=(Player &&source);//move assigment operator
     ~Player();
 private:
     void move() override;

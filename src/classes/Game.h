@@ -44,7 +44,8 @@ private:
     SDL_Rect _camera, _level_size;
     std::vector<SDL_Rect> _clip_fruit,_clip_powerup;
 //    std::shared_ptr<SDL_Rect> _camera;
-    std::unique_ptr<Player> _player;
+//    std::unique_ptr<Player> _player;
+    Player _player;
     //std::vector<std::unique_ptr<Snake>> _bot;
     TTF_Font *_font;
     int TOTAL_FRUIT_SPRITES;
