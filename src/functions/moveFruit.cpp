@@ -3,8 +3,9 @@
 //
 
 
-#include "moveFruit.h"
-
+#ifndef SNAKER_MOVEFRUIT_H
+#define SNAKER_MOVEFRUIT_H
+#include "../classes/Game.h"
 template<typename S,typename F> double calculateDistance(S &snake, F &fruit){
     return sqrt(pow((snake.headCoordinates()._x - fruit.getPosX()), 2) + pow((snake.headCoordinates()._y - fruit.getPosY()), 2));
 }
@@ -32,8 +33,7 @@ template<typename S,typename F> void changeFruitPosition(S &snake, F &fruit){
 }
 
 template<typename S,typename F> void moveFruit(S &snake, F &fruit){
-    double _calculated_distance{calculateDistance(snake,fruit)},
-    _calculated_angle{calculateAngle(snake, fruit)},
+    double _calculated_angle{calculateAngle(snake, fruit)},
     _fruit_to_head_angle{[_calculated_angle]()->double{
         if(_calculated_angle+180.0<360){
             return _calculated_angle+180.0;
@@ -43,8 +43,8 @@ template<typename S,typename F> void moveFruit(S &snake, F &fruit){
         }
         return _calculated_angle-180.0;
     }()*(M_PI/180.0)};
-    fruit.setPosition(static_cast<int>(fruit.getPosX()+_calculated_distance*sin(_fruit_to_head_angle)),
-        static_cast<int>(fruit.getPosY()-_calculated_distance*cos(_fruit_to_head_angle)));
+    fruit.setPosition(static_cast<int>(fruit.getPosX()+snake.collectionDistance()*sin(_fruit_to_head_angle)),
+        static_cast<int>(fruit.getPosY()-snake.collectionDistance()*cos(_fruit_to_head_angle)));
 }
 
 template<typename S,typename F> bool fruitIsInRange(S &snake, F &fruit){
@@ -55,3 +55,4 @@ template<typename S,typename F> bool fruitIsInCollectionAngle(S &snake, F &fruit
     return calculateAngle(snake, fruit)<(snake.headCoordinates()._angle+snake.collectionAngle())
            ||calculateAngle(snake, fruit)>(snake.headCoordinates()._angle-snake.collectionAngle());
 }
+#endif //SNAKER_MOVEFRUIT_H

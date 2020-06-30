@@ -7,8 +7,6 @@
 
 #include "Fruit.h"
 
-#include <utility>
-
 Fruit::Fruit(std::shared_ptr<Win> window, const int& level_width, const int& level_height)
             :mWindow(std::move(window)), mLevelWidth(level_width), mLevelHeight(level_height) {
 	mPosX = 0;

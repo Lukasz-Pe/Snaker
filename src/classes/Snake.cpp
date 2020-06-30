@@ -10,8 +10,8 @@
 const int Snake::_powerup_duration=20;
 const double Snake::_max_collection_angle=30.0;
 const double Snake::_min_collection_angle=15.0;
-const double Snake::_max_collection_distance=30.0;
-const double Snake::_min_collection_distance=15.0;
+const double Snake::_max_collection_distance=300.0;
+const double Snake::_min_collection_distance=150.0;
 
 Snake::Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
              const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
@@ -21,6 +21,7 @@ Snake::Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window
     _powerup_deactivation_timestamp={0, 0, 0, 0, 0};
     _angle=0.0;
     _collection_angle=_max_collection_angle;
+    _collection_distance=_min_collection_distance;
 }
 
 void Snake::StartPosition(SDL_Point &position){

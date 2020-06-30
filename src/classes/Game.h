@@ -5,7 +5,7 @@
 #ifndef SNAKER_GAME_H
 #define SNAKER_GAME_H
 #include "../main.h"
-#include "../functions/moveFruit.h"
+#include "../functions/moveFruit.cpp"
 #include "Player.h"
 #include "PowerUp.h"
 

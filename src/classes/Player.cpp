@@ -97,7 +97,6 @@ Player::Player(const Player &source):Snake(source){
     _tail=source._tail;
     _camera=std::make_unique<SDL_Rect>(*source._camera);
     _speed=source._speed;
-    _body=source._body;
 }
 
 Player &Player::operator=(const Player &source){
@@ -109,7 +108,6 @@ Player &Player::operator=(const Player &source){
     _tail=source._tail;
     _camera=std::make_unique<SDL_Rect>(*source._camera);
     _speed=source._speed;
-    _body=source._body;
     return *this;
 }
 
@@ -121,7 +119,6 @@ Player::Player(Player &&source):Snake(source){
         source._camera.release();
     }
     _speed=source._speed;
-    _body=source._body;
 }
 
 Player &Player::operator=(Player &&source){
@@ -133,7 +130,6 @@ Player &Player::operator=(Player &&source){
     _tail=source._tail;
     _camera=std::move(source._camera);
     _speed=source._speed;
-    _body=source._body;
     return *this;
 }
 
