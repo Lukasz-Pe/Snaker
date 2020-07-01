@@ -16,6 +16,7 @@ public:
     void render() override;
     void eventHandler(SDL_Event& event);
     void updateSnake() override;
+    SDL_Rect headAndBodyRects(const int &body_part) override;
     Player(const Player &source);//copy constructor
     Player &operator=(const Player &source);//copy assigment operator
     Player(Player &&source);//move constructor

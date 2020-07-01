@@ -142,7 +142,7 @@ int main() {
             game_menu.renderPauseDialogue();
         }
         if(state==game_menu.getMapping()[2]){
-            game.moveFruits();
+            game.recalculateVariables();
             game.render();
         }
         game_window->render();

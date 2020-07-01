@@ -6,6 +6,7 @@
 #define SNAKER_GAME_H
 #include "../main.h"
 #include "../functions/moveFruit.cpp"
+#include "../functions/collisions.h"
 #include "Player.h"
 #include "PowerUp.h"
 
@@ -19,10 +20,12 @@ public:
          const std::shared_ptr<Timer> &timer, const std::shared_ptr<Settings> &settings, TTF_Font *font,
          const int &text_size);
     bool setLevelSize(const int& width=13660, const int& height=7200);
+    void recalculateVariables();
     void render();
     void eventHandler(SDL_Event &event);
     void generatePlayers();
     void moveFruits();
+    void checkCollisionsWithFruits();
     void repositionFruit(const int& i);
     void repositionPowerUp(const int& i);
 private:
@@ -50,6 +53,7 @@ private:
     TTF_Font *_font;
     int TOTAL_FRUIT_SPRITES;
     template<typename S,typename F> friend void changeFruitPosition(S &snake, F &fruit);
+    friend bool checkCollision(SDL_Rect a, SDL_Rect b);
 };
 
 

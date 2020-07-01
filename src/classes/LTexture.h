@@ -47,7 +47,6 @@ private:
 	void *mPixels;
 	int mPitch;
 	int mTextureWidht, mTextureHeight, mPosX, mPosY;
-	SDL_Rect mBox;
     std::shared_ptr<Win> _window;
 };
 

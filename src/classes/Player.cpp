@@ -133,3 +133,21 @@ Player &Player::operator=(Player &&source){
     return *this;
 }
 
+SDL_Rect Player::headAndBodyRects(const int &body_part){
+    if(body_part>=0&&body_part<_body.size()){
+        if(body_part==0){
+            return SDL_Rect{static_cast<int>(_body[body_part]._x),
+                            static_cast<int>(_body[body_part]._y),
+                            _head->getWidth(),
+                            _head->getHeight()};
+        }
+        if(body_part>0){
+            return SDL_Rect{static_cast<int>(_body[body_part]._x),
+                            static_cast<int>(_body[body_part]._y),
+                            _tail->getWidth(),
+                            _tail->getHeight()};
+        }
+    }
+    return SDL_Rect{0,0,0,0};
+}
+
