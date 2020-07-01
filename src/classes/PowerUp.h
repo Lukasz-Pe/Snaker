@@ -6,16 +6,16 @@
 #define SNAKER_POWERUP_H
 #include "Fruit.h"
 
+enum PowerUpTypes: char{
+    SnakeEater, GhostMode, EatingDistance, Shield, Vision
+};
+
 class PowerUp:public Fruit{
 public:
-    PowerUp (std::shared_ptr<Win> window, const int& level_width, const int& level_height);
-    bool Is_PowerUp();
-    void Is_PowerUp(const int& value);
-    int Lifespan();
-    void Lifespan(const int& value);
+    PowerUp(const char &powerup_type, std::shared_ptr<Win> window, const int &level_width, const int &level_height);
+    int powerUpType();
 private:
-    bool is_powerup;
-    int lifespan;
+    PowerUpTypes _type;
     
 };
 

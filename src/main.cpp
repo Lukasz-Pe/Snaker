@@ -9,12 +9,9 @@
 #include "classes/Win.h"
 #include "classes/LTexture.h"
 #include "classes/Timer.h"
-#include "classes/PowerUp.h"
 #include "classes/Game.h"
 #include "classes/GameMenu.h"
 #include "functions/initsdl.h"
-//#include "functions/collisions.h"
-//TODO think about memory management
 //TODO think about concurrency
 //----------------------------------------------------------------Declarations of variables
 int main() {
