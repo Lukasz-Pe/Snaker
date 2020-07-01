@@ -15,15 +15,16 @@ public:
            SDL_Rect &camera);
     void render() override;
     void eventHandler(SDL_Event& event);
-    void updateSnake() override;
     SDL_Rect headAndBodyRects(const int &body_part) override;
+    void addLength() override;
     Player(const Player &source);//copy constructor
     Player &operator=(const Player &source);//copy assigment operator
     Player(Player &&source);//move constructor
     Player &operator=(Player &&source);//move assigment operator
     ~Player();
-private:
     void move() override;
+private:
+    void updateSnake() override;
     std::shared_ptr<LTexture> _head,_tail;
     SDL_Point _mouse_position;
     SnakeBody::Coordinates _previous_position;

@@ -131,12 +131,14 @@ void Game::checkCollisionsWithFruits(){
 //        std::cerr<<"Check collision for fruit: "<<i<<"\n";
         if(checkCollision(_player.headAndBodyRects(0),
                                         _fruits[i].getRect())){ //0 in _player refers to head
+            _player.addLength();
             _fruits[i].reposition();
         }
     }
 }
 
 void Game::recalculateVariables(){
+    _player.move();
     moveFruits();
     checkCollisionsWithFruits();
 }

@@ -13,6 +13,7 @@ Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail,
                    , settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
     _speed=_game_settings->settingsFromFile()[4];
     _body.emplace_back(SnakeBody::Coordinates{static_cast<double>(_camera->w/2),static_cast<double>(_camera->h/2),0.0});
+    _old_length=_body.size();
 }
 
 void Player::move(){
@@ -30,11 +31,9 @@ void Player::move(){
     _previous_position._x=_body[0]._x;
     _previous_position._y=_body[0]._y;
     _previous_position._angle=_body[0]._angle;
+    updateSnake();
     _body[0]._x+=_speed*sin(_body[0]._angle * (M_PI / 180.0))*_timer->getSeconds<double>();
     _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_timer->getSeconds<double>();
-//    if (mTailLength > 0) {
-//        updateTail(vTexTail);
-//    }
     if ((_body[0]._y + _head->getHeight()) > _level_size.h) {
         _body[0]._y = _level_size.h - _head->getHeight();
     }
@@ -50,7 +49,6 @@ void Player::move(){
 }
 
 void Player::render(){
-    move();
     _camera->x = _body[0]._x - _camera->w/2;
     _camera->y = _body[0]._y - _camera->h/2;
 //    std::cerr<<"player:"<<_camera->x<<"x"<<_camera->y<<"\n";
@@ -65,6 +63,11 @@ void Player::render(){
     }
     if (_camera->y > _level_size.h - _camera->h) {
         _camera->y = _level_size.h - _camera->h;
+    }
+    if(_body.size()>1){
+        for(unsigned long i=_body.size()-1;i>1;i--){
+            _tail->render(static_cast<int>(_body[i]._x) - _camera->x, static_cast<int>(_body[i]._y) - _camera->y, _window, NULL, NULL, _body[i]._angle);
+        }
     }
     _head->render(static_cast<int>(_body[0]._x) - _camera->x, static_cast<int>(_body[0]._y) - _camera->y, _window, NULL, NULL, _body[0]._angle);
 //    mHeadBox= {(int)_body[0]._x,_body[0]._y, _head->getWidth(),_head->getHeight()};
@@ -85,7 +88,12 @@ void Player::eventHandler(SDL_Event &event){
 }
 
 void Player::updateSnake(){
-
+    if(_body.size()>1){
+        _body[1]=_previous_position;
+        for(int i=_body.size()-1;i>1;i--){
+            _body[i]=_body[i-1];
+        }
+    }
 }
 
 Player::~Player(){
@@ -149,5 +157,9 @@ SDL_Rect Player::headAndBodyRects(const int &body_part){
         }
     }
     return SDL_Rect{0,0,0,0};
+}
+
+void Player::addLength(){
+    _body.emplace_back(_body[_body.size()-1]);
 }
 

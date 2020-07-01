@@ -41,6 +41,7 @@ public:
     double collectionDistance();
     double collectionAngle();
     virtual SDL_Rect headAndBodyRects(const int &body_part)=0;
+    virtual void addLength()=0;
 protected:
     virtual void move()=0;
     std::vector<unsigned int> _powerup_deactivation_timestamp;
