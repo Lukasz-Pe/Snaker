@@ -104,8 +104,7 @@ int main() {
             game_menu.eventHandler(event);
             game.eventHandler(event);
         }
-        if(state==game_menu.getMapping()[23]||state==game_menu.getMapping()[1]||
-           state==game_menu.getMapping()[6]){
+        if(state==game_menu.getMapping()[23]|| state==game_menu.getMapping()[6]){
             if(frame_timer->isStarted()||frame_timer->isPaused()){
                 frame_timer->stop();
             }
@@ -141,9 +140,14 @@ int main() {
             }
             game_menu.renderPauseDialogue();
         }
-        if(state==game_menu.getMapping()[2]){
+        if(state==game_menu.getMapping()[2]||state==game_menu.getMapping()[0]){
             game.recalculateVariables();
             game.render();
+        }
+        if(state==game_menu.getMapping()[1]){
+            std::cerr<<"Reset done!\n";
+            game.resetGame();
+            game_menu.goToMainMenu();
         }
         game_window->render();
 	}

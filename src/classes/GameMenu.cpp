@@ -190,7 +190,7 @@ void GameMenu::eventHandler(SDL_Event &event){
     bool options=false;
     //Buttons to check for main menu
 //    if(_game_state!=_mapping[0]||_game_state!=_mapping[2]){
-        if(_game_state==_mapping[23]||_game_state==_mapping[1]/*||_game_state==_mapping[2]*/||_game_state==_mapping[6]){
+        if(_game_state==_mapping[23]||_game_state==_mapping[1]||_game_state==_mapping[6]){
             if(_played){
                 begin=0;
             }else{
@@ -322,7 +322,7 @@ void GameMenu::eventHandler(SDL_Event &event){
             }
             case SDLK_r:{
                 if(_played){
-                    _game_state=_mapping[2];
+                    _game_state=_mapping[1];
                 }
                 break;
             }
@@ -472,4 +472,8 @@ void GameMenu::createMenuItems(){
     _menu_text[_mapping[26]].loadFromText(_game_settings->Translation()[_mapping[26]],SDL_Color{255,255,0},_text_font,_game_window);
     _menu_text[_mapping[26]].setWidth(12*_menu_text[_mapping[26]].getWidth());
     _menu_text[_mapping[26]].setHeight(*_text_size);
+}
+
+void GameMenu::goToMainMenu(){
+    _game_state=_mapping[23];
 }

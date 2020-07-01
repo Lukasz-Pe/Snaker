@@ -120,25 +120,37 @@ void Game::generatePlayers(){
                   _window, _settings, _level_size, _timer, _camera);
 }
 
-void Game::moveFruits(){
+void Game::moveFruitsAndPowerUps(){
     for(int i=0;i<_fruits.size();i++){
         changeFruitPosition(_player,_fruits[i]);
     }
+    for(int i=0;i<_powerups.size();i++){
+        changeFruitPosition(_player,_powerups[i]);
+    }
 }
 
-void Game::checkCollisionsWithFruits(){
+void Game::checkCollisionsWithFruitsAndPowerUps(){
     for(int i=0;i<_fruits.size();i++){
-//        std::cerr<<"Check collision for fruit: "<<i<<"\n";
         if(checkCollision(_player.headAndBodyRects(0),
                                         _fruits[i].getRect())){ //0 in _player refers to head
             _player.addLength();
             _fruits[i].reposition();
         }
     }
+    for(int i=0;i<_powerups.size();i++){
+        if(checkCollision(_player.headAndBodyRects(0),
+                          _powerups[i].getRect())){ //0 in _player refers to head
+            _powerups[i].reposition();
+        }
+    }
 }
 
 void Game::recalculateVariables(){
     _player.move();
-    moveFruits();
-    checkCollisionsWithFruits();
+    moveFruitsAndPowerUps();
+    checkCollisionsWithFruitsAndPowerUps();
+}
+
+void Game::resetGame(){
+    _player.resetLength();
 }

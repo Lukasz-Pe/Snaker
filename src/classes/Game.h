@@ -24,10 +24,9 @@ public:
     void render();
     void eventHandler(SDL_Event &event);
     void generatePlayers();
-    void moveFruits();
-    void checkCollisionsWithFruits();
-    void repositionFruit(const int& i);
-    void repositionPowerUp(const int& i);
+    void moveFruitsAndPowerUps();
+    void checkCollisionsWithFruitsAndPowerUps();
+    void resetGame();
 private:
     void renderHUD();
     void renderLevelBackground();

@@ -24,6 +24,7 @@ public:
     std::string getGameState();
     std::vector<std::string> getMapping();
     void createMenuItems();
+    void goToMainMenu();
 private:
     void renderButton(Button &btn, const int &posX, const int &posY);
     void renderBackground();
