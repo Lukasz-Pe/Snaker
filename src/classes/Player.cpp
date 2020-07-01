@@ -37,14 +37,14 @@ void Player::move(){
     if ((_body[0]._y + _head->getHeight()) > _level_size.h) {
         _body[0]._y = _level_size.h - _head->getHeight();
     }
-    if ( _body[0]._y < 0) {
-        _body[0]._y = 0;
+    if ( _body[0]._y < 1) {
+        _body[0]._y = 1;
     }
     if (( _body[0]._x + _head->getWidth()) > _level_size.w) {
         _body[0]._x = _level_size.w - _head->getWidth();
     }
-    if (_body[0]._x < 0) {
-        _body[0]._x = 0;
+    if (_body[0]._x < 1) {
+        _body[0]._x = 1;
     }
 }
 
