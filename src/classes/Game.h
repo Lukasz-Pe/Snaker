@@ -53,7 +53,7 @@ private:
     Player _player;
     //std::vector<std::unique_ptr<Snake>> _bot;
     TTF_Font *_font;
-    int TOTAL_FRUIT_SPRITES;
+    int TOTAL_FRUIT_SPRITES, TOTAL_POWERUP_SPRITES;
     template<typename S,typename F> friend void changeFruitPosition(S &snake, F &fruit);
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
 };

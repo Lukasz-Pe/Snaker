@@ -20,6 +20,8 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
     _fps=0.0;
     _frame_time=0.0;
     _powerup_hud_clip={0,0,50,50};
+    TOTAL_FRUIT_SPRITES=5;
+    TOTAL_POWERUP_SPRITES=4;
 }
 
 void Game::renderLevelBackground(){
@@ -54,17 +56,16 @@ bool Game::setLevelSize(const int &width, const int &height){
         for(int i=0;i<_powerups_count;i++){
             int x=rand()%static_cast<int>(0.9*_level_width);
             int y=rand()%static_cast<int>(0.9*_level_height);
-            _powerups.emplace_back(PowerUp(static_cast<char>(i%5), _window, _level_width, _level_height));
+            _powerups.emplace_back(PowerUp(static_cast<unsigned int>(i%TOTAL_POWERUP_SPRITES), _window, _level_width, _level_height));
             _powerups[i].setPosition(x,y);
         }
-        TOTAL_FRUIT_SPRITES=5;
         int SPRITE_DIMS=20;
         for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
             for(int j=0;j<TOTAL_FRUIT_SPRITES;j++){
                 _clip_fruit.emplace_back(SDL_Rect{i*SPRITE_DIMS, j*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
             }
         }
-        for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
+        for (int i = 0; i < TOTAL_POWERUP_SPRITES; i++) {
             _clip_powerup.emplace_back(SDL_Rect{i*SPRITE_DIMS, 5*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
         }
         generateBackground();
