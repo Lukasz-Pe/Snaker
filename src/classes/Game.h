@@ -16,7 +16,7 @@ public:
     Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &background_texture,
          const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
          const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
-         const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
+         const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &powerup_textures,
          const std::shared_ptr<Settings> &settings, TTF_Font *font, const int &text_size,
          const std::shared_ptr<Timer> &timer);
     bool setLevelSize(const int& width=13660, const int& height=7200);
@@ -38,7 +38,7 @@ private:
     std::shared_ptr<Settings> _settings;
     std::shared_ptr<LTexture> _player_head, _player_tail, _background_texture,
         _bot_head, _bot_tail, _fruit, _powerup_textures;
-    LTexture _score_texture, _fps_texture;
+    LTexture _score_texture, _fps_texture, _powerup_timer;
     std::vector<Fruit> _fruits;
     std::vector<PowerUp> _powerups;
     std::shared_ptr<Timer> _timer;
@@ -46,7 +46,7 @@ private:
     int _level_width, _level_height, _powerups_count;
     const int &_text_size;
     std::vector<std::unique_ptr<Tile>> _background;
-    SDL_Rect _camera, _level_size;
+    SDL_Rect _camera, _level_size, _powerup_hud_clip;
     std::vector<SDL_Rect> _clip_fruit,_clip_powerup;
 //    std::shared_ptr<SDL_Rect> _camera;
 //    std::unique_ptr<Player> _player;

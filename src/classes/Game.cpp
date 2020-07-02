@@ -2,26 +2,24 @@
 // Created by lukasz on 12.06.2020.
 //
 
+#include <iomanip>
 #include "Game.h"
 
 Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &background_texture,
            const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
            const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
-           const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
+           const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &powerup_textures,
            const std::shared_ptr<Settings> &settings, TTF_Font *font, const int &text_size,
            const std::shared_ptr<Timer> &timer):
     _window(window), _background_texture(background_texture), _player_head(player_head),
     _player_tail(player_tail), _bot_head(bot_head), _bot_tail(bot_tail),
-    _fruit(fruit), _powerup_textures(poweup_textures), _timer(timer), _settings(settings),
+    _fruit(fruit), _powerup_textures(powerup_textures), _timer(timer), _settings(settings),
     _font(font), _text_size(text_size){
     _camera={0,0,_window->getWidth(),_window->getHeight()};
     _powerups_count=_settings->settingsFromFile()[2]*_settings->settingsFromFile()[3]/100;
     _fps=0.0;
     _frame_time=0.0;
-//    _camera->x={0};
-//    _camera->y={0};
-//    _camera->w={_window->getWidth()};
-//    _camera->h={_window->getHeight()};
+    _powerup_hud_clip={0,0,50,50};
 }
 
 void Game::renderLevelBackground(){
@@ -105,6 +103,20 @@ void Game::renderHUD(){
     _fps_texture.setHeight(_text_size);
     _score_texture.render(0, 0, _window);
     _fps_texture.render((_window->getWidth()-_fps_texture.getWidth())/2, 0, _window);
+    for(int i=0;i<5;i++){
+        if(_player.PowerUpsDeactivationTimeStamp()[i]>_timer->getSeconds<unsigned int>()){
+            _powerup_hud_clip.x=i*(_powerup_textures->getWidth()/5);
+            _powerup_textures->render(_window->getWidth()-_powerup_textures->getWidth()/5,
+                                      _powerup_textures->getHeight()*i, _window, &_powerup_hud_clip);
+            std::stringstream timer;
+            timer<<std::setw(2)<<std::setfill('0')<<_player.PowerUpsDeactivationTimeStamp()[i]-_timer->getSeconds<unsigned int>();
+            _powerup_timer.loadFromText(timer.str(),SDL_Color{255, 0, 0}, _font, _window);
+            _powerup_timer.setWidth(2*_powerup_timer.getWidth());
+            _powerup_timer.setHeight(_text_size);
+            _powerup_timer.render(_window->getWidth()-_powerup_textures->getWidth()/5-_powerup_timer.getWidth(),
+                                  _powerup_textures->getHeight()*i, _window);
+        }
+    }
 }
 
 void Game::generatePlayers(){
@@ -123,16 +135,17 @@ void Game::moveFruitsAndPowerUps(){
 }
 
 void Game::checkCollisionsWithFruitsAndPowerUps(){
-    for(int i=0;i<_fruits.size();i++){
+    for(unsigned int i=0;i<_fruits.size();i++){
         if(checkCollision(_player.headAndBodyRects(0),
                                         _fruits[i].getRect())){ //0 in _player refers to head
             _player.addLength();
             _fruits[i].reposition();
         }
     }
-    for(int i=0;i<_powerups.size();i++){
+    for(unsigned int i=0;i<_powerups.size();i++){
         if(checkCollision(_player.headAndBodyRects(0),
                           _powerups[i].getRect())){ //0 in _player refers to head
+            _player.activatePowerUp(_powerups[i].powerUpType());
             _powerups[i].reposition();
         }
     }

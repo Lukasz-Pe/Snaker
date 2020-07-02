@@ -30,12 +30,8 @@ public:
     void resetLength();
     unsigned long Length();
     virtual void render()=0;
-    void ActivatePowerUpVision();
-    void ActivatePowerUpSnakeEater();
-    void ActivatePowerUpGhostMode();
-    void ActivatePowerUpEatingDistance();
-    void ActivatePowerUpShield();
-    std::vector<unsigned int> PowerUpsActivationTimeStamp();
+    std::vector<unsigned int> PowerUpsDeactivationTimeStamp();
+    void activatePowerUp(const unsigned int &powerup);
     SnakeBody::Coordinates headCoordinates();
     double collectionDistance();
     double collectionAngle();
@@ -54,7 +50,7 @@ protected:
     SDL_Rect _level_size;
     std::shared_ptr<Timer> _timer;
     std::shared_ptr<Settings> _game_settings;
-    static const int _powerup_duration;
+    static const unsigned int _powerup_duration;
 };
 
 #endif /* SNAKE_H_ */

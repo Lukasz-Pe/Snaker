@@ -7,7 +7,7 @@
 
 #include "Snake.h"
 
-const int Snake::_powerup_duration=20;
+const unsigned int Snake::_powerup_duration=20;
 const double Snake::_max_collection_angle=30.0;
 const double Snake::_min_collection_angle=15.0;
 const double Snake::_max_collection_distance=300.0;
@@ -36,27 +36,7 @@ unsigned long Snake::Length(){
     return _body.size()-1;
 }
 
-void Snake::ActivatePowerUpVision(){
-    _powerup_deactivation_timestamp[0]=_timer->getSeconds<int>()+_powerup_duration;
-}
-
-void Snake::ActivatePowerUpSnakeEater(){
-    _powerup_deactivation_timestamp[1]=_timer->getSeconds<int>()+_powerup_duration;
-}
-
-void Snake::ActivatePowerUpGhostMode(){
-    _powerup_deactivation_timestamp[2]=_timer->getSeconds<int>()+_powerup_duration;
-}
-
-void Snake::ActivatePowerUpEatingDistance(){
-    _powerup_deactivation_timestamp[3]=_timer->getSeconds<int>()+_powerup_duration;
-}
-
-void Snake::ActivatePowerUpShield(){
-    _powerup_deactivation_timestamp[4]=_timer->getSeconds<int>()+_powerup_duration;
-}
-
-std::vector<unsigned int> Snake::PowerUpsActivationTimeStamp(){
+std::vector<unsigned int> Snake::PowerUpsDeactivationTimeStamp(){
     return _powerup_deactivation_timestamp;
 }
 
@@ -70,4 +50,8 @@ double Snake::collectionDistance(){
 
 double Snake::collectionAngle(){
     return _collection_angle;
+}
+
+void Snake::activatePowerUp(const unsigned int &powerup){
+    _powerup_deactivation_timestamp[powerup]=_timer->getSeconds<unsigned int>()+_powerup_duration;
 }
