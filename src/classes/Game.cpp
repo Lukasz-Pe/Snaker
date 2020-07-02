@@ -154,6 +154,7 @@ void Game::checkCollisionsWithFruitsAndPowerUps(){
 
 void Game::recalculateVariables(){
     _player.frameTime(_frame_time);
+    _player.checkPowerUps();
     _player.move();
     moveFruitsAndPowerUps();
     checkCollisionsWithFruitsAndPowerUps();

@@ -8,7 +8,7 @@
 #include "Snake.h"
 
 const unsigned int Snake::_powerup_duration=20;
-const double Snake::_max_collection_angle=30.0;
+const double Snake::_max_collection_angle=60.0;
 const double Snake::_min_collection_angle=15.0;
 const double Snake::_max_collection_distance=300.0;
 const double Snake::_min_collection_distance=150.0;
@@ -54,4 +54,33 @@ double Snake::collectionAngle(){
 
 void Snake::activatePowerUp(const unsigned int &powerup){
     _powerup_deactivation_timestamp[powerup]=_timer->getSeconds<unsigned int>()+_powerup_duration;
+}
+
+void Snake::checkPowerUps(){
+    for(int i=0;i<_powerup_deactivation_timestamp.size()-2;i++){
+        switch(i){
+            case SnakeEater:{
+                //ToDo at collision with snake transfer his points to hitter
+                break;
+            }
+            case GhostMode:{
+                //ToDo at collision allow go through
+                break;
+            }
+            case EatingDistance:{
+                if(_powerup_deactivation_timestamp[EatingDistance]>=_timer->getSeconds<unsigned  int>()){
+                    _collection_distance=_max_collection_distance;
+                    _collection_angle=_min_collection_angle;
+                }else{
+                    _collection_distance=_min_collection_distance;
+                    _collection_angle=_max_collection_angle;
+                }
+                break;
+            }
+            case Shield:{
+                //ToDo when another player hits, he shall loose his points.
+                break;
+            }
+        }
+    }
 }

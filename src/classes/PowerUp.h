@@ -6,9 +6,7 @@
 #define SNAKER_POWERUP_H
 #include "Fruit.h"
 
-enum PowerUpTypes:unsigned int{
-    SnakeEater, GhostMode, EatingDistance, Shield, Vision
-};
+
 
 class PowerUp:public Fruit{
 public:

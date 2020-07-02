@@ -30,6 +30,9 @@
 #include <SDL2/SDL_ttf.h>
 //#include <SDL2/SDL_thread.h>
 //--------------------------------other functions
+enum PowerUpTypes:unsigned int{
+    SnakeEater, GhostMode, EatingDistance, Shield, Vision
+};
 #include "functions/collisions.h"
 double distanceCalc(SDL_Point &a, SDL_Point &b);
 
