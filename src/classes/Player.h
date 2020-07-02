@@ -10,9 +10,8 @@ class Player:public Snake{
 public:
     Player()= default;;
     Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
-           const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
-           const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer,
-           SDL_Rect &camera);
+           const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
+           SDL_Rect &camera, const std::shared_ptr<Timer> &timer);
     void render() override;
     void eventHandler(SDL_Event& event);
     SDL_Rect headAndBodyRects(const int &body_part) override;
@@ -23,8 +22,10 @@ public:
     Player &operator=(Player &&source);//move assigment operator
     ~Player();
     void move() override;
+    void frameTime(const double &frame_time);
 private:
     void updateSnake() override;
+    double _frame_time;
     std::shared_ptr<LTexture> _head,_tail;
     SDL_Point _mouse_position;
     SnakeBody::Coordinates _previous_position;

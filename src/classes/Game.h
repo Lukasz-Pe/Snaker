@@ -17,8 +17,8 @@ public:
          const std::shared_ptr<LTexture> &player_head, const std::shared_ptr<LTexture> &player_tail,
          const std::shared_ptr<LTexture> &bot_head, const std::shared_ptr<LTexture> &bot_tail,
          const std::shared_ptr<LTexture> &fruit, const std::shared_ptr<LTexture> &poweup_textures,
-         const std::shared_ptr<Timer> &timer, const std::shared_ptr<Settings> &settings, TTF_Font *font,
-         const int &text_size);
+         const std::shared_ptr<Settings> &settings, TTF_Font *font, const int &text_size,
+         const std::shared_ptr<Timer> &timer);
     bool setLevelSize(const int& width=13660, const int& height=7200);
     void recalculateVariables();
     void render();
@@ -27,15 +27,18 @@ public:
     void moveFruitsAndPowerUps();
     void checkCollisionsWithFruitsAndPowerUps();
     void resetGame();
+    void FPS(const double &fps);
+    void frameTime(const double &frame_time);
 private:
     void renderHUD();
     void renderLevelBackground();
     void generateBackground();
+    double _fps, _frame_time;
     std::shared_ptr<Win> _window;
     std::shared_ptr<Settings> _settings;
     std::shared_ptr<LTexture> _player_head, _player_tail, _background_texture,
         _bot_head, _bot_tail, _fruit, _powerup_textures;
-    LTexture _score, _fps;
+    LTexture _score_texture, _fps_texture;
     std::vector<Fruit> _fruits;
     std::vector<PowerUp> _powerups;
     std::shared_ptr<Timer> _timer;

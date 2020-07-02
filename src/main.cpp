@@ -15,6 +15,7 @@
 //TODO think about concurrency
 //----------------------------------------------------------------Declarations of variables
 int main() {
+    const double FPS_RECALC_PER_SECOND=4.0;
     const int TEXT_SIZE=50, TITLE_SIZE=150;
     const std::string PATH_TO_TRANSLATION_LIST{"../assets/lang/_LangList.txt"},
         PATH_TO_SETTINGS{"../assets/settings.txt"},
@@ -90,10 +91,18 @@ int main() {
     auto frame_timer=std::make_shared<Timer>();
     Game game(game_window, level_background, player_head_textures, player_tail_textures,
               snake_head_textures, snake_tail_textures, fruits_and_powerups_textures, icons_of_active_powerups,
-              frame_timer, game_settings, text_font.get(), TEXT_SIZE);
+              game_settings, text_font.get(), TEXT_SIZE, frame_timer);
     gContinue=game.setLevelSize(6830,3600);
     game.generatePlayers();
+    double frame_time{0}, time_on_loop_begining{0}, FPS_recalc_treshhold{1.0/FPS_RECALC_PER_SECOND};
 	while(gContinue){
+	    if(frame_timer->isStarted()&&!frame_timer->isPaused()){
+            if((frame_timer->getSeconds<double>()-time_on_loop_begining)>FPS_recalc_treshhold){
+                game.FPS(1.0/frame_time);
+                time_on_loop_begining=frame_timer->getSeconds<double>();
+            }
+	        frame_time=frame_timer->getSeconds<double>();
+	    }
         state=game_menu.getGameState();
         game_window->prepareRenderer(0,0,0);
         while(SDL_PollEvent(&event)){
@@ -103,7 +112,7 @@ int main() {
         }
         if(state==game_menu.getMapping()[23]|| state==game_menu.getMapping()[6]){
             if(frame_timer->isStarted()||frame_timer->isPaused()){
-                frame_timer->stop();
+                frame_timer->pause();
             }
             game_menu.renderMainMenu();
         }
@@ -138,15 +147,27 @@ int main() {
             game_menu.renderPauseDialogue();
         }
         if(state==game_menu.getMapping()[2]||state==game_menu.getMapping()[0]){
+            if(!frame_timer->isStarted()&&!frame_timer->isPaused()){
+                frame_timer->start();
+            }
+            if(frame_timer->isPaused()){
+                frame_timer->unpause();
+            }
             game.recalculateVariables();
             game.render();
         }
         if(state==game_menu.getMapping()[1]){
-            std::cerr<<"Reset done!\n";
+            if(!frame_timer->isStarted()||frame_timer->isPaused()){
+                frame_timer->stop();
+            }
             game.resetGame();
             game_menu.goToMainMenu();
         }
         game_window->render();
+        if(frame_timer->isStarted()&&!frame_timer->isPaused()){
+            frame_time=frame_timer->getSeconds<double>()-frame_time;
+            game.frameTime(frame_time);
+        }
 	}
 	return 0;
 }

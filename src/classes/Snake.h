@@ -24,8 +24,7 @@ class Snake {
 public:
     Snake()= default;
     Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
-          const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
-          const std::shared_ptr<Timer> &timer);
+          const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer);
     void StartPosition(SDL_Point &position);
     virtual void updateSnake()=0;
     void resetLength();

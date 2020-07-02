@@ -8,12 +8,13 @@
 
 Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
                const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
-               const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer,
-               SDL_Rect &camera):Snake(start_position, window
-                   , settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
+               const SDL_Rect &level_size,
+               SDL_Rect &camera, const std::shared_ptr<Timer> &timer):Snake(start_position,
+                                                                            window, settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
     _speed=_game_settings->settingsFromFile()[4];
     _body.emplace_back(SnakeBody::Coordinates{static_cast<double>(_camera->w/2),static_cast<double>(_camera->h/2),0.0});
     _old_length=_body.size();
+    _frame_time=0.0;
 }
 
 void Player::move(){
@@ -32,8 +33,8 @@ void Player::move(){
     _previous_position._y=_body[0]._y;
     _previous_position._angle=_body[0]._angle;
     updateSnake();
-    _body[0]._x+=_speed*sin(_body[0]._angle * (M_PI / 180.0))*_timer->getSeconds<double>();
-    _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_timer->getSeconds<double>();
+    _body[0]._x+=_speed*sin(_body[0]._angle * (M_PI / 180.0))*_frame_time;
+    _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_frame_time;
     if ((_body[0]._y + _head->getHeight()) > _level_size.h) {
         _body[0]._y = _level_size.h - _head->getHeight();
     }
@@ -70,7 +71,6 @@ void Player::render(){
         }
     }
     _head->render(static_cast<int>(_body[0]._x) - _camera->x, static_cast<int>(_body[0]._y) - _camera->y, _window, NULL, NULL, _body[0]._angle);
-//    mHeadBox= {(int)_body[0]._x,_body[0]._y, _head->getWidth(),_head->getHeight()};
 }
 
 void Player::eventHandler(SDL_Event &event){
@@ -161,5 +161,9 @@ SDL_Rect Player::headAndBodyRects(const int &body_part){
 
 void Player::addLength(){
     _body.emplace_back(_body[_body.size()-1]);
+}
+
+void Player::frameTime(const double &frame_time){
+    _frame_time=frame_time;
 }
 

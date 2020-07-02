@@ -2,4 +2,4 @@
 50	/Enemies count - original 20
 1500	/Fruits count - original 200
 25	/Powerups count, cannot be 0 - original 25
-450	/Snake speed - original 3000
+300	/Snake speed - original 3000
