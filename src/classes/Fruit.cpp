@@ -168,7 +168,6 @@ SDL_Rect Fruit::getRect() {
 }
 
 void Fruit::reposition(){
-    srand(time(NULL));
     mPosX=rand()%static_cast<int>(0.9*mLevelWidth);
     mPosY=rand()%static_cast<int>(0.9*mLevelHeight);
 }

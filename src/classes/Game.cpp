@@ -129,7 +129,7 @@ void Game::generatePlayers(){
                    _window, _settings, _level_size, _camera, _timer);
     for(int i=0; i<_settings->settingsFromFile()[1];i++){
         _bot.emplace_back(_bot_head, _bot_tail,
-            SDL_Point{rand()%static_cast<int>(0.99*_level_width), rand()%static_cast<int>(0.99*_level_height)},
+            SDL_Point{rand()%static_cast<int>(0.8*_level_width), rand()%static_cast<int>(0.8*_level_height)},
             _window,_settings,_level_size,_clip_bot_and_fruit[i%5],_timer,
             _fruits,_powerups,_frame_time, _camera);
     }
@@ -138,9 +138,15 @@ void Game::generatePlayers(){
 void Game::moveFruitsAndPowerUps(){
     for(int i=0;i<_fruits.size();i++){
         changeFruitPosition(_player,_fruits[i]);
+        for(int j=0;j<_bot.size();j++){
+            changeFruitPosition(_bot[j],_fruits[i]);
+        }
     }
     for(int i=0;i<_powerups.size();i++){
         changeFruitPosition(_player,_powerups[i]);
+        for(int j=0;j<_bot.size();j++){
+            changeFruitPosition(_bot[j],_powerups[i]);
+        }
     }
 }
 
@@ -151,12 +157,26 @@ void Game::checkCollisionsWithFruitsAndPowerUps(){
             _player.addLength();
             _fruits[i].reposition();
         }
+        for(int j=0;j<_bot.size();j++){
+            if(checkCollision(_bot[j].headAndBodyRects(0),
+                              _fruits[i].getRect())){
+                _bot[j].addLength();
+                _fruits[i].reposition();
+            }
+        }
     }
     for(unsigned int i=0;i<_powerups.size();i++){
         if(checkCollision(_player.headAndBodyRects(0),
                           _powerups[i].getRect())){ //0 in _player refers to head
             _player.activatePowerUp(_powerups[i].powerUpType());
             _powerups[i].reposition();
+        }
+        for(int j=0;j<_bot.size();j++){
+            if(checkCollision(_bot[j].headAndBodyRects(0),
+                              _powerups[i].getRect())){
+                _bot[j].addLength();
+                _powerups[i].reposition();
+            }
         }
     }
 }

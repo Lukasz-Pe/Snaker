@@ -2,6 +2,7 @@
 // Created by lukasz on 03.07.2020.
 //
 
+#include <algorithm>
 #include "Bot.h"
 
 Bot::Bot(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
@@ -68,14 +69,14 @@ SDL_Rect Bot::headAndBodyRects(const int &body_part){
         if(body_part==0){
             return SDL_Rect{static_cast<int>(_body[body_part]._x),
                             static_cast<int>(_body[body_part]._y),
-                            _head->getWidth(),
-                            _head->getHeight()};
+                            _head->getWidth()/5,
+                            _head->getHeight()/5};
         }
         if(body_part>0){
             return SDL_Rect{static_cast<int>(_body[body_part]._x),
                             static_cast<int>(_body[body_part]._y),
-                            _tail->getWidth(),
-                            _tail->getHeight()};
+                            _tail->getWidth()/5,
+                            _tail->getHeight()/5};
         }
     }
     return SDL_Rect{0,0,0,0};
@@ -86,34 +87,33 @@ void Bot::addLength(){
 }
 
 void Bot::move(){
-//    TargetPosition target_fruit{calculateNearestTargetPosition(_fruits)},
-//    target_powerup{calculateNearestTargetPosition(_powerups)},
-//    target(_level_size.w/2,_level_size.h/2);
-//    target=target_fruit;
-//    if(sqrt(pow((this->headCoordinates()._x - target_fruit._x), 2) + pow((this->headCoordinates()._y - target_fruit._y), 2))
-//        <sqrt(pow((this->headCoordinates()._x - target_powerup._x), 2) + pow((this->headCoordinates()._y - target_powerup._y), 2))
-//        ){
-//        target=target_fruit;
-//    }else{
-//        target=target_powerup;
-//    }
-//    if (target._x >= 0 && target._y >= 0) {
-//        _body[0]._angle = (180 / M_PI) * std::atan(target._x/target._y);
-//    } else if (target._x > 0 && target._y < 0) {
-//        _body[0]._angle = 180 + (180 / M_PI) * std::atan(target._x/target._y);
-//    } else if (target._x < 0 && target._y >= 0) {
-//        _body[0]._angle = (180 / M_PI) * std::atan(target._x/target._y);
-//    } else if (target._x < 0 && target._y < 0) {
-//        _body[0]._angle = 180 + (180 / M_PI) * std::atan(target._x/target._y);
-//    }
+    TargetPosition target_fruit{calculateNearestTargetPosition(_fruits)},
+    target_powerup{calculateNearestTargetPosition(_powerups)},
+    target(_level_size.w/2,_level_size.h/2);
+    if(sqrt(pow((this->headCoordinates()._x - target_fruit._x), 2) + pow((this->headCoordinates()._y - target_fruit._y), 2))
+        <sqrt(pow((this->headCoordinates()._x - target_powerup._x), 2) + pow((this->headCoordinates()._y - target_powerup._y), 2))
+        ){
+        target=target_fruit;
+    }else{
+        target=target_powerup;
+    }
+    target={target._x-this->headCoordinates()._x,target._y-this->headCoordinates()._y};
+    std::cerr<<"Target: "<<target._x<<"x"<<target._y<<"\n";
+    if (target._x >= 0 && target._y >= 0) {
+        _body[0]._angle = (180 / M_PI) * std::atan(target._x/target._y);
+    } else if (target._x > 0 && target._y < 0) {
+        _body[0]._angle = 180 + (180 / M_PI) * std::atan(target._x/target._y);
+    } else if (target._x < 0 && target._y > 0) {
+        _body[0]._angle = (180 / M_PI) * std::atan(target._x/target._y);
+    } else if (target._x < 0 && target._y < 0) {
+        _body[0]._angle = 180 + (180 / M_PI) * std::atan(target._x/target._y);
+    }
     _previous_position._x=_body[0]._x;
     _previous_position._y=_body[0]._y;
     _previous_position._angle=_body[0]._angle;
     updateSnake();
-    _body[0]._x+=_speed*sin(_body[0]._angle * (M_PI / 180.0))*_frame_time;
-    _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_frame_time;
-    if ((_body[0]._y + _head->getHeight()) > _level_size.h) {
-        _body[0]._y = _level_size.h - _head->getHeight();
+    if ((_body[0]._y + this->headAndBodyRects(0).h) > _level_size.h) {
+        _body[0]._y = _level_size.h - this->headAndBodyRects(0).h;
         if(_body[0]._angle>=90&&_body[0]._angle<180){
             _body[0]._angle=180-_body[0]._angle;
         }
@@ -130,8 +130,8 @@ void Bot::move(){
             _body[0]._angle=540-_body[0]._angle;
         }
     }
-    if (( _body[0]._x + _head->getWidth()) > _level_size.w) {
-        _body[0]._x = _level_size.w - _head->getWidth();
+    if (( _body[0]._x + this->headAndBodyRects(0).w) > _level_size.w) {
+        _body[0]._x = _level_size.w - this->headAndBodyRects(0).w;
         if(_body[0]._angle>=90&&_body[0]._angle<180){
             _body[0]._angle=360.0-_body[0]._angle;
         }
@@ -148,6 +148,8 @@ void Bot::move(){
             _body[0]._angle=360-_body[0]._angle;
         }
     }
+    _body[0]._x+=_speed*sin(_body[0]._angle * (M_PI / 180.0))*_frame_time;
+    _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_frame_time;
 }
 
 void Bot::updateSnake(){
@@ -161,19 +163,12 @@ void Bot::updateSnake(){
 
 template<typename T>
 TargetPosition Bot::calculateNearestTargetPosition(std::vector<T> fruit){
-    unsigned int min_index{0};
     std::vector<double> distance;
     for(unsigned int i=0;i<fruit.size();i++){
         distance.emplace_back(
             sqrt(pow((this->headCoordinates()._x - fruit[i].getPosX()), 2) + pow((this->headCoordinates()._y - fruit[i].getPosY()), 2))
         );
     }
-    for(int i=0;i<distance.size();i++){
-        for(int j=0;j<distance.size();j++){
-            if(distance[i]<distance[j]){
-                min_index=i;
-            }
-        }
-    }
+    int min_index=std::min_element(distance.begin(),distance.end())-distance.begin();
     return TargetPosition(fruit[min_index].getPosX(),fruit[min_index].getPosY());
 }

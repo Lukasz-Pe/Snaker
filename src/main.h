@@ -24,6 +24,7 @@
 #include <fstream>
 #include <memory>
 #include <thread>
+#include <algorithm>
 //--------------------------------SDL include
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
