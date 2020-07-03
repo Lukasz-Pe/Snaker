@@ -47,6 +47,7 @@ protected:
     static const double _max_collection_angle, _min_collection_angle,
                         _max_collection_distance, _min_collection_distance;
     std::vector<SnakeBody::Coordinates> _body;
+    SnakeBody::Coordinates _previous_position;
     std::shared_ptr<Win> _window;
     SDL_Rect _level_size;
     std::shared_ptr<Timer> _timer;

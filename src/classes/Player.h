@@ -28,8 +28,6 @@ private:
     double _frame_time;
     std::shared_ptr<LTexture> _head,_tail;
     SDL_Point _mouse_position;
-    SnakeBody::Coordinates _previous_position;
-    int _speed;
     std::unique_ptr<SDL_Rect> _camera;
 };
 

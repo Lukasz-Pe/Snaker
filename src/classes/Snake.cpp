@@ -22,6 +22,7 @@ Snake::Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window
     _angle=0.0;
     _collection_angle=_max_collection_angle;
     _collection_distance=_min_collection_distance;
+    _speed=_game_settings->settingsFromFile()[4];
 }
 
 void Snake::StartPosition(SDL_Point &position){

@@ -9,9 +9,8 @@
 Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
                const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings,
                const SDL_Rect &level_size,
-               SDL_Rect &camera, const std::shared_ptr<Timer> &timer):Snake(start_position,
-                                                                            window, settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
-    _speed=_game_settings->settingsFromFile()[4];
+               SDL_Rect &camera, const std::shared_ptr<Timer> &timer):
+               Snake(start_position, window, settings, level_size, timer), _head(head), _tail(tail), _camera(&camera){
     _body.emplace_back(SnakeBody::Coordinates{static_cast<double>(_camera->w/2),static_cast<double>(_camera->h/2),0.0});
     _old_length=_body.size();
     _frame_time=0.0;
@@ -104,40 +103,36 @@ Player::Player(const Player &source):Snake(source){
     _head=source._head;
     _tail=source._tail;
     _camera=std::make_unique<SDL_Rect>(*source._camera);
-    _speed=source._speed;
 }
 
 Player &Player::operator=(const Player &source){
-    Snake::operator=(source);
     if(this==&source){
         return *this;
     }
+    Snake::operator=(source);
     _head=source._head;
     _tail=source._tail;
     _camera=std::make_unique<SDL_Rect>(*source._camera);
-    _speed=source._speed;
     return *this;
 }
 
 Player::Player(Player &&source):Snake(source){
-    _head=source._head;
-    _tail=source._tail;
+    _head=std::move(source._head);
+    _tail=std::move(source._tail);
     _camera=std::move(source._camera);
     if(source._camera!=nullptr){
         source._camera.release();
     }
-    _speed=source._speed;
 }
 
 Player &Player::operator=(Player &&source){
-    Snake::operator=(std::move(source));
     if(this==&source){
         return *this;
     }
-    _head=source._head;
-    _tail=source._tail;
+    Snake::operator=(std::move(source));
+    _head=std::move(source._head);
+    _tail=std::move(source._tail);
     _camera=std::move(source._camera);
-    _speed=source._speed;
     return *this;
 }
 
