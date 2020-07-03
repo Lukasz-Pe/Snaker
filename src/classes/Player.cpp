@@ -51,7 +51,6 @@ void Player::move(){
 void Player::render(){
     _camera->x = _body[0]._x - _camera->w/2;
     _camera->y = _body[0]._y - _camera->h/2;
-//    std::cerr<<"player:"<<_camera->x<<"x"<<_camera->y<<"\n";
     if (_camera->x < 0) {
         _camera->x = 0;
     }
@@ -161,4 +160,3 @@ void Player::addLength(){
 void Player::frameTime(const double &frame_time){
     _frame_time=frame_time;
 }
-

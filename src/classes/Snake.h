@@ -12,7 +12,7 @@
 #include "Settings.h"
 #include "Win.h"
 #include "LTexture.h"
-#include "Fruit.h"
+#include "PowerUp.h"
 //TODO Make Snake super class for Bots.
 namespace SnakeBody{
     struct Coordinates{

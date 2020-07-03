@@ -8,7 +8,7 @@
 
 class Player:public Snake{
 public:
-    Player()= default;;
+    Player()=default;
     Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const SDL_Point &start_position,
            const std::shared_ptr<Win> &window, const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size,
            SDL_Rect &camera, const std::shared_ptr<Timer> &timer);

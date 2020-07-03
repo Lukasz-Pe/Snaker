@@ -62,7 +62,7 @@ bool Game::setLevelSize(const int &width, const int &height){
         int SPRITE_DIMS=20;
         for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
             for(int j=0;j<TOTAL_FRUIT_SPRITES;j++){
-                _clip_fruit.emplace_back(SDL_Rect{i*SPRITE_DIMS, j*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
+                _clip_bot_and_fruit.emplace_back(SDL_Rect{i*SPRITE_DIMS, j*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
             }
         }
         for (int i = 0; i < TOTAL_POWERUP_SPRITES; i++) {
@@ -79,10 +79,13 @@ bool Game::setLevelSize(const int &width, const int &height){
 void Game::render(){
     renderLevelBackground();
     for(int i=0;i<_fruits.size();i++){
-        _fruits[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_fruit[i%25]);
+        _fruits[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_bot_and_fruit[i%25]);
     }
     for(int i=0;i<_powerups.size();i++){
         _powerups[i].renderDot(*_fruit,-1,-1,&_camera,&_clip_powerup[_powerups[i].powerUpType()]);
+    }
+    for(int i=0;i<_bot.size();i++){
+        _bot[i].render();
     }
     _player.render();
     renderHUD();
@@ -124,6 +127,12 @@ void Game::generatePlayers(){
     _player=Player(_player_head, _player_tail,
                    SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
                    _window, _settings, _level_size, _camera, _timer);
+    for(int i=0; i<_settings->settingsFromFile()[1];i++){
+        _bot.emplace_back(_bot_head, _bot_tail,
+            SDL_Point{rand()%static_cast<int>(0.99*_level_width), rand()%static_cast<int>(0.99*_level_height)},
+            _window,_settings,_level_size,_clip_bot_and_fruit[i%5],_timer,
+            _fruits,_powerups,_frame_time, _camera);
+    }
 }
 
 void Game::moveFruitsAndPowerUps(){
@@ -156,12 +165,18 @@ void Game::recalculateVariables(){
     _player.frameTime(_frame_time);
     _player.checkPowerUps();
     _player.move();
+    for(int i=0;i<_bot.size();i++){
+        _bot[i].move();
+    }
     moveFruitsAndPowerUps();
     checkCollisionsWithFruitsAndPowerUps();
 }
 
 void Game::resetGame(){
     _player.resetLength();
+    for(int i=0;i<_bot.size();i++){
+        _bot[i].resetLength();
+    }
 }
 
 void Game::FPS(const double &fps){

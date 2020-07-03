@@ -9,6 +9,7 @@
 #include "../functions/collisions.h"
 #include "Player.h"
 #include "PowerUp.h"
+#include "Bot.h"
 
 
 class Game{
@@ -42,16 +43,13 @@ private:
     std::vector<Fruit> _fruits;
     std::vector<PowerUp> _powerups;
     std::shared_ptr<Timer> _timer;
-    std::vector<SDL_Point> _fruits_pos,_powerups_pos;
     int _level_width, _level_height, _powerups_count;
     const int &_text_size;
     std::vector<std::unique_ptr<Tile>> _background;
     SDL_Rect _camera, _level_size, _powerup_hud_clip;
-    std::vector<SDL_Rect> _clip_fruit,_clip_powerup;
-//    std::shared_ptr<SDL_Rect> _camera;
-//    std::unique_ptr<Player> _player;
+    std::vector<SDL_Rect> _clip_bot_and_fruit,_clip_powerup;
     Player _player;
-    //std::vector<std::unique_ptr<Snake>> _bot;
+    std::vector<Bot> _bot;
     TTF_Font *_font;
     int TOTAL_FRUIT_SPRITES, TOTAL_POWERUP_SPRITES;
     template<typename S,typename F> friend void changeFruitPosition(S &snake, F &fruit);
