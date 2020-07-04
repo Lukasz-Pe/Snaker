@@ -8,6 +8,7 @@
 #include "Snake.h"
 
 struct TargetPosition{
+    TargetPosition()=default;
     TargetPosition(const double& x, const double& y):_x(x),_y(y){}
     double _x,_y;
 };
@@ -22,6 +23,7 @@ public:
     void render() override;
     SDL_Rect headAndBodyRects(const int &body_part) override;
     void addLength() override;
+    void findNewTarget();
     Bot(const Bot &source);//copy constructor
     Bot &operator=(const Bot &source);//copy assigment operator
     Bot(Bot &&source);//move constructor
@@ -37,7 +39,7 @@ private:
     std::shared_ptr<LTexture> _head,_tail;
     SDL_Rect _clip;
     const SDL_Rect &_camera;
-//    friend
+    TargetPosition _target;
 };
 
 

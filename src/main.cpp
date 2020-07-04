@@ -92,7 +92,7 @@ int main() {
     Game game(game_window, level_background, player_head_textures, player_tail_textures,
               snake_head_textures, snake_tail_textures, fruits_and_powerups_textures, icons_of_active_powerups,
               game_settings, text_font.get(), TEXT_SIZE, frame_timer);
-    gContinue=game.setLevelSize(3415,1800);
+    gContinue=game.setLevelSize(1366,720);
     game.generatePlayers();
     double frame_time{0}, time_on_loop_begining{0}, FPS_recalc_treshhold{1.0/FPS_RECALC_PER_SECOND};
 	while(gContinue){

@@ -1,5 +1,5 @@
 0	/Languages, as they are present in the list
-1	/Enemies count - original 20
-450	/Fruits count - original 200
+10	/Enemies count - original 20
+4	/Fruits count - original 200
 25	/Powerups count, cannot be 0 - original 25
 300	/Snake speed - original 3000

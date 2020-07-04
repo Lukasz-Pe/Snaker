@@ -132,6 +132,7 @@ void Game::generatePlayers(){
             SDL_Point{rand()%static_cast<int>(0.8*_level_width), rand()%static_cast<int>(0.8*_level_height)},
             _window,_settings,_level_size,_clip_bot_and_fruit[i%5],_timer,
             _fruits,_powerups,_frame_time, _camera);
+        _bot[i].findNewTarget();
     }
 }
 
@@ -162,6 +163,7 @@ void Game::checkCollisionsWithFruitsAndPowerUps(){
                               _fruits[i].getRect())){
                 _bot[j].addLength();
                 _fruits[i].reposition();
+                _bot[j].findNewTarget();
             }
         }
     }
@@ -176,6 +178,7 @@ void Game::checkCollisionsWithFruitsAndPowerUps(){
                               _powerups[i].getRect())){
                 _bot[j].addLength();
                 _powerups[i].reposition();
+                _bot[j].findNewTarget();
             }
         }
     }

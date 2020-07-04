@@ -13,12 +13,14 @@ Bot::Bot(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail, const
          _head(head), _tail(tail), _clip(clip), _fruits(fruits), _powerups(powerups),
          _frame_time(frame_time), _camera(camera)
          {
-             _body.emplace_back(SnakeBody::Coordinates{static_cast<double>(start_position.x),
-                                                       static_cast<double>(start_position.y),0.0});
+    _target={0, 0};
+    _body.emplace_back(SnakeBody::Coordinates{static_cast<double>(start_position.x),
+                                              static_cast<double>(start_position.y),0.0});
 }
 
 Bot::Bot(const Bot &source):Snake(source), _fruits(source._fruits), _powerups(source._powerups),
                             _frame_time(source._frame_time), _camera(source._camera){
+    _target=source._target;
     _head=source._head;
     _tail=source._tail;
     _clip=source._clip;
@@ -29,6 +31,7 @@ Bot &Bot::operator=(const Bot &source){
         return *this;
     }
     Snake::operator=(source);
+    _target=source._target;
     _head=source._head;
     _tail=source._tail;
     _clip=source._clip;
@@ -37,6 +40,7 @@ Bot &Bot::operator=(const Bot &source){
 
 Bot::Bot(Bot &&source):Snake(source), _fruits(source._fruits), _powerups(source._powerups),
                        _frame_time(source._frame_time), _camera(source._camera){
+    _target=source._target;
     _head=std::move(source._head);
     _tail=std::move(source._tail);
     _clip=source._clip;
@@ -47,6 +51,7 @@ Bot &Bot::operator=(Bot &&source){
     if(this==&source){
         return *this;
     }
+    _target=source._target;
     Snake::operator=(std::move(source));
     _head=std::move(source._head);
     _tail=std::move(source._tail);
@@ -87,26 +92,14 @@ void Bot::addLength(){
 }
 
 void Bot::move(){
-    TargetPosition target_fruit{calculateNearestTargetPosition(_fruits)},
-    target_powerup{calculateNearestTargetPosition(_powerups)},
-    target(_level_size.w/2,_level_size.h/2);
-    if(sqrt(pow((this->headCoordinates()._x - target_fruit._x), 2) + pow((this->headCoordinates()._y - target_fruit._y), 2))
-        <sqrt(pow((this->headCoordinates()._x - target_powerup._x), 2) + pow((this->headCoordinates()._y - target_powerup._y), 2))
-        ){
-        target=target_fruit;
-    }else{
-        target=target_powerup;
-    }
-    target={target._x-this->headCoordinates()._x,target._y-this->headCoordinates()._y};
-    std::cerr<<"Target: "<<target._x<<"x"<<target._y<<"\n";
-    if (target._x >= 0 && target._y >= 0) {
-        _body[0]._angle = (180 / M_PI) * std::atan(target._x/target._y);
-    } else if (target._x > 0 && target._y < 0) {
-        _body[0]._angle = 180 + (180 / M_PI) * std::atan(target._x/target._y);
-    } else if (target._x < 0 && target._y > 0) {
-        _body[0]._angle = (180 / M_PI) * std::atan(target._x/target._y);
-    } else if (target._x < 0 && target._y < 0) {
-        _body[0]._angle = 180 + (180 / M_PI) * std::atan(target._x/target._y);
+    if(_target._x>=0&&_target._y>=0){
+        _body[0]._angle=(180/M_PI)*std::atan(_target._x/_target._y);
+    }else if(_target._x>0&&_target._y<0){
+        _body[0]._angle=180+(180/M_PI)*std::atan(_target._x/_target._y);
+    }else if(_target._x<0&&_target._y>0){
+        _body[0]._angle=(180/M_PI)*std::atan(_target._x/_target._y);
+    }else if(_target._x<0&&_target._y<0){
+        _body[0]._angle=180+(180/M_PI)*std::atan(_target._x/_target._y);
     }
     _previous_position._x=_body[0]._x;
     _previous_position._y=_body[0]._y;
@@ -114,39 +107,19 @@ void Bot::move(){
     updateSnake();
     if ((_body[0]._y + this->headAndBodyRects(0).h) > _level_size.h) {
         _body[0]._y = _level_size.h - this->headAndBodyRects(0).h;
-        if(_body[0]._angle>=90&&_body[0]._angle<180){
-            _body[0]._angle=180-_body[0]._angle;
-        }
-        if(_body[0]._angle<270&&_body[0]._angle>=180){
-            _body[0]._angle=540-_body[0]._angle;
-        }
+        this->findNewTarget();
     }
     if ( _body[0]._y < 1) {
         _body[0]._y = 1;
-        if(_body[0]._angle>=0&&_body[0]._angle<90){
-            _body[0]._angle=180-_body[0]._angle;
-        }
-        if(_body[0]._angle<360&&_body[0]._angle>=270){
-            _body[0]._angle=540-_body[0]._angle;
-        }
+        this->findNewTarget();
     }
     if (( _body[0]._x + this->headAndBodyRects(0).w) > _level_size.w) {
         _body[0]._x = _level_size.w - this->headAndBodyRects(0).w;
-        if(_body[0]._angle>=90&&_body[0]._angle<180){
-            _body[0]._angle=360.0-_body[0]._angle;
-        }
-        if(_body[0]._angle>=0&&_body[0]._angle<90){
-            _body[0]._angle=360-_body[0]._angle;
-        }
+        this->findNewTarget();
     }
     if (_body[0]._x < 1) {
         _body[0]._x = 1;
-        if(_body[0]._angle>=180&&_body[0]._angle<270){
-            _body[0]._angle=360-_body[0]._angle;
-        }
-        if(_body[0]._angle>=270&&_body[0]._angle<360){
-            _body[0]._angle=360-_body[0]._angle;
-        }
+        this->findNewTarget();
     }
     _body[0]._x+=_speed*sin(_body[0]._angle * (M_PI / 180.0))*_frame_time;
     _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_frame_time;
@@ -171,4 +144,16 @@ TargetPosition Bot::calculateNearestTargetPosition(std::vector<T> fruit){
     }
     int min_index=std::min_element(distance.begin(),distance.end())-distance.begin();
     return TargetPosition(fruit[min_index].getPosX(),fruit[min_index].getPosY());
+}
+
+void Bot::findNewTarget(){
+    TargetPosition target_fruit{calculateNearestTargetPosition(_fruits)},
+        target_powerup{calculateNearestTargetPosition(_powerups)};
+    if(sqrt(pow((this->headCoordinates()._x - target_fruit._x), 2) + pow((this->headCoordinates()._y - target_fruit._y), 2))
+       <sqrt(pow((this->headCoordinates()._x - target_powerup._x), 2) + pow((this->headCoordinates()._y - target_powerup._y), 2))
+        ){
+        _target={target_fruit._x-_body[0]._x,_body[0]._y-target_fruit._y};
+    }else{
+        _target={target_powerup._x-_body[0]._x,_body[0]._y-target_powerup._y};
+    }
 }
