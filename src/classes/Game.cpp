@@ -101,7 +101,7 @@ void Game::renderHUD(){
     _score_texture.loadFromText(score.str(), SDL_Color{255, 0, 0}, _font, _window);
     _score_texture.setWidth(3*_score_texture.getWidth());
     _score_texture.setHeight(_text_size);
-    fps<<_fps<<" FPS";
+    fps<<std::setprecision(2)<<std::fixed<<_fps<<" FPS";
     _fps_texture.loadFromText(fps.str(), SDL_Color{255, 0, 0}, _font, _window);
     _fps_texture.setWidth(3*_fps_texture.getWidth());
     _fps_texture.setHeight(_text_size);
@@ -166,19 +166,19 @@ void Game::checkCollisionsWithFruitsAndPowerUps(){
                 _bot[j].findNewTarget();
             }
         }
-    }
-    for(unsigned int i=0;i<_powerups.size();i++){
-        if(checkCollision(_player.headAndBodyRects(0),
-                          _powerups[i].getRect())){ //0 in _player refers to head
-            _player.activatePowerUp(_powerups[i].powerUpType());
-            _powerups[i].reposition();
-        }
-        for(int j=0;j<_bot.size();j++){
-            if(checkCollision(_bot[j].headAndBodyRects(0),
-                              _powerups[i].getRect())){
-                _bot[j].addLength();
+        if(i<_powerups.size()){
+            if(checkCollision(_player.headAndBodyRects(0),
+                              _powerups[i].getRect())){ //0 in _player refers to head
+                _player.activatePowerUp(_powerups[i].powerUpType());
                 _powerups[i].reposition();
-                _bot[j].findNewTarget();
+            }
+            for(int j=0; j<_bot.size(); j++){
+                if(checkCollision(_bot[j].headAndBodyRects(0),
+                                  _powerups[i].getRect())){
+                    _bot[j].addLength();
+                    _powerups[i].reposition();
+                    _bot[j].findNewTarget();
+                }
             }
         }
     }
@@ -229,20 +229,21 @@ void Game::checkPowerUps(){
                 }
             }
             for(int j=0;j<_bot.size();j++){
-                if(_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int >()
-                   &&collided(_bot[i],_bot[j])){
-                    if(_bot[j].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()
-                        &&i!=j){
-                        if(_bot[j].PowerUpsDeactivationTimeStamp()[SnakeEater]>_timer->getSeconds<unsigned int>()
-                           &&_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()){
-                            if(_bot[i].PowerUpsDeactivationTimeStamp()[Shield]>_timer->getSeconds<unsigned int>()){
-                                _bot[j].addLength(_bot[i].Length());
+                if(collided(_bot[i],_bot[j])){
+                    if(_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()){
+                        if(_bot[j].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()
+                           &&i!=j){
+                            if(_bot[j].PowerUpsDeactivationTimeStamp()[SnakeEater]>_timer->getSeconds<unsigned int>()
+                               &&_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()){
+                                if(_bot[i].PowerUpsDeactivationTimeStamp()[Shield]>_timer->getSeconds<unsigned int>()){
+                                    _bot[j].addLength(_bot[i].Length());
+                                }else{
+                                    _bot[j].addLength(_bot[i].Length());
+                                    _bot[i].resetLength();
+                                }
                             }else{
-                                _bot[j].addLength(_bot[i].Length());
                                 _bot[i].resetLength();
                             }
-                        }else{
-                            _bot[i].resetLength();
                         }
                     }
                 }
