@@ -17,6 +17,7 @@ Player::Player(std::shared_ptr<LTexture> &head, std::shared_ptr<LTexture> &tail,
 }
 
 void Player::move(){
+    eatingDistance();
     double target_x{static_cast<double>((_mouse_position.x+_camera->x)-_body[0]._x)},
     target_y{static_cast<double>(_body[0]._y-(_mouse_position.y+_camera->y))};
     if (target_x >= 0 && target_y >= 0) {
@@ -85,15 +86,6 @@ void Player::eventHandler(SDL_Event &event){
     }
 }
 
-void Player::updateSnake(){
-    if(_body.size()>1){
-        _body[1]=_previous_position;
-        for(int i=_body.size()-1;i>1;i--){
-            _body[i]=_body[i-1];
-        }
-    }
-}
-
 Player::~Player(){
     _camera.release();
 }
@@ -151,10 +143,6 @@ SDL_Rect Player::headAndBodyRects(const int &body_part){
         }
     }
     return SDL_Rect{0,0,0,0};
-}
-
-void Player::addLength(){
-    _body.emplace_back(_body[_body.size()-1]);
 }
 
 void Player::frameTime(const double &frame_time){

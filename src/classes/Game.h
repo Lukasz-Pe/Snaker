@@ -31,9 +31,11 @@ public:
     void FPS(const double &fps);
     void frameTime(const double &frame_time);
 private:
+    template <typename P, typename B> bool collided(P &first, B &second);
     void renderHUD();
     void renderLevelBackground();
     void generateBackground();
+    void checkPowerUps();
     double _fps, _frame_time;
     std::shared_ptr<Win> _window;
     std::shared_ptr<Settings> _settings;
@@ -55,6 +57,5 @@ private:
     template<typename S,typename F> friend void changeFruitPosition(S &snake, F &fruit);
     friend bool checkCollision(SDL_Rect a, SDL_Rect b);
 };
-
 
 #endif //SNAKER_GAME_H

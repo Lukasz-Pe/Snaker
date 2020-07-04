@@ -85,3 +85,33 @@ void Snake::checkPowerUps(){
         }
     }
 }
+
+void Snake::addLength(const int &length){
+    for(int i=0; i<length; i++){
+        _body.emplace_back(_body[_body.size()-1]);
+    }
+}
+
+void Snake::updateSnake(){
+    if(_body.size()>1){
+        _body[1]=_previous_position;
+        for(int i=_body.size()-1;i>1;i--){
+            _body[i]=_body[i-1];
+        }
+    }
+}
+
+void Snake::addLength(){
+    _body.emplace_back(_body[_body.size()-1]);
+}
+
+void Snake::eatingDistance(){
+    if(_powerup_deactivation_timestamp[EatingDistance]>=_timer->getSeconds<unsigned  int>()){
+        _collection_distance=_max_collection_distance;
+        _collection_angle=_min_collection_angle;
+    }else{
+        _collection_distance=_min_collection_distance;
+        _collection_angle=_max_collection_angle;
+    }
+}
+

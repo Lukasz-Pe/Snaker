@@ -193,6 +193,7 @@ void Game::recalculateVariables(){
     }
     moveFruitsAndPowerUps();
     checkCollisionsWithFruitsAndPowerUps();
+    checkPowerUps();
 }
 
 void Game::resetGame(){
@@ -208,4 +209,54 @@ void Game::FPS(const double &fps){
 
 void Game::frameTime(const double &frame_time){
     _frame_time=frame_time;
+}
+
+void Game::checkPowerUps(){
+    for(unsigned int i=0;i<_bot.size();i++){
+        for(unsigned int j=0;j<TOTAL_POWERUP_SPRITES;j++){
+            if(_player.PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()
+               &&collided(_player,_bot[i])){
+                if(_player.PowerUpsDeactivationTimeStamp()[SnakeEater]>_timer->getSeconds<unsigned int >()
+                   &&_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int >()){
+                    if(_bot[i].PowerUpsDeactivationTimeStamp()[Shield]>_timer->getSeconds<unsigned int >()){
+                        _player.addLength(_bot[i].Length());
+                    }else{
+                        _player.addLength(_bot[i].Length());
+                        _bot[i].resetLength();
+                    }
+                }else{
+                    _player.resetLength();
+                }
+            }
+            for(int j=0;j<_bot.size();j++){
+                if(_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int >()
+                   &&collided(_bot[i],_bot[j])){
+                    if(_bot[j].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()
+                        &&i!=j){
+                        if(_bot[j].PowerUpsDeactivationTimeStamp()[SnakeEater]>_timer->getSeconds<unsigned int>()
+                           &&_bot[i].PowerUpsDeactivationTimeStamp()[GhostMode]<_timer->getSeconds<unsigned int>()){
+                            if(_bot[i].PowerUpsDeactivationTimeStamp()[Shield]>_timer->getSeconds<unsigned int>()){
+                                _bot[j].addLength(_bot[i].Length());
+                            }else{
+                                _bot[j].addLength(_bot[i].Length());
+                                _bot[i].resetLength();
+                            }
+                        }else{
+                            _bot[i].resetLength();
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+template<typename P, typename B>
+bool Game::collided(P &first, B &second){
+    for(unsigned int i=0;i<second.Length();i++){
+        if(checkCollision(first.headAndBodyRects(0),second.headAndBodyRects(i))){
+            return true;
+        }
+    }
+    return false;
 }

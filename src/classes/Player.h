@@ -15,7 +15,6 @@ public:
     void render() override;
     void eventHandler(SDL_Event& event);
     SDL_Rect headAndBodyRects(const int &body_part) override;
-    void addLength() override;
     Player(const Player &source);//copy constructor
     Player &operator=(const Player &source);//copy assigment operator
     Player(Player &&source);//move constructor
@@ -24,7 +23,6 @@ public:
     void move() override;
     void frameTime(const double &frame_time);
 private:
-    void updateSnake() override;
     double _frame_time;
     std::shared_ptr<LTexture> _head,_tail;
     SDL_Point _mouse_position;

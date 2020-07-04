@@ -26,7 +26,6 @@ public:
     Snake(const SDL_Point &start_position, const std::shared_ptr<Win> &window,
           const std::shared_ptr<Settings> &settings, const SDL_Rect &level_size, const std::shared_ptr<Timer> &timer);
     void StartPosition(SDL_Point &position);
-    virtual void updateSnake()=0;
     void resetLength();
     unsigned long Length();
     virtual void render()=0;
@@ -36,9 +35,12 @@ public:
     double collectionDistance();
     double collectionAngle();
     virtual SDL_Rect headAndBodyRects(const int &body_part)=0;
-    virtual void addLength()=0;
+    void addLength();
+    void addLength(const int& length);
     void checkPowerUps();
+    void eatingDistance();
 protected:
+    void updateSnake();
     virtual void move()=0;
     std::vector<unsigned int> _powerup_deactivation_timestamp;
     SDL_Point _position;

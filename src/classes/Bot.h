@@ -22,7 +22,6 @@ public:
         const std::vector<PowerUp> &powerups, const double &frame_time, const SDL_Rect &camera);
     void render() override;
     SDL_Rect headAndBodyRects(const int &body_part) override;
-    void addLength() override;
     void findNewTarget();
     Bot(const Bot &source);//copy constructor
     Bot &operator=(const Bot &source);//copy assigment operator
@@ -30,9 +29,9 @@ public:
     Bot &operator=(Bot &&source);//move assigment operator
     ~Bot()=default;
     void move() override;
+    
 private:
     template <typename T>TargetPosition calculateNearestTargetPosition(std::vector<T> fruit);
-    void updateSnake() override;
     const double &_frame_time;
     const std::vector<Fruit> &_fruits;
     const std::vector<PowerUp> &_powerups;

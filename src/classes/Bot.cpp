@@ -87,11 +87,8 @@ SDL_Rect Bot::headAndBodyRects(const int &body_part){
     return SDL_Rect{0,0,0,0};
 }
 
-void Bot::addLength(){
-    _body.emplace_back(_body[_body.size()-1]);
-}
-
 void Bot::move(){
+    eatingDistance();
     if(_target._x>=0&&_target._y>=0){
         _body[0]._angle=(180/M_PI)*std::atan(_target._x/_target._y);
     }else if(_target._x>0&&_target._y<0){
@@ -125,14 +122,7 @@ void Bot::move(){
     _body[0]._y-=_speed*cos(_body[0]._angle * (M_PI / 180.0))*_frame_time;
 }
 
-void Bot::updateSnake(){
-    if(_body.size()>1){
-        _body[1]=_previous_position;
-        for(int i=_body.size()-1;i>1;i--){
-            _body[i]=_body[i-1];
-        }
-    }
-}
+
 
 template<typename T>
 TargetPosition Bot::calculateNearestTargetPosition(std::vector<T> fruit){
