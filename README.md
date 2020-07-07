@@ -4,6 +4,13 @@
 
 This is the capstone project for C++ Nanodegree program.
 For this project the Option 1 has been chosen and has been realised as Snake-like game with bots.
+
+The player's Snake shall follow the mouse pointer as long as there is focus on the game's window.
+Very basic collision detection has been built in. The player's target is to eat as much fruits as it is possible and do not be eaten.
+Bots have very rudimentary logic - they go from fruit to fruit, and new target is chosen with every collision of bot with fruit/powerup or level edge.
+
+Changes made in options shall be directly after saving them, visible in the game.
+
 ## Directory/project structure:
 * Snaker - main directory
     * assets - here is the settings file and mapping file.
