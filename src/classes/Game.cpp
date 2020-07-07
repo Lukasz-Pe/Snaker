@@ -22,6 +22,7 @@ Game::Game(const std::shared_ptr<Win> &window, const std::shared_ptr<LTexture> &
     _powerup_hud_clip={0,0,50,50};
     TOTAL_FRUIT_SPRITES=5;
     TOTAL_POWERUP_SPRITES=4;
+    _settings_values=_settings->settingsFromFile();
 }
 
 void Game::renderLevelBackground(){
@@ -47,27 +48,7 @@ bool Game::setLevelSize(const int &width, const int &height){
         _level_width=width;
         _level_height=height;
         _level_size={0,0,_level_width,_level_height};
-        for(int i=0;i<_settings->settingsFromFile()[2]-_powerups_count;i++){
-            int x=rand()%static_cast<int>(0.9*_level_width);
-            int y=rand()%static_cast<int>(0.9*_level_height);
-            _fruits.emplace_back(Fruit(_window,_level_width,_level_height));
-            _fruits[i].setPosition(x,y);
-        }
-        for(int i=0;i<_powerups_count;i++){
-            int x=rand()%static_cast<int>(0.9*_level_width);
-            int y=rand()%static_cast<int>(0.9*_level_height);
-            _powerups.emplace_back(PowerUp(static_cast<unsigned int>(i%TOTAL_POWERUP_SPRITES), _window, _level_width, _level_height));
-            _powerups[i].setPosition(x,y);
-        }
-        int SPRITE_DIMS=20;
-        for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
-            for(int j=0;j<TOTAL_FRUIT_SPRITES;j++){
-                _clip_bot_and_fruit.emplace_back(SDL_Rect{i*SPRITE_DIMS, j*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
-            }
-        }
-        for (int i = 0; i < TOTAL_POWERUP_SPRITES; i++) {
-            _clip_powerup.emplace_back(SDL_Rect{i*SPRITE_DIMS, 5*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
-        }
+        placeFruits();
         generateBackground();
         return true;
     }
@@ -124,6 +105,9 @@ void Game::renderHUD(){
 }
 
 void Game::generatePlayers(){
+    if(!_bot.empty()){
+        _bot.clear();
+    }
     _player=Player(_player_head, _player_tail,
                    SDL_Point{_window->getWidth()/2, _window->getHeight()/2},
                    _window, _settings, _level_size, _camera, _timer);
@@ -166,19 +150,19 @@ void Game::checkCollisionsWithFruitsAndPowerUps(){
                 _bot[j].findNewTarget();
             }
         }
-        if(i<_powerups.size()){
-            if(checkCollision(_player.headAndBodyRects(0),
-                              _powerups[i].getRect())){ //0 in _player refers to head
-                _player.activatePowerUp(_powerups[i].powerUpType());
+    }
+    for(unsigned int i=0;i<_powerups_count;i++){
+        if(checkCollision(_player.headAndBodyRects(0),
+                          _powerups[i].getRect())){ //0 in _player refers to head
+            _player.activatePowerUp(_powerups[i].powerUpType());
+            _powerups[i].reposition();
+        }
+        for(int j=0; j<_bot.size(); j++){
+            if(checkCollision(_bot[j].headAndBodyRects(0),
+                              _powerups[i].getRect())){
+                _bot[j].addLength();
                 _powerups[i].reposition();
-            }
-            for(int j=0; j<_bot.size(); j++){
-                if(checkCollision(_bot[j].headAndBodyRects(0),
-                                  _powerups[i].getRect())){
-                    _bot[j].addLength();
-                    _powerups[i].reposition();
-                    _bot[j].findNewTarget();
-                }
+                _bot[j].findNewTarget();
             }
         }
     }
@@ -260,4 +244,64 @@ bool Game::collided(P &first, B &second){
         }
     }
     return false;
+}
+
+void Game::checkSettings(){
+    bool modified{false};
+    for(int i=0;i<_settings_values.size();i++){
+        if(_settings_values[i]!=_settings->settingsFromFile()[i]){
+            modified=true;
+        }
+    }
+    if(modified){
+        _powerups_count=_settings->settingsFromFile()[2]*_settings->settingsFromFile()[3]/100;
+        placeFruits();
+        regenerateBots();
+        _settings_values=_settings->settingsFromFile();
+    }
+}
+
+void Game::placeFruits(){
+    if(!_fruits.empty()){
+        _fruits.clear();
+    }
+    
+    if(!_powerups.empty()){
+        _powerups.clear();
+    }
+    
+    for(int i=0;i<_settings->settingsFromFile()[2]-_powerups_count;i++){
+        int x=rand()%static_cast<int>(0.99*_level_width);
+        int y=rand()%static_cast<int>(0.99*_level_height);
+        _fruits.emplace_back(Fruit(_window,_level_width,_level_height));
+        _fruits[i].setPosition(x,y);
+    }
+    for(int i=0;i<_powerups_count;i++){
+        int x=rand()%static_cast<int>(0.99*_level_width);
+        int y=rand()%static_cast<int>(0.99*_level_height);
+        _powerups.emplace_back(PowerUp(static_cast<unsigned int>(i%TOTAL_POWERUP_SPRITES), _window, _level_width, _level_height));
+        _powerups[i].setPosition(x,y);
+    }
+    int SPRITE_DIMS=20;
+    for (int i = 0; i < TOTAL_FRUIT_SPRITES; i++) {
+        for(int j=0;j<TOTAL_FRUIT_SPRITES;j++){
+            _clip_bot_and_fruit.emplace_back(SDL_Rect{i*SPRITE_DIMS, j*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
+        }
+    }
+    for (int i = 0; i < TOTAL_POWERUP_SPRITES; i++) {
+        _clip_powerup.emplace_back(SDL_Rect{i*SPRITE_DIMS, 5*SPRITE_DIMS, SPRITE_DIMS, SPRITE_DIMS});
+    }
+}
+
+void Game::regenerateBots(){
+    if(!_bot.empty()){
+        _bot.clear();
+    }
+    for(int i=0; i<_settings->settingsFromFile()[1];i++){
+        _bot.emplace_back(_bot_head, _bot_tail,
+                          SDL_Point{rand()%static_cast<int>(0.8*_level_width), rand()%static_cast<int>(0.8*_level_height)},
+                          _window,_settings,_level_size,_clip_bot_and_fruit[i%5],_timer,
+                          _fruits,_powerups,_frame_time, _camera);
+        _bot[i].findNewTarget();
+    }
 }

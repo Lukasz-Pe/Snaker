@@ -124,6 +124,9 @@ Player &Player::operator=(Player &&source){
     _head=std::move(source._head);
     _tail=std::move(source._tail);
     _camera=std::move(source._camera);
+    if(source._camera!=nullptr){
+        source._camera.release();
+    }
     return *this;
 }
 

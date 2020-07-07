@@ -110,6 +110,10 @@ int main() {
             game_menu.eventHandler(event);
             game.eventHandler(event);
         }
+        if(game_settings->settingsRecentlySaved()){
+            game.checkSettings();
+            game_settings->resetRecentlySaved();
+        }
         if(state==game_menu.getMapping()[23]|| state==game_menu.getMapping()[6]){
             if(frame_timer->isStarted()||frame_timer->isPaused()){
                 frame_timer->pause();

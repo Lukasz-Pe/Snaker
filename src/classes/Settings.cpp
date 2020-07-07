@@ -6,6 +6,7 @@
 
 bool Settings::loadSettings(const std::string &path){
     _settings_file_path=path;
+    _settings_saved=false;
     return reloadSettings();
 }
 
@@ -81,6 +82,7 @@ bool Settings::saveSettings(){
             _settings_file<<_settings_values[i]<<"\t"<<_settingsInstructions[i];//<<"\n";
         }
         _settings_file.close();
+        _settings_saved=true;
         return true;
     }
     std::cerr << "Unable to save settings file to: "<<_settings_file_path<<"\n";
@@ -123,4 +125,14 @@ bool Settings::reloadSettings(){
     }
     std::cerr << "Unable to load settings file from: "<<_settings_file_path<<"\n";
     return false;
+}
+
+bool Settings::settingsRecentlySaved(){
+    return _settings_saved;
+}
+
+void Settings::resetRecentlySaved(){
+    if(_settings_saved){
+        _settings_saved=false;
+    }
 }

@@ -26,7 +26,10 @@ public:
     bool loadTanslation();
     std::vector<int> settingsFromFile();
     bool reloadSettings();
+    bool settingsRecentlySaved();
+    void resetRecentlySaved();
 private:
+    bool _settings_saved;
     std::vector<std::string> _settingsInstructions;
     std::fstream _settings_file;
     std::fstream _language_list_file;

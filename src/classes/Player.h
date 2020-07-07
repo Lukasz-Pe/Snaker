@@ -22,6 +22,7 @@ public:
     ~Player();
     void move() override;
     void frameTime(const double &frame_time);
+    
 private:
     double _frame_time;
     std::shared_ptr<LTexture> _head,_tail;
