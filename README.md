@@ -48,11 +48,12 @@ The projects codebase at the begineng was about 2 years old. Part of it has been
   * Linux: make is installed by default on most Linux distros
   * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
   * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* SDL2
+* SDL>=2.0
   * Linux (available through packaging system). SDL2 Packages needed:
     * SDL2 (package libsdl2 on debian):`sudo apt-get install libsdl2-dev`
     * SDL2 image (package libsdl2-image):`sudo apt-get install libsdl2-image-dev`
     * SDL2 ttf (package libsdl2-ttf):`sudo apt-get install libsdl2-ttf-dev`
+  * Windows & Mac & other Linuxes - installation instructions can be found [here](https://wiki.libsdl.org/Installation)
 * gcc/g++ >= 5.4
   * Linux: gcc / g++ is installed by default on most Linux distros
   * Mac: same deal as make - [install Xcode command line tools](https://developer.apple.com/xcode/features/)
