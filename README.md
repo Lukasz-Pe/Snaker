@@ -102,4 +102,4 @@ If you want, just copy the command below:
     6. In all classes where no SDL typical were passed around, smart pointer were used.
     
     In class `Snake` is for example `shared_ptr` to `Settings` object, and in `main.cpp` is `unique_ptr` to font object.
-4. Concurrency was no implemented in this project.
+4. Concurrency has not been implemented in this project.
